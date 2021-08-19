@@ -484,21 +484,26 @@ module.exports = class Functions {
   async findCommand(filter) {
     var commandName = null;
     var command = this.client.cmd[filter];
-    var newCmd = null
+    var newCmd = null;
 
     if (command) {
       if (command.category == "general") newCmd = this.client.command.general[command.commandName];
+      if (command.category == "ticket") newCmd = this.client.command.ticket[command.commandName];
       if (command.category == "administrator") newCmd = this.client.command.administrator[command.commandName];
       if (command.category == "moderator") newCmd = this.client.command.moderator[command.commandName];
+      if (command.category == "support") newCmd = this.client.command.support[command.commandName];
       if (command.category == "developer") newCmd = this.client.command.developer[command.commandName];
+      
     } else if (this.client.command.aliases[filter]) {
       commandName = this.client.command.aliases[filter];
       command = this.client.cmd[commandName];
 
       if (commandName) {
         if (command.category == "general") newCmd = this.client.command.general[command.commandName];
+        if (command.category == "ticket") newCmd = this.client.command.ticket[command.commandName];
         if (command.category == "administrator") newCmd = this.client.command.administrator[command.commandName];
         if (command.category == "moderator") newCmd = this.client.command.moderator[command.commandName];
+        if (command.category == "support") newCmd = this.client.command.support[command.commandName];
         if (command.category == "developer") newCmd = this.client.command.developer[command.commandName];
       }
     }

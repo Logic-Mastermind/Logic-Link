@@ -468,6 +468,9 @@ module.exports = {
       commandName: "whois"
     }
   },
+  ticket: {
+
+  },
   moderator: {
     announce: {
       name: "Announce",
@@ -1051,6 +1054,21 @@ module.exports = {
       usage: "unlock [channel] [reason]",
       required: "admin",
       commandName: "unlock"
+    }
+  },
+  support: {
+    error: {
+      name: "Error",
+      description: "Retrieves error information from an error ID.",
+      permissions: ["SUPPORT_TEAM"],
+      clientPerms: [],
+      cooldown: 3,
+      minArgs: 1,
+      options: [],
+      aliases: [],
+      usage: "error <id>",
+      required: "support",
+      commandName: "error",
     }
   },
   developer: {

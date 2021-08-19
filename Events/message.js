@@ -46,7 +46,7 @@ module.exports = async (client, message) => {
     const now = Date.now();
 
     var commandName = args.shift().toLowerCase();
-    var command = await client.functions.findCommand(commandName, client);
+    var command = await client.functions.findCommand(commandName);
     if (!command) return;
 
     var cmd = client.commands.get(command.commandName);
@@ -87,6 +87,11 @@ module.exports = async (client, message) => {
                 const embed = client.embeds.permission(command)
                 return message.channel.send(embed)
               }
+            } else if (command.required == "support") {
+              if (!message.member.roles.cache.has(client.util.supportRole) && (message.author.id !== client.util.devId)) {
+                const embed = client.embeds.permission(command)
+                return message.channel.send(embed)
+              }
             }
           }
         } else {
@@ -99,6 +104,11 @@ module.exports = async (client, message) => {
                 }
               } else if (command.required == "admin") {
                 if (!message.member.roles.cache.has(settings.adminRole)) {
+                  const embed = client.embeds.permission(command)
+                  return message.channel.send(embed)
+                }
+              } else if (command.required == "support") {
+                if (!message.member.roles.cache.has(client.util.supportRole) && (message.author.id !== client.util.devId)) {
                   const embed = client.embeds.permission(command)
                   return message.channel.send(embed)
                 }
@@ -135,6 +145,11 @@ module.exports = async (client, message) => {
                 const embed = client.embeds.permission(command)
                 return message.channel.send(embed)
               }
+            } else if (command.required == "support") {
+              if (!message.member.roles.cache.has(client.util.supportRole) && (message.author.id !== client.util.devId)) {
+                const embed = client.embeds.permission(command)
+                return message.channel.send(embed)
+              }
             }
           }
         } else {
@@ -147,6 +162,11 @@ module.exports = async (client, message) => {
                 }
               } else if (command.required == "admin") {
                 if (!message.member.roles.cache.has(settings.adminRole)) {
+                  const embed = client.embeds.permission(command)
+                  return message.channel.send(embed)
+                }
+              } else if (command.required == "support") {
+                if (!message.member.roles.cache.has(client.util.supportRole) && (message.author.id !== client.util.devId)) {
                   const embed = client.embeds.permission(command)
                   return message.channel.send(embed)
                 }

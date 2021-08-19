@@ -60,6 +60,10 @@ module.exports = {
     category: "developer",
     commandName: "logs"
   },
+  error: {
+    category: "support",
+    commandName: "error"
+  },
   eval: {
     category: "developer",
     commandName: "eval"

@@ -405,4 +405,15 @@ module.exports = class Embeds {
 
     return embed
   }
+
+  notValid(command, arg, type) {
+    const embed = new Discord.MessageEmbed()
+    embed.setTitle(command.name);
+    embed.setColor(`RED`);
+    embed.setDescription(`${cross} No valid ${type}s were recorded from your message.\n\n**Detailed Info**\n\`${arg}\` is not a valid ${type}.`);
+    embed.setFooter(footer1, footer2);
+    embed.setTimestamp();
+
+    return embed
+  }
 }

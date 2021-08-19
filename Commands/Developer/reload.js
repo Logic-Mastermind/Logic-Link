@@ -30,11 +30,17 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     if (commandObject.category == "general") {
       commandPath = `../General/${commandObject.commandName}.js`
 
+    } else if (commandObject.category == "ticket") {
+      commandPath = `../Ticket/${commandObject.commandName}.js`
+
     } else if (commandObject.category == "moderator") {
       commandPath = `../Moderator/${commandObject.commandName}.js`
 
     } else if (commandObject.category == "administrator") {
       commandPath = `../Administrator/${commandObject.commandName}.js`
+
+    } else if (commandObject.category == "support") {
+      commandPath = `../Support/${commandObject.commandName}.js`
 
     } else if (commandObject.category == "developer") {
       commandPath = `../Developer/${commandObject.commandName}.js`

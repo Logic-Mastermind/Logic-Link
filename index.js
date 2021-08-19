@@ -106,6 +106,30 @@ FS.readdir("./Commands/Moderator/", (error, files) => {
   });
 });
 
+FS.readdir("./Commands/Support/", (error, files) => {
+  if (error) return console.error(error);
+  files.forEach((file) => {
+    if (!file.endsWith(".js")) return;
+    let props = require(`./Commands/Support/${file}`);
+    let commandName = file.split(".")[0];
+    
+    client.functions.log(`Loading ${commandName}.`);
+    client.commands.set(commandName, props);
+  });
+});
+
+FS.readdir("./Commands/Ticket/", (error, files) => {
+  if (error) return console.error(error);
+  files.forEach((file) => {
+    if (!file.endsWith(".js")) return;
+    let props = require(`./Commands/Ticket/${file}`);
+    let commandName = file.split(".")[0];
+    
+    client.functions.log(`Loading ${commandName}.`);
+    client.commands.set(commandName, props);
+  });
+});
+
 
 process.on("unhandledRejection", async (error) => {
   if (client.ready) {
