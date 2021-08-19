@@ -12,7 +12,7 @@ module.exports = {
     autoFetch: true,
     dataDir: "./Data/",
     autoEnsure: {
-      prefix: null,
+      prefix: ">",
       modRole: null,
       adminRole: null,
       logChannel: null,
