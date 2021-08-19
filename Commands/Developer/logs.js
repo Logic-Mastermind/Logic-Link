@@ -25,11 +25,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     if (secArg) {
       if (secArg == "clr" || secArg == "clear") {
         await client.logger.clear();
-        const embed = client.embeds.success(command, `Cleared the logs successfully.`);
+        const embed = client.embeds.success(command, `Cleared the bot logs successfully.`);
         return message.lineReply(embed);
       }
 
-      if (secArg == "persist" || secArg == "persistent") {
+      if (secArg == "perst" || secArg == "persist" || secArg == "persistent") {
         logs = await client.db.logs.fetchEverything();
         persist = true;
       }
@@ -44,7 +44,9 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
     const chunks = await client.functions.divideChunk(allLogs, 15);
     chunks.forEach((v, k, m) => {
-      var description = (k == 0 ? `${persist ? `Displaying all logs since last cleared since <t:${Math.floor(devLog.clearedAt / 1000)}:T>.` : `Displaying all logs last loaded since <t:${client.readySince}:T>.`}\nA total of \`${allLogs.length}\` log${allLogs.length == 1 ? ` is` : `s are`} shown.\n\n` : ``)
+      var totalLogs = client.db.logs.count - 1;
+      var description = (k == 0 ? `${persist ? `Displaying all logs since last cleared since <t:${Math.floor(devLog.clearedAt / 1000)}:T>.` : `Displaying all logs last loaded since <t:${client.readySince}:T>.`}\nA total of \`${allLogs.length}\` log${allLogs.length == 1 ? ` is` : `s are`} shown.${allLogs.length !== totalLogs ? ` (${totalLogs} total log${totalLogs == 1 ? `` : `s`})` : ``}\n\n` : ``);
+
       const embed = client.embeds.blue(command, `${description}${code}${v.join("\n")}${code}`);
       pages.push(embed)
     })
