@@ -12,16 +12,16 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const code = `\`\`\``;
 
   const responses = {
-    
+
   }
 
   try {
     const cmdArray = [
-      { name: `${client.util.integration} Developer Commands`, value: `${code}\n${client.command.total.developer.join("\n")}${code}`, inline: true }
+      { name: `${client.util.support} Support Commands`, value: `${code}\n${client.command.total.support.join("\n")}${code}`, inline: true }
     ]
 
     if (!secArg) {
-      const helpEmbed = client.embeds.field(command, `${client.util.welcomeBotInfo}\n\n**Command List**\nBelow shows a list of all developer commands.\nTo get more details about a particular command, run: \`${guildPrefix}dhelp [command]\`.\nIf you would like a detailed guide on the help menu, run \`${guildPrefix}dhelp guide\`.\n\n${code}Developer Commands${code}\u200b`, cmdArray)
+      const helpEmbed = client.embeds.field(command, `${client.util.welcomeBotInfo}\n\n**Command List**\nBelow shows a list of all support commands.\nTo get more details about a particular command, run: \`${guildPrefix}shelp [command]\`.\nIf you would like a detailed guide on the help menu, run \`${guildPrefix}shelp guide\`.\n\n${code}Support Commands${code}\u200b`, cmdArray)
 
       message.lineReply(helpEmbed)
     } else {
@@ -32,7 +32,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       
       var infoCmd = null;
 
-      for (const [name, info] of Object.entries(client.command.developer)) {
+      for (const [name, info] of Object.entries(client.command.support)) {
         if (infoCmd) break;
         if (secArg == info.commandName || info.aliases.includes(secArg)) {
           infoCmd = info;
@@ -51,5 +51,5 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     }
   } catch (error) {
     client.functions.sendErrorMsg(error, true, message, command);
-  } 
+  }
 }

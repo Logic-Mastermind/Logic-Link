@@ -85,7 +85,7 @@ module.exports = {
       clientPerms: [],
       cooldown: 10800,
       minArgs: 1,
-      options: ["new", "lookup"],
+      options: ["new"],
       aliases: ["paste"],
       usage: "pastebin <option>",
       required: "none",
@@ -1162,7 +1162,20 @@ module.exports = {
       aliases: [],
       usage: "error <id>",
       required: "support",
-      commandName: "error",
+      commandName: "error"
+    },
+    shelp: {
+      name: "Support Help",
+      description: "Provides information about support team commands.",
+      permissions: ["SUPPORT_TEAM"],
+      clientPerms: [],
+      cooldown: 2,
+      minArgs: 0,
+      options: [],
+      aliases: [],
+      usage: "shelp [command]",
+      required: "support",
+      commandName: "shelp"
     }
   },
   developer: {
@@ -1390,7 +1403,7 @@ module.exports = {
     },
     moderator: ["announce", "ban", "embed", "kick", "mute", "nickname", "purge", "slowmode", "unban", "unmute", "warn", "warnings"],
     administrator: ["addrole", "create", "delete", "hide", "hoist", "lock", "modify", "removerole", "settings", "unhide", "unhoist", "unlock"],
-    support: ["error"],
+    support: ["error", "shelp"],
     developer: ["devhelp", "devlock", "devmode", "eval", "logs", "reload", "reset", "restart", "shutdown", "test"]
   },
   all: ["admin", "avatar", "ban", "botinfo", "create", "delete", "devlock", "eval", "help", "invite", "kick", "membercount", "mute", "nickname", "ping", "purge", "reload", "restart", "roles", "settings", "shutdown", "slowmode", "test", "ticket", "unban", "unmute", "uptime", "voice"],

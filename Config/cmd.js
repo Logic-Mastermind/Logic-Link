@@ -1,8 +1,3 @@
-const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
-const Prefix = require("discord-prefix");
-const Reply = require("discord-reply");
-
 module.exports = {
   announce: {
     category: "moderator",
@@ -63,6 +58,10 @@ module.exports = {
   error: {
     category: "support",
     commandName: "error"
+  },
+  shelp: {
+    category: "support",
+    commandName: "shelp"
   },
   eval: {
     category: "developer",

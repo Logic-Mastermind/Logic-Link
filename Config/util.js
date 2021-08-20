@@ -18,6 +18,7 @@ module.exports = {
   noOption: "No command options found.",
   noCooldown: "No command cooldown found.",
   support: `<:IconSupport:868117797429997578>`,
+  integration: `<:IconIntegration:868118554497671238>`,
   members: `<:IconMembers:868118276310437898>`,
   cross: `<:Cross:867955785978761266>`,
   check: `<:Check:867931890437476353>`,

@@ -1,7 +1,7 @@
 const Discord = require("discord.js");
 const Buttons = require("discord-buttons");
 const Prefix = require("discord-prefix");
-const Reply = require("discord-reply");
+const ms = require("ms");
 const code = "```"
 
 const footer1 = `Logic Link - Imagine A World`;
@@ -322,7 +322,7 @@ module.exports = class Embeds {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(`Help - ${command.name}`);
     embed.setColor(`BLUE`);
-    embed.setDescription(`${command.description}\n\n**Usage**\n${code}\n${prefix}${command.usage}${code}\n**Cooldown**\n${command.cooldown == 0 ? `${this.client.util.noCooldown}` : `${command.cooldown} second${command.cooldown == 1 ? `` : `s`} cooldown.`}`);
+    embed.setDescription(`${command.description}\n\n**Usage**\n${code}\n${prefix}${command.usage}${code}\n**Cooldown**\n${command.cooldown == 0 ? `${this.client.util.noCooldown}` : `${ms(command.cooldown * 1000, { long: true })} cooldown.`}`);
     embed.addFields(fields);
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();

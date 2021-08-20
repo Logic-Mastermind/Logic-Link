@@ -70,6 +70,22 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         }
       }
 
+      for (const [name, info] of Object.entries(client.command.support)) {
+        if (infoCmd) break;
+        if (secArg == info.commandName || info.aliases.includes(secArg)) {
+          infoCmd = info;
+          break;
+        }
+      }
+
+      for (const [name, info] of Object.entries(client.command.ticket)) {
+        if (infoCmd) break;
+        if (secArg == info.commandName || info.aliases.includes(secArg)) {
+          infoCmd = info;
+          break;
+        }
+      }
+
       if (infoCmd) {
         const embed = client.embeds.helpMenu(infoCmd, guildPrefix);
         message.lineReply(embed);
