@@ -15,6 +15,7 @@ const prompts = require("./Config/prompts.js");
 const db = require("./Config/db.js");
 const logger = require("./Config/logger.js");
 const util = require("./Config/util.js");
+const os = require("os");
 
 const client = new Discord.Client({
   fetchAllMembers: true, 
@@ -36,6 +37,7 @@ client.command = commands;
 client.config = config;
 client.db = db;
 client.util = util;
+client.os = os;
 
 client.embeds = new embeds(client);
 client.functions = new functions(client);

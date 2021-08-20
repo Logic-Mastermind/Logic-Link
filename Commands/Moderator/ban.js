@@ -23,6 +23,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
   try {
     var member = message.mentions.members.first();
+    var softBan = (extra.commandName == "softban" || extra.commandName == "sban") ? true : false;
+
     if (!member) member = await client.functions.findMember(secArg, message.guild);
     if (!member) member = await client.functions.findUser(secArg);
     if (secArg.toLowerCase() == "me") member = message.member
@@ -76,7 +78,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       setTimeout(banMember, 500)
 
       function banMember() {
-        message.guild.members.ban(member, { reason: `${member.user ? member.user.tag : member.tag} was banned. Responsible User: ${message.author.tag}` })
+        message.guild.members.ban(member, { days: softBan ? 0 : 7, reason: `${member.user ? member.user.tag : member.tag} was banned. Responsible User: ${message.author.tag}` })
         .then(() => {
           const successEmbed = client.embeds.success(command, `Banned <@${member.id}> from the server.\n\n**Reason**\n${reason}`);
 

@@ -534,7 +534,7 @@ module.exports = {
       cooldown: 2,
       minArgs: 1,
       options: [],
-      aliases: ["tempban"],
+      aliases: ["softban", "sban"],
       usage: "ban <user> [reason]",
       required: "mod",
       commandName: "ban"
@@ -1332,6 +1332,8 @@ module.exports = {
     "roleinfo": "info",
     "sinfo": "info",
     "cinfo": "info",
-    "rinfo": "info"
+    "rinfo": "info",
+    "softban": "ban",
+    "sban": "ban"
   }
 }
