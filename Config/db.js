@@ -47,7 +47,8 @@ module.exports = {
     autoFetch: true,
     dataDir: "./Data/",
     autoEnsure: {
-      panels: [0]
+      count: 0,
+      panels: []
     }
   }),
   mutes: new Enmap({

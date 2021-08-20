@@ -72,6 +72,18 @@ module.exports = {
     category: "general",
     commandName: "help"
   },
+  thelp: {
+    category: "ticket",
+    commandName: "thelp"
+  },
+  tpanels: {
+    category: "ticket",
+    commandName: "tpanels"
+  },
+  tsettings: {
+    category: "ticket",
+    commandName: "tsettings"
+  },
   hoist: {
     category: "administrator",
     commandName: "hoist"

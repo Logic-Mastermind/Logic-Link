@@ -17,6 +17,13 @@ module.exports = {
   noAlias: "No command aliases found.",
   noOption: "No command options found.",
   noCooldown: "No command cooldown found.",
+  support: `<:IconSupport:868117797429997578>`,
+  members: `<:IconMembers:868118276310437898>`,
+  cross: `<:Cross:867955785978761266>`,
+  check: `<:Check:867931890437476353>`,
+  error: `<:MessageFail:868113159737720912>`,
+  warn: `<:Warn:868113114221121586>`,
+  settings: `<:IconSettings:868117828341997588>`,
   permsArray: [
     'CREATE_INSTANT_INVITE', 'KICK_MEMBERS',
     'BAN_MEMBERS',           'ADMINISTRATOR',

@@ -461,18 +461,17 @@ module.exports = class Functions {
   async getTicketData(guild) {
     const settings = await this.client.db.tsettings.get(guild.id);
     const panels = await this.client.db.panels.get(guild.id, "panels");
+    const count = await this.client.db.panels.get(guild.id, "count");
 
-    const settingsObj = {
+    return {
       settings: {
         dmUsers: settings.dmUsers
       },
       panels: {
-        all: panels.slice(1),
-        count: panels.slice(0, 1),
+        all: panels,
+        count: count
       }
     }
-
-    return settingsObj
   }
 
   async getRandomInt(min, max) {

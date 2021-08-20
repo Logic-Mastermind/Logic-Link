@@ -469,7 +469,86 @@ module.exports = {
     }
   },
   ticket: {
-
+    thelp: {
+      name: "Ticket Help",
+      description: "Provides information about ticket commands.",
+      permissions: ["ALL"],
+      clientPerms: [],
+      cooldown: 2,
+      minArgs: 0,
+      options: [],
+      aliases: ["tickethelp"],
+      usage: "thelp [command]",
+      required: "ticket",
+      commandName: "thelp"
+    },
+    tpanels: {
+      name: "Ticket Panels",
+      description: "Allows users to view or modify ticket panels.",
+      permissions: ["ADMINISTRATOR"],
+      clientPerms: [],
+      cooldown: 3,
+      minArgs: 0,
+      options: [],
+      aliases: ["ticketpanels"],
+      usage: "tpanels [new | modify | delete]",
+      required: "ticket",
+      commandName: "tpanels",
+      option: {
+        new: {
+          name: "Ticket Panels - New",
+          description: "Creates a new ticket panel for your server.",
+          permissions: ["ADMINISTRATOR"],
+          clientPerms: [],
+          cooldown: 3,
+          minArgs: 0,
+          options: [],
+          aliases: [],
+          usage: "tpanels new",
+          required: "ticket",
+          commandName: "tpanels new",
+        },
+        modify: {
+          name: "Ticket Panels - Modify",
+          description: "Modifies the data of a ticket panel.",
+          permissions: ["ADMINISTRATOR"],
+          clientPerms: [],
+          cooldown: 3,
+          minArgs: 0,
+          options: [],
+          aliases: [],
+          usage: "tpanels modify <panel id> [option] [option parameter]",
+          required: "ticket",
+          commandName: "tpanels modify",
+        },
+        delete: {
+          name: "Ticket Panels - Delete",
+          description: "Deletes a ticket panel.",
+          permissions: ["ADMINISTRATOR"],
+          clientPerms: [],
+          cooldown: 3,
+          minArgs: 0,
+          options: [],
+          aliases: [],
+          usage: "tpanels delete <panel id>",
+          required: "ticket",
+          commandName: "tpanels delete",
+        }
+      }
+    },
+    tsettings: {
+      name: "Ticket Settings",
+      description: "Allows users to view or modify ticket settings.",
+      permissions: ["ADMINISTRATOR"],
+      clientPerms: [],
+      cooldown: 3,
+      minArgs: 0,
+      options: [],
+      aliases: ["ticketsettings", "tset"],
+      usage: "tsettings [setting] [option parameter]",
+      required: "ticket",
+      commandName: "tsettings"
+    }
   },
   moderator: {
     announce: {
@@ -531,13 +610,28 @@ module.exports = {
       description: "Permanently removes members from your server, banned users are not able to rejoin unless unbanned.",
       permissions: ["BAN_MEMBERS"],
       clientPerms: ["BAN_MEMBERS"],
-      cooldown: 2,
+      cooldown: 4,
       minArgs: 1,
-      options: [],
-      aliases: ["softban", "sban"],
+      options: ["softban"],
+      aliases: [],
       usage: "ban <user> [reason]",
       required: "mod",
-      commandName: "ban"
+      commandName: "ban",
+      option: {
+        soft: {
+          name: "Softban",
+          description: "Bans members from your server without deleting previous messages.",
+          permissions: ["BAN_MEMBERS"],
+          clientPerms: ["BAN_MEMBERS"],
+          cooldown: 4,
+          minArgs: 1,
+          options: [],
+          aliases: ["sban"],
+          usage: "softban <user> [reason]",
+          required: "mod",
+          commandName: "softban"
+        }
+      }
     },
     embed: {
       name: "Embed",
@@ -1276,8 +1370,14 @@ module.exports = {
   },
   total: {
     general: ["avatar", "botinfo", "help", "info", "invite", "membercount", "pastebin", "ping", "ticket", "uptime", "voice", "whois"],
+    ticket: {
+      basic: [],
+      support: [],
+      admin: ["thelp", "tpanels", "tsettings"]
+    },
     moderator: ["announce", "ban", "embed", "kick", "mute", "nickname", "purge", "slowmode", "unban", "unmute", "warn", "warnings"],
     administrator: ["addrole", "create", "delete", "hide", "hoist", "lock", "modify", "removerole", "settings", "unhide", "unhoist", "unlock"],
+    support: ["error"],
     developer: ["devhelp", "devlock", "devmode", "eval", "logs", "reload", "reset", "restart", "shutdown", "test"]
   },
   all: ["admin", "avatar", "ban", "botinfo", "create", "delete", "devlock", "eval", "help", "invite", "kick", "membercount", "mute", "nickname", "ping", "purge", "reload", "restart", "roles", "settings", "shutdown", "slowmode", "test", "ticket", "unban", "unmute", "uptime", "voice"],
@@ -1334,6 +1434,14 @@ module.exports = {
     "cinfo": "info",
     "rinfo": "info",
     "softban": "ban",
-    "sban": "ban"
+    "sban": "ban",
+    "tickethelp": "thelp",
+    "ticketsettings": "tsettings",
+    "ticketsetting": "tsettings",
+    "tset": "tsettings",
+    "ticketpanels": "tpanels",
+    "tpanel": "tpanels",
+    "ticketpanel": "tpanels",
+    "errors": "error"
   }
 }

@@ -27,7 +27,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     ]
 
     if (!secArg) {
-      const helpEmbed = client.embeds.field(command, `${client.util.welcomeBotInfo}\n\n**Command List**\nBelow shows a list of available commands.\nTo get more details about a particular command, run: \`${guildPrefix}help [command]\`.\nIf you would like a detailed guide on the help menu, run \`${guildPrefix}help guide\`.\n\n${code}Commands${code}\n‎`, cmdArray)
+      const helpEmbed = client.embeds.field(command, `${client.util.welcomeBotInfo}\n\n**Command List**\nBelow shows a list of available commands.\nTo get more details about a particular command, run: \`${guildPrefix}help [command]\`.\nIf you would like a detailed guide on the help menu, run \`${guildPrefix}help guide\`.\n\n${code}Commands${code}\u200b`, cmdArray)
 
       message.lineReply(helpEmbed)
     } else {
