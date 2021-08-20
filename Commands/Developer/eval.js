@@ -41,22 +41,31 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       var execCode
       var evaled = null
 
-      if (secArg == "silent") {
+      if (secArg == "silent" || secArg == "s") {
         execCode = args.slice(1).join(" ");
         
         if (execCode) {
-          evaled = await eval(execCode);
+          evaled = await eval(`(async function() => {return ${execCode}})()`);
         } else {
           const embed = client.embeds.noArgs(command.option.silent, message.guild);
-          message.lineReply(embed)
+          return message.lineReply(embed);
+        }
+      } else if (secArg == "async" || secArg == "a") {
+        execCode = args.slice(1).join(" ");
+
+        if (execCode) {
+          evaled = await eval(`(async function() {return ${execCode}})()`);
+        } else {
+          const embed = client.embeds.noArgs(command.option.async, message.guild);
+          return message.lineReply(embed)
         }
       } else {
         execCode = args.join(" ");
-        evaled = await eval(execCode);
+        evaled = await eval(`${execCode}`);
       }
 
       if (typeof evaled !== "string") evaled = require("util").inspect(evaled);
-      if (secArg !== "silent") message.lineReply(evaled, { code: "xl", split: true })
+      if (secArg !== "silent" && secArg !== "s") message.lineReply(evaled, { code: "xl", split: true })
     } catch (error) {
       const embed = client.embeds.red(command, `An error has occured whilst trying to execute that evaluation.\n\n**Code Executed**\n${code}javascript\n${execCode}${code}\n**Error**\n${code}${error.stack}${code}`);
 

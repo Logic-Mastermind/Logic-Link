@@ -118,10 +118,7 @@ module.exports = {
     name: "errors",
     fetchAll: false,
     autoFetch: true,
-    dataDir: "./Data/",
-    autoEnsure: {
-      info: null
-    }
+    dataDir: "./Data/"
   }),
   logs: new Enmap({
     name: "logs",

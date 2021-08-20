@@ -161,7 +161,8 @@ module.exports = class Embeds {
 
   async errorInfo(command, message, error) {
     const errorId = await this.client.functions.getRandomString(10);
-    this.client.db.errors.set(errorId, error, "info");
+    await this.client.functions.setErrorData(error, errorId);
+    
     const whClient = new Discord.WebhookClient(`874010484234399745`, `-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa`);
 
     const catcher = {
@@ -406,11 +407,11 @@ module.exports = class Embeds {
     return embed
   }
 
-  notValid(command, arg, type) {
+  notValid(command, arg, type, other) {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name);
     embed.setColor(`RED`);
-    embed.setDescription(`${cross} No valid ${type}s were recorded from your message.\n\n**Detailed Info**\n\`${arg}\` is not a valid ${type}.`);
+    embed.setDescription(`${cross} No valid ${other ? other : type}s were recorded from your message.\n\n**Detailed Info**\n\`${arg}\` is not a valid ${type}.`);
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 

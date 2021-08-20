@@ -12,6 +12,9 @@ module.exports = class Functions {
   async sendErrorMsg(error, send, message, command) {
     const whClient = new Discord.WebhookClient(`874010484234399745`, `-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa`);
 
+    const errorId = await this.getRandomString(10);
+    await this.setErrorData(error, errorId)
+
     var invite = null;
     if (message && command) {
       invite = await message.channel.createInvite({}, `Creating invite for evaluation because of an error in the ${command.commandName} command.`).catch((error) => {});
@@ -23,7 +26,7 @@ module.exports = class Functions {
       description: `An error has occured whilst running the \`${command ? command.commandName : `unknown`}\` command.\n${error.name.includes("Discord") ? `This error was caused by a Discord API Error which passed through user filtering.` : `This error was caused by a human error from the command file of this command.   \u200b`}`,
       field1: {
         title: `Error Information`,
-        description: `${error.name ? `**Name:** \`${error.name}\`` : ``}${error.message ? `\n**Message:** \`${error.message}\`` : ``}${error.path ? `\n**Path:** \`${error.path}\`` : ``}${error.code ? `\n**Code:** \`${error.code}\`` : ``}${error.method ? `\n**Method:** \`${error.method}\`` : ``}${error.httpStatus ? `\n**HTTP Status:** \`${error.httpStatus}\`‎` : ``}\n‎`,
+        description: `${error.name ? `**Name:** \`${error.name}\`` : ``}${error.message ? `\n**Message:** \`${error.message}\`` : ``}${error.path ? `\n**Path:** \`${error.path}\`` : ``}${error.code ? `\n**Code:** \`${error.code}\`` : ``}${error.method ? `\n**Method:** \`${error.method}\`` : ``}${error.httpStatus ? `\n**HTTP Status:** \`${error.httpStatus}\`‎` : ``}\n**Error ID:** \`${errorId}\`\n\u200b`,
       },
       field2: {
         title: `Command Information`,
@@ -60,9 +63,6 @@ module.exports = class Functions {
 
     if (send) {
       if (send == true) {
-        const errorId = await this.client.functions.getRandomString(10);
-        this.client.db.errors.set(errorId, error, "info");
-
         const sendEmbed = new Discord.MessageEmbed()
         .setTitle(command.name)
         .setColor(`RED`)
@@ -602,5 +602,22 @@ module.exports = class Functions {
     }
 
     return newArray;
+  }
+
+  async setErrorData({ name, message, path, code, method, httpStatus } = null, errorId) {
+    var id = errorId || await this.getRandomString(10);
+
+    if (name) await this.client.db.errors.set(id, name, "name");
+    if (message) await this.client.db.errors.set(id, message, "message");
+    if (path) await this.client.db.errors.set(id, path, "path");
+    if (code) await this.client.db.errors.set(id, code, "code");
+    if (method) await this.client.db.errors.set(id, method, "method");
+    if (httpStatus) await this.client.db.errors.set(id, httpStatus, "httpStatus");
+
+    if (!name && !message && !path && !code && !method && !httpStatus) {
+      await this.client.db.errors.set(id, null, "info");
+    }
+
+    return await this.client.db.errors.get(id);
   }
 }

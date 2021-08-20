@@ -17,7 +17,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
   try {
     if (secArg == "1") {
-      return 1
+      return tyuytre
     }
 
     const embeds = [

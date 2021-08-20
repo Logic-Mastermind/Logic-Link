@@ -16,12 +16,24 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   }
 
   try {
-    var errorInfo = await client.db.errors.get(secArg);
+    var error = await client.db.errors.get(secArg);
 
-    if (errorInfo) {
-      
+    if (error) {
+      if (error.info) {
+        const embed = client.embeds.error(command, `No readable information is associated with this error.`);
+        return message.lineReply(embed);
+      }
+
+      const fields = [{
+        name: `Error Info`,
+        value: `${error.name ? `**Name:** \`${error.name}\`` : ``}${error.message ? `\n**Message:** \`${error.message}\`` : ``}${error.path ? `\n**Path:** \`${error.path}\`` : ``}${error.code ? `\n**Code:** \`${error.code}\`` : ``}${error.method ? `\n**Method:** \`${error.method}\`` : ``}${error.httpStatus ? `\n**HTTP Status:** \`${error.httpStatus}\`‎` : ``}`
+      }];
+
+      const embed = client.embeds.fieldSuccess(command, `Found an error with the ID: \`${secArg}\`.`, fields);
+
+      message.lineReply(embed);
     } else {
-      const embed = client.embeds.notValid(command, secArg, "Error ID");
+      const embed = client.embeds.error(command, `No errors were found matching the associated ID: \`${secArg}\`.`);
       message.lineReply(embed);
     }
   } catch (error) {

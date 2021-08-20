@@ -38,7 +38,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     logs.forEach((v, k, m) => {
       if (k !== client.util.devId) {
         const log = `[${v.type} ${k}]: ${v.content}`;
-        allLogs.push(log);
+        allLogs.unshift(log);
       }
     })
 
@@ -53,7 +53,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
     const leftBtn = client.buttons.grey("<", "Left_Button").setDisabled();
     const rightBtn = client.buttons.grey(">", "Right_Button");
-    if (allLogs.length < 5) rightBtn.setDisabled();
+    if (allLogs.length < 15) rightBtn.setDisabled();
 
     const msg = await message.channel.send({ embed: pages[0], buttons: [leftBtn, rightBtn] });
     pages = pages.slice(1);
