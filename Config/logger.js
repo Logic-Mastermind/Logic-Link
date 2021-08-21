@@ -5,50 +5,74 @@ module.exports = class Logger {
 
   async log(content) {
     try {
-      const logId = (this.client.db.logs.size + 1).toString();
+      const count = this.client.db.logs.count;
+      const logId = (count + 1).toString();
+
       await this.client.db.logs.set(logId, Date.now(), "timestamp");
       await this.client.db.logs.set(logId, content, "content");
       await this.client.db.logs.set(logId, "Log", "type");
 
-      return this.client.db.logs.get(logId);
+      return logId;
     } catch (error) {
-      return error
+      return error;
     }
   }
 
   async warn(content) {
     try {
-      const logId = (this.client.db.logs.size + 1).toString();
+      const count = this.client.db.logs.count;
+      const logId = (count + 1).toString();
+
       await this.client.db.logs.set(logId, Date.now(), "timestamp");
       await this.client.db.logs.set(logId, content, "content");
       await this.client.db.logs.set(logId, "Warn", "type");
 
-      return this.client.db.logs.get(logId);
+      return logId;
     } catch (error) {
-      return error
+      return error;
     }
   }
 
   async error(content) {
     try {
-      const logId = (this.client.db.logs.size + 1).toString();
+      const count = this.client.db.logs.count;
+      const logId = (count + 1).toString();
+
       await this.client.db.logs.set(logId, Date.now(), "timestamp");
       await this.client.db.logs.set(logId, content, "content");
       await this.client.db.logs.set(logId, "Error", "type");
 
-      return this.client.db.logs.get(logId);
+      return logId;
     } catch (error) {
-      return error
+      return error;
+    }
+  }
+
+  async updateLog(content, id) {
+    try {
+      const count = await this.client.db.logs.count;
+      const data = await this.client.db.logs.get(id);
+      const logId = id ? id.toString() : (count + 1).toString();
+      var details = data.details;
+
+      if (!data.content) return "Invalid ID provided";
+      if (!details) details = [];
+      details.push(content);
+
+      await this.client.db.logs.set(logId, details, "details");      
+      return content;
+    } catch (error) {
+      return error;
     }
   }
 
   async clear() {
     try {
       await this.client.db.logs.clear();
-      await this.client.db.logs.set(this.client.util.devId, Date.now(), "clearedAt");
+      await this.client.db.devSettings.set(this.client.util.devId, Date.now(), "logsCleared");
       return null
     } catch (error) {
-      return error
+      return error;
     }
   }
 }

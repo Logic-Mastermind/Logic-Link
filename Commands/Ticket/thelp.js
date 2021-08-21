@@ -30,7 +30,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         { name: `${adminPermissions}Administrator Commands`, value: `${code}\n${client.command.total.ticket.admin.join("\n")}${code}`, inline: true }
       ]
 
-      const embed = client.embeds.field(command, `${client.util.welcomeBotInfo}\n\n**Command List**\nBelow shows a list of available ticket commands.\nTo get more details about a particular command, run: \`${guildPrefix}thelp [command]\`.\nIf you would like a detailed guide on the help menu, run \`${guildPrefix}thelp guide\`.\n\n${code}Ticket Commands${code}\u200b${(noPanels && (message.member.hasPermission("ADMINISTRATOR") || message.member.roles.cache.has(settings.adminRole))) ? `\n${client.util.warn} This server does not have any panels. Run \`${guildPrefix}tpanels new\` to create one.\n` : ``}`, cmdArray);
+      const embed = client.embeds.field(command, `${client.util.welcomeBotInfo}\n\n**Command List**\nBelow shows a list of available ticket commands.\nTo get more details about a particular command, run: \`${guildPrefix}thelp [command]\`.\nIf you would like a detailed guide on the help menu, run \`${guildPrefix}thelp guide\`.\n\n${code}Ticket Commands${code}\u200b${(noPanels && (message.member.hasPermission("ADMINISTRATOR") || message.member.roles.cache.has(settings.adminRole))) ? `\n${client.util.warn} This server does not have any panels. Run \`${guildPrefix}panels new\` to create one.\n` : ``}`, cmdArray);
       message.lineReply(embed);
 
     } else {

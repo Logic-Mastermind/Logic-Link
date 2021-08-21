@@ -25,6 +25,13 @@ module.exports = {
   error: `<:MessageFail:868113159737720912>`,
   warn: `<:Warn:868113114221121586>`,
   settings: `<:IconSettings:868117828341997588>`,
+  category: `<:ChannelCategory:868119798620512297>`,
+  moderator: `<:IconRole:868117933237358642>`,
+  message: `<:StatusRichPresence:868113305565278218>`,
+  reply: `<:Reply:878702649732628561>`,
+  clock: `<:IconClock:868118866960728144>`,
+  supportServer: `836760447297650729`,
+  supportRole: `878657218537459762`,
   permsArray: [
     'CREATE_INSTANT_INVITE', 'KICK_MEMBERS',
     'BAN_MEMBERS',           'ADMINISTRATOR',

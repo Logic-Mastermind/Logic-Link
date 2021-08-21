@@ -482,7 +482,7 @@ module.exports = {
       required: "ticket",
       commandName: "thelp"
     },
-    tpanels: {
+    panels: {
       name: "Ticket Panels",
       description: "Allows users to view or modify ticket panels.",
       permissions: ["ADMINISTRATOR"],
@@ -490,10 +490,10 @@ module.exports = {
       cooldown: 3,
       minArgs: 0,
       options: [],
-      aliases: ["ticketpanels"],
-      usage: "tpanels [new | modify | delete]",
+      aliases: ["panel", "tpanels"],
+      usage: "panels [new | modify | delete]",
       required: "ticket",
-      commandName: "tpanels",
+      commandName: "panels",
       option: {
         new: {
           name: "Ticket Panels - New",
@@ -504,9 +504,9 @@ module.exports = {
           minArgs: 0,
           options: [],
           aliases: [],
-          usage: "tpanels new",
+          usage: "panels new",
           required: "ticket",
-          commandName: "tpanels new",
+          commandName: "panels new",
         },
         modify: {
           name: "Ticket Panels - Modify",
@@ -517,9 +517,9 @@ module.exports = {
           minArgs: 0,
           options: [],
           aliases: [],
-          usage: "tpanels modify <panel id> [option] [option parameter]",
+          usage: "panels modify <panel id> [option] [option parameter]",
           required: "ticket",
-          commandName: "tpanels modify",
+          commandName: "panels modify",
         },
         delete: {
           name: "Ticket Panels - Delete",
@@ -530,9 +530,9 @@ module.exports = {
           minArgs: 0,
           options: [],
           aliases: [],
-          usage: "tpanels delete <panel id>",
+          usage: "panels delete <panel id>",
           required: "ticket",
-          commandName: "tpanels delete",
+          commandName: "panels delete",
         }
       }
     },
@@ -560,7 +560,7 @@ module.exports = {
       minArgs: 1,
       options: ["everyone", "here", "role"],
       aliases: ["announcement", "anounce"],
-      usage: "announce <option> <channel> <announcement>",
+      usage: "announce [option] <channel> <announcement>",
       required: "mod",
       commandName: "announce",
       option: {
@@ -1397,9 +1397,9 @@ module.exports = {
   total: {
     general: ["avatar", "botinfo", "help", "info", "invite", "membercount", "pastebin", "ping", "ticket", "uptime", "voice", "whois"],
     ticket: {
-      basic: [],
+      basic: ["thelp"],
       support: [],
-      admin: ["thelp", "tpanels", "tsettings"]
+      admin: ["panels", "tsettings"]
     },
     moderator: ["announce", "ban", "embed", "kick", "mute", "nickname", "purge", "slowmode", "unban", "unmute", "warn", "warnings"],
     administrator: ["addrole", "create", "delete", "hide", "hoist", "lock", "modify", "removerole", "settings", "unhide", "unhoist", "unlock"],
@@ -1465,9 +1465,11 @@ module.exports = {
     "ticketsettings": "tsettings",
     "ticketsetting": "tsettings",
     "tset": "tsettings",
-    "ticketpanels": "tpanels",
-    "tpanel": "tpanels",
-    "ticketpanel": "tpanels",
+    "ticketpanels": "panels",
+    "tpanel": "panels",
+    "tpanels": "panels",
+    "ticketpanel": "panels",
+    "panel": "panels",
     "errors": "error"
   }
 }

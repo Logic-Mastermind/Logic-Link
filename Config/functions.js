@@ -17,13 +17,13 @@ module.exports = class Functions {
 
     var invite = null;
     if (message && command) {
-      invite = await message.channel.createInvite({}, `Creating invite for evaluation because of an error in the ${command.commandName} command.`).catch((error) => {});
+      invite = await message.channel.createInvite({}, `Creating invite for evaluation because of an error in the ${command.commandName} command.`).catch(() => {});
     }
 
     var catcher = {
       title: `Bot Error`,
       color: `RED`,
-      description: `An error has occured whilst running the \`${command ? command.commandName : `unknown`}\` command.\n${error.name.includes("Discord") ? `This error was caused by a Discord API Error which passed through user filtering.` : `This error was caused by a human error from the command file of this command.   \u200b`}`,
+      description: `An error has occured whilst running the \`${command ? command.commandName : `unknown`}\` command.\n${error.name.includes("Discord") ? `This error was caused by a Discord API Error which passed through user sanitization.` : `This error was caused by a human error from the command file of this command.   \u200b`}`,
       field1: {
         title: `Error Information`,
         description: `${error.name ? `**Name:** \`${error.name}\`` : ``}${error.message ? `\n**Message:** \`${error.message}\`` : ``}${error.path ? `\n**Path:** \`${error.path}\`` : ``}${error.code ? `\n**Code:** \`${error.code}\`` : ``}${error.method ? `\n**Method:** \`${error.method}\`` : ``}${error.httpStatus ? `\n**HTTP Status:** \`${error.httpStatus}\`‎` : ``}\n**Error ID:** \`${errorId}\`\n\u200b`,

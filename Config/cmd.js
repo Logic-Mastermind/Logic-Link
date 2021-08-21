@@ -75,9 +75,9 @@ module.exports = {
     category: "ticket",
     commandName: "thelp"
   },
-  tpanels: {
+  panels: {
     category: "ticket",
-    commandName: "tpanels"
+    commandName: "panels"
   },
   tsettings: {
     category: "ticket",

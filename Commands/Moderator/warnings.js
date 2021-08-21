@@ -22,7 +22,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
     if (member) {
       const warnings = client.db.userInfo.get(`${member.id}-${member.guild.id}`, "warnings");
-      const divided = await client.functions.divideChunk(warnings, 10);
+      const divided = await client.functions.divideChunk(warnings, 5);
 
       if (warnings.length == 0) {
         const embed = client.embeds.error(command, `This member has no warnings.`);
@@ -60,7 +60,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       const buttonLeft = client.buttons.grey("<", "buttonLeft");
       const buttonRight = client.buttons.grey(">", "buttonRight");
 
-      if (warnings.length <= 10) {
+      if (warnings.length <= 5) {
         buttonLeft.setDisabled();
         buttonRight.setDisabled();
       } else {
@@ -73,11 +73,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       for (const [key, val] of Object.entries(divided)) {
         const pageContents = [];
         divided[key].forEach((v, k, a) => {
-          const init = `<:IconRole:868117933237358642> Moderator: <@${v.initiator}>`
-          const msg = `<:StatusRichPresence:868113305565278218> Warning: ${v.message}`
-          const date = `<:IconClock:868118866960728144> Date: <t:${Math.round(v.date / 1000)}:R>`
+          const mod = `${client.util.moderator} Moderator: <@${v.initiator}>`
+          const msg = `${client.util.message} Warning: ${v.message}`
+          const date = `${client.util.clock} Date: <t:${Math.round(v.date / 1000)}:R>`
 
-          pageContents.unshift(`${init}\n${date}\n${msg}`);
+          pageContents.unshift(`${mod}\n${date}\n${msg}`);
         });
 
         const embed = client.embeds.blue(command, `This member has  a total of \`${warnings.length}\` warnings.\n\n**Member Warnings**\n${pageContents.join("\n\n")}`);

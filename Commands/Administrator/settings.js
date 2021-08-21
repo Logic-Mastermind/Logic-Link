@@ -34,7 +34,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         )
       }
 
-      const embed = client.embeds.field(command, `${client.util.welcomeBotInfo}\n\n**Server Settings**\nBelow is a list of configurations for this server.\nTo modify any of these settings, run: \`${guildPrefix}settings [option] [new setting]\`.\n\n${code}Settings${code}\n\u200b`, settingsArray);
+      const embed = client.embeds.field(command, `${client.util.welcomeBotInfo}\n\n**Server Settings**\nBelow is a list of configurations for this server.\nTo modify any of these settings, run: \`${guildPrefix}settings [option] [new setting]\`.\n\n${code}Settings${code}\u200b`, settingsArray);
 
       message.lineReply(embed)
     } else {

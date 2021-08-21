@@ -23,6 +23,12 @@ module.exports = async (client, message) => {
     var prefix = guildPrefix;
     var allArgs = message.content.split(/ +/g);
     var pingPrefixes = [`<@${client.user.id}>`, `<@!${client.user.id}>`];
+    var blacklistInfo = client.db.blacklists.get(message.author.id);
+
+    if (blacklistInfo.blacklisted) {
+      const embed = client.embeds.error(command, `You are currently blacklisted from using Logic Link.\n\n**Reason**\n${blacklistInfo.reason}`);
+      return message.lineReply(embed);
+    }
 
     if (message.author.id == client.util.devId) {
       if (message.content.startsWith(".")) prefix = ".";
@@ -55,134 +61,69 @@ module.exports = async (client, message) => {
     const settings = await client.functions.getSettings(message.guild);
     const tsettings = await client.functions.getTicketData(message.guild);
     const devMode = client.db.devSettings.get(client.util.devId, "devMode");
-    const blacklistInfo = client.db.blacklists.get(message.author.id);
+    const logId = await client.logger.log(`${message.author.tag} ran the ${command.commandName} command.`);
     
     const hasPermission = (arr1, arr2) => arr1.some((e) => arr2.includes(e))
-    const permissionsCheck = (arr, target) => target.every(v => arr.includes(v));
     const permissionWhitelist = ["delete", "lock", "hide", "unhide", "unlock"];
 
-    if (blacklistInfo.blacklisted) {
-      const embed = client.embeds.error(command, `You are currently blacklisted from using Logic Link.\n\n**Reason**\n${blacklistInfo.reason}`);
-      return message.lineReply(embed);
-    }
+    async function filterPermissions() {
+      if (permissionWhitelist.includes(command.commandName)) return null;
+      if (devMode && (message.author.id == client.util.devId)) return null;
+      if (command.required == "none") return null;
 
-    function filterPermissions() {
-      if (!permissionWhitelist.includes(command.commandName)) {
-        if (!devMode) {
-          if (command.required == "dev") {
-            if (message.author.id !== client.util.devId) {
-              const embed = client.embeds.permission(command)
-              return message.channel.send(embed)
-            }
-          }
+      if (command.required == "dev") {
+        if (message.author.id !== client.util.devId) {
+          await client.logger.updateLog(`User lacked permissions.`, logId);
+          const embed = client.embeds.permission(command);
+          return message.lineReply(embed);
+        }
+      } else if (command.required == "support") {
+        if (message.member.roles.cache.has(client.util.supportRole)) return null;
+        if (message.author.id == client.util.devId) return null;
+        if (command.permissions.includes("ALL")) return null;
 
-          if (!hasPermission(message.member.permissions.toArray(), command.permissions)) {
-            if (command.required == "mod") {
-              if (!message.member.roles.cache.has(settings.modRole) && !message.member.roles.cache.has(settings.adminRole)) {
-                const embed = client.embeds.permission(command)
-                return message.channel.send(embed)
-              }
-            } else if (command.required == "admin") {
-              if (!message.member.roles.cache.has(settings.adminRole)) {
-                const embed = client.embeds.permission(command)
-                return message.channel.send(embed)
-              }
-            } else if (command.required == "support") {
-              if (!message.member.roles.cache.has(client.util.supportRole) && (message.author.id !== client.util.devId)) {
-                const embed = client.embeds.permission(command)
-                return message.channel.send(embed)
-              }
-            }
-          }
+        if (message.guild.id !== client.util.supportServer) {
+          await client.logger.updateLog(`Not in support server.`, logId);
+          const embed = client.embeds.red(command, `This command is only available in the bot's support server.\nUse the \`${guildPrefix}invite\` command to join it.`);
+          return message.lineReply(embed);
+
         } else {
-          if (message.author.id !== client.util.devId) {
-            if (!hasPermission(message.member.permissions.toArray(), command.permissions)) {
-              if (command.required == "mod") {
-                if (!message.member.roles.cache.has(settings.modRole) && !message.member.roles.cache.has(settings.adminRole)) {
-                  const embed = client.embeds.permission(command)
-                  return message.channel.send(embed)
-                }
-              } else if (command.required == "admin") {
-                if (!message.member.roles.cache.has(settings.adminRole)) {
-                  const embed = client.embeds.permission(command)
-                  return message.channel.send(embed)
-                }
-              } else if (command.required == "support") {
-                if (!message.member.roles.cache.has(client.util.supportRole) && (message.author.id !== client.util.devId)) {
-                  const embed = client.embeds.permission(command)
-                  return message.channel.send(embed)
-                }
-              } else if (command.required == "dev") {
-                if (message.author.id !== client.util.devId) {
-                  const embed = client.embeds.permission(command)
-                  return message.channel.send(embed)
-                }
-              }
-            }
-          }
+          await client.logger.updateLog(`User lacked permissions.`, logId);
+          const embed = client.embeds.permission(command);
+          return message.lineReply(embed);
+        }
+      } else if (command.required == "ticket") {
+        if (command.permissions.includes("ALL")) return null;
+      }
+
+      var hasPerms = await hasPermission(message.member.permissions.toArray(), command.permissions);
+      var hasAdminRole = message.member.roles.cache.has(settings.adminRole);
+      var hasModRole = message.member.roles.cache.has(settings.modRole);
+
+      if (!hasPerms) {
+        if (hasAdminRole) return null;
+
+        if (command.required == "mod") {
+          if (hasModRole) return null;
+          
+          await client.logger.updateLog(`User lacked permissions.`, logId);
+          const embed = client.embeds.permission(command);
+          return message.lineReply(embed);
+
+        } else if (command.required == "admin") {
+          await client.logger.updateLog(`User lacked permissions.`, logId);
+          const embed = client.embeds.permission(command);
+          return message.lineReply(embed);
+
+        } else if (command.required == "ticket") {
+          await client.logger.updateLog(`User lacked permissions.`, logId);
+          const embed = client.embeds.permission(command);
+          return message.lineReply(embed);
         }
       }
     }
 
-    function filterPermissions1() {
-      if (!permissionWhitelist.includes(command.commandName)) {
-        if (!devMode) {
-          if (command.required == "dev") {
-            if (message.author.id !== client.util.devId) {
-              const embed = client.embeds.permission(command)
-              return message.channel.send(embed)
-            }
-          }
-
-          if (!hasPermission(message.member.permissions.toArray(), command.permissions)) {
-            if (command.required == "mod") {
-              if (!message.member.roles.cache.has(settings.modRole) && !message.member.roles.cache.has(settings.adminRole)) {
-                const embed = client.embeds.permission(command)
-                return message.channel.send(embed)
-              }
-            } else if (command.required == "admin") {
-              if (!message.member.roles.cache.has(settings.adminRole)) {
-                const embed = client.embeds.permission(command)
-                return message.channel.send(embed)
-              }
-            } else if (command.required == "support") {
-              if (!message.member.roles.cache.has(client.util.supportRole) && (message.author.id !== client.util.devId)) {
-                const embed = client.embeds.permission(command)
-                return message.channel.send(embed)
-              }
-            }
-          }
-        } else {
-          if (message.author.id !== client.util.devId) {
-            if (!hasPermission(message.member.permissions.toArray(), command.permissions)) {
-              if (command.required == "mod") {
-                if (!message.member.roles.cache.has(settings.modRole) && !message.member.roles.cache.has(settings.adminRole)) {
-                  const embed = client.embeds.permission(command)
-                  return message.channel.send(embed)
-                }
-              } else if (command.required == "admin") {
-                if (!message.member.roles.cache.has(settings.adminRole)) {
-                  const embed = client.embeds.permission(command)
-                  return message.channel.send(embed)
-                }
-              } else if (command.required == "support") {
-                if (!message.member.roles.cache.has(client.util.supportRole) && (message.author.id !== client.util.devId)) {
-                  const embed = client.embeds.permission(command)
-                  return message.channel.send(embed)
-                }
-              } else if (command.required == "dev") {
-                if (message.author.id !== client.util.devId) {
-                  const embed = client.embeds.permission(command)
-                  return message.channel.send(embed)
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    const filtered = filterPermissions()
+    const filtered = await filterPermissions();
     if (filtered) return
 
     if (message.author.id !== client.util.devId) {
@@ -193,14 +134,16 @@ module.exports = async (client, message) => {
 
       if (locked == true && lockedGuild) {
         if (message.guild.id == lockedGuild.id) {
+          await client.logger.updateLog(`Command was locked in the guild.`, logId);
           const lockedEmbed = client.embeds.new(`Developer Lock`, `The \`${command.commandName}\` command has been locked until further notice.${lockedReason ? `\n\n**Developer Note**\n${lockedReason}` : `\nNo further information was provied.`}`, `BLUE`, client.util.footer1, client.util.footer2, true)
 
-          return message.channel.send(lockedEmbed)
+          return message.lineReply(lockedEmbed)
         }
       } else if (locked == true && (!lockedGuild)) {
+        await client.logger.updateLog(`Command was locked.`, logId);
         const lockedEmbed = client.embeds.new(`Developer Lock`, `The \`${command.commandName}\` command has been locked until further notice.${lockedReason ? `\n\n**Developer Note**\n${lockedReason}` : `\nNo further information was provided.`}`, `BLUE`, client.util.footer1, client.util.footer2, true)
 
-        return message.channel.send(lockedEmbed)
+        return message.lineReply(lockedEmbed)
       }
 
       if (userCooldown) {
@@ -210,9 +153,10 @@ module.exports = async (client, message) => {
           const timeLeft = expiration - now;
 
           if (now < expiration) {
+            await client.logger.updateLog(`User was on cooldown for that command.`, logId);
             const cooldownEmbed = client.embeds.error(command, `You are on cooldown for the \`${command.commandName}\` command.\nYou currently need to wait \`${ms(timeLeft, { long: true })}\` before running this command again.`);
 
-            return message.channel.send(cooldownEmbed)
+            return message.lineReply(cooldownEmbed)
           }
         }
       }
@@ -220,11 +164,12 @@ module.exports = async (client, message) => {
 
     if (command.minArgs > 0) {
       if (!args[command.minArgs - 1]) {
-        const denied = filterPermissions1();
-        if (denied) return
+        const denied = await filterPermissions();
+        if (denied) return;
 
-        const embed = client.embeds.noArgs(command, message.guild)
-        return message.channel.send(embed)
+        await client.logger.updateLog(`User did not give enough arguments.`, logId);
+        const embed = client.embeds.noArgs(command, message.guild);
+        return message.lineReply(embed);
       }
     }
 
@@ -234,11 +179,11 @@ module.exports = async (client, message) => {
       mentioned: mentioned
     }
 
-    client.logger.log(`${message.author.tag} ran the ${command.commandName} command.`);
-    client.db.cooldown.set(message.author.id, now, command.commandName);
+    await client.logger.updateLog(`User passed through into the command file.`, logId);
+    await client.db.cooldown.set(message.author.id, now, command.commandName);
 
     cmd.run(client, message, args, command, settings, tsettings, extra);
   } catch (error) {
-    client.functions.sendError(error, true, message, command)
+    client.functions.sendError(error, true, message, command);
   }
 }
