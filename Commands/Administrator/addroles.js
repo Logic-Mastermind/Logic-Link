@@ -17,11 +17,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
   try {
     var member = message.mentions.members.first();
-    var mentionedRoles = message.mentions.roles.map(r => r.id)
+    var mentionedRoles = message.mentions.roles.map(r => r.id);
     var roles = args.slice(1);
 
     roles.unshift(...mentionedRoles);
-    roles = roles.filter((v) => (!v.startsWith("<@&") || !v.startsWith("<@!")) && !v.endsWith(">"))
+    roles = roles.filter((v) => (!v.startsWith("<@&") || !v.startsWith("<@!")) && !v.endsWith(">"));
     roles = [...new Set(roles)];
 
     if (!member) member = await client.functions.findMember(secArg, message.guild);

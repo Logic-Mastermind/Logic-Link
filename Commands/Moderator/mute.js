@@ -33,11 +33,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       return message.lineReply(errorEmbed)
     }
 
-    if (!clientMember.hasPermission(command.clientPerms)) {
-      const errorEmbed = client.embeds.botPermission(command)
-      return message.lineReply(errorEmbed)
-    }
-
     if (member.id === client.user.id) {
       const errorEmbed = client.embeds.error(command, `${responses.botMute}Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`)
       return message.lineReply(errorEmbed)
@@ -147,20 +142,18 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     }
 
     if (settings.mutedRoleConfig == false) {
-      const pendingEmbed1 = client.embeds.pending(command, `Configuring muted role...`);
-      editMsg.edit(pendingEmbed1);
-      
-      await message.guild.channels.cache.forEach((channel) => {
-        if (channel.permissionsFor(clientMember).has("MANAGE_CHANNELS")) {
-          channel.updateOverwrite(mutedRole, { SEND_MESSAGES: false })
-          .catch(async (error) => {
-            const errorEmbed = await client.embeds.errorInfo(command, error);
-            return editMsg.edit(errorEmbed)
-          })
-        }
-      })
+      if (clientMember.hasPermission("MANAGE_CHANNELS")) {
+        const pendingEmbed1 = client.embeds.pending(command, `Configuring muted role...`);
+        editMsg.edit(pendingEmbed1);
+        
+        await message.guild.channels.cache.forEach((channel) => {
+          if (channel.permissionsFor(clientMember).has("MANAGE_CHANNELS")) {
+            channel.updateOverwrite(mutedRole, { SEND_MESSAGES: false });
+          }
+        })
 
-      client.db.settings.set(message.guild.id, true, "mutedRoleConfig");
+        client.db.settings.set(message.guild.id, true, "mutedRoleConfig");
+      }
     }
 
     member.roles.add(mutedRole)

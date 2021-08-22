@@ -215,6 +215,53 @@ module.exports = class Functions {
     return channel
   }
 
+  async findCategory(filter, guild, safe) {
+    var channel = null;
+    var found = false;
+
+    if (!isNaN(filter)) {
+      channel = guild.channels.cache.get(filter);
+
+      if (!channel) channel = guild.channels.cache.find(c => c.name.toLowerCase() === filter.toLowerCase());
+
+      if (!safe) {
+        if (!channel) channel = guild.channels.cache.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
+          if (found == false) {
+            found = key
+          }
+        })
+      } else {
+        if (!channel) channel = guild.channels.cache.filter(c => c.name.toLowerCase().startsWith(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
+          if (found == false) {
+            found = key
+          }
+        })
+      }
+    } else {
+      channel = guild.channels.cache.find(c => c.name.toLowerCase() === filter.toLowerCase());
+
+      if (!safe) {
+        if (!channel) channel = guild.channels.cache.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
+          if (found == false) {
+            found = key
+          }
+        })
+      } else {
+        if (!channel) channel = guild.channels.cache.filter(c => c.name.toLowerCase().startsWith(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
+          if (found == false) {
+            found = key
+          }
+        })
+      }
+    }
+
+    if (found !== false) channel = guild.channels.cache.get(found);
+    if (channel) {
+      if (channel.type !== "category") channel = null;
+    }
+    return channel
+  }
+
   async findMember(filter, guild, safe) {
     var member = null;
     var found = false;
@@ -619,5 +666,11 @@ module.exports = class Functions {
     }
 
     return await this.client.db.errors.get(id);
+  }
+
+  async next(channel, idObj, embeds, num) {
+    const msg = await channel.send(embeds[num - 1]);
+    idObj[num - 1] = msg.id;
+    return idObj;
   }
 }

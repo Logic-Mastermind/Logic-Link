@@ -50,5 +50,27 @@ module.exports = {
     'MANAGE_ROLES',          'MANAGE_WEBHOOKS',
     'MANAGE_EMOJIS'
   ],
-  chalkOptions: ["bold", "dim", "italic", "underline", "inverse", "strikethrough", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "gray", "bgBlack", "bgRed", "bgGreen", "bgYellow", "bgBlue", "bgMagenta", "bgCyan", "bgWhite"]
+  chalkOptions: ["bold", "dim", "italic", "underline", "inverse", "strikethrough", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "gray", "bgBlack", "bgRed", "bgGreen", "bgYellow", "bgBlue", "bgMagenta", "bgCyan", "bgWhite"],
+  skipAliases: ["skip", "skip.", "skip,"],
+  cancelAliases: ["cancel", "cancel.", "cancel,"],
+  settingsAliases: {
+    "prefix": "prefix",
+    "modrole": "modRole",
+    "adminrole": "adminRole",
+    "logchannel": "logChannel",
+    "welcomechannel": "welcomeChannel",
+    "welcomerole": "welcomeRole",
+    "mutedrole": "mutedRole",
+    "welcomesystem": "welcomeSystem",
+    "mutedroleconfig": "mutedRoleConfig",
+    "pre": "prefix",
+    "mod": "modRole",
+    "admin": "adminRole",
+    "log": "logChannel",
+    "welcchan": "welcomeChannel",
+    "welcrole": "welcomeRole",
+    "muted": "mutedRole",
+    "welcome": "welcomeSystem",
+    "mutedconfig": "mutedRoleConfig"
+  }
 }

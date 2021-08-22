@@ -662,8 +662,8 @@ module.exports = {
     mute: {
       name: "Mute",
       description: "Removes the ablity for a user to type in a text channel.",
-      permissions: ["MANAGE_CHANNELS"],
-      clientPerms: ["MANAGE_CHANNELS"],
+      permissions: ["MANAGE_ROLES"],
+      clientPerms: ["MANAGE_ROLES"],
       cooldown: 7,
       minArgs: 1,
       options: [],
@@ -919,54 +919,6 @@ module.exports = {
       usage: "lock [channel] [reason]",
       required: "admin",
       commandName: "lock"
-    },
-    panel: {
-      name: "Panel",
-      description: "Allows you to manage ticket panels.",
-      permissions: ["ADMINISTRATOR"],
-      clientPerms: [],
-      cooldown: 3,
-      minArgs: 1,
-      options: ["delete", "modify", "new"],
-      aliases: ["pan"],
-      usage: "panel <option> [option parameter]",
-      required: "admin",
-      commandName: "panel",
-      option: {
-        delete: {
-          name: "Panel - Delete",
-          description: "Deletes a specific ticket panel from your settings.",
-          permissions: ["ADMINISTRATOR"],
-          clientPerms: [],
-          cooldown: 3,
-          aliases: ["panel d"],
-          usage: "panel delete <panel id>",
-          required: "admin",
-          commandName: "panel delete"
-        },
-        modify: {
-          name: "Panel - Modify",
-          description: "Allows you to modify the options of ticket panels.",
-          permissions: ["ADMINISTRATOR"],
-          clientPerms: [],
-          cooldown: 3,
-          aliases: ["panel m"],
-          usage: "panel modify <panel id>",
-          required: "admin",
-          commandName: "panel modify"
-        },
-        new: {
-          name: "Panel - New",
-          description: "Creates a new ticket panel.",
-          permissions: ["ADMINISTRATOR"],
-          clientPerms: [],
-          cooldown: 3,
-          aliases: ["panel n"],
-          usage: "panel new",
-          required: "admin",
-          commandName: "panel new"
-        }
-      }
     },
     removerole: {
       name: "Remove Role",

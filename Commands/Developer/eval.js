@@ -45,7 +45,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         execCode = args.slice(1).join(" ");
         
         if (execCode) {
-          evaled = await eval(`(async function() => {return ${execCode}})()`);
+          evaled = await eval(`${execCode}`);
         } else {
           const embed = client.embeds.noArgs(command.option.silent, message.guild);
           return message.lineReply(embed);

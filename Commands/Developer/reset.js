@@ -49,8 +49,24 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         const embed = client.embeds.error(command.option.cooldown, `No users were recorded from your message.`);
         message.lineReply(embed);
       }
-    } else if (secArg == "settings") {
+    } else if (secArg == "settings" || secArg == "setting") {
+      if (!thirdArg) {
+        const noArgsEmbed = client.embeds.noArgs(command.option.settings, message.guild);
+        return message.lineReply(noArgsEmbed);
+      }
 
+      var setting = client.util.settingsAliases[fourthArg];
+      var guild = await client.guilds.cache.get(thirdArg);
+
+      if (guild) {
+        await client.db.settings.delete(guild.id, setting || null);
+        const embed = client.embeds.success(command, `${setting ? `Reset the \`${setting}\` setting` : `Reset settings `} in the \`${guild.name}\` guild.`);
+        message.lineReply(embed);
+
+      } else {
+        const embed = client.embeds.notValid(command, thirdArg, `guild`);
+        message.lineReply(embed);
+      }
     }
   } catch (error) {
     client.functions.sendErrorMsg(error, true, message, command);
