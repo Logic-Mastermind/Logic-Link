@@ -73,18 +73,20 @@ module.exports = async (client, message) => {
 
       if (command.required == "dev") {
         if (message.author.id !== client.util.devId) {
-          await client.logger.updateLog(`User lacked permissions.`, logId);
-          const embed = client.embeds.permission(command);
-          return message.lineReply(embed);
+          if (!command.permissions.includes("ALL")) {
+            await client.logger.updateLog(`User lacked permissions.`, logId);
+            const embed = client.embeds.permission(command);
+            return message.lineReply(embed);
+          }
         }
       } else if (command.required == "support") {
         if (message.member.roles.cache.has(client.util.supportRole)) return null;
         if (message.author.id == client.util.devId) return null;
-        if (command.permissions.includes("ALL")) return null;
+        if (command.permissions.includes("ALL") || !command.permissions[0]) return null;
 
         if (message.guild.id !== client.util.supportServer) {
-          await client.logger.updateLog(`Not in support server.`, logId);
-          const embed = client.embeds.red(command, `This command is only available in the bot's support server.\nUse the \`${guildPrefix}invite\` command to join it.`);
+          await client.logger.updateLog(`User not in support server.`, logId);
+          const embed = client.embeds.red(command, `This command is only available in the Logic Link's support server.\nUse the \`${guildPrefix}invite\` command to join it.`);
           return message.lineReply(embed);
 
         } else {
@@ -167,7 +169,7 @@ module.exports = async (client, message) => {
         const denied = await filterPermissions();
         if (denied) return;
 
-        await client.logger.updateLog(`User did not give enough arguments.`, logId);
+        await client.logger.updateLog(`User did not pass enough arguments.`, logId);
         const embed = client.embeds.noArgs(command, message.guild);
         return message.lineReply(embed);
       }
@@ -176,10 +178,11 @@ module.exports = async (client, message) => {
     const extra = {
       commandName: commandName,
       allArgs: allArgs,
-      mentioned: mentioned
+      mentioned: mentioned,
+      logId: logId
     }
 
-    await client.logger.updateLog(`User passed through into the command file.`, logId);
+    await client.logger.updateLog(`User passed all checks.`, logId);
     await client.db.cooldown.set(message.author.id, now, command.commandName);
 
     cmd.run(client, message, args, command, settings, tsettings, extra);

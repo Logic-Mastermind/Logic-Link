@@ -328,7 +328,7 @@ module.exports = class Functions {
     return role
   }
 
-  async findUser(filter) {
+  async findUser(filter, safe) {
     var user = null;
     var found = false;
 
@@ -362,8 +362,8 @@ module.exports = class Functions {
       })
     }
 
-    if (found !== false) user = this.client.users.cache.get(found);
-    return user
+    if ((found !== false) && !safe) user = this.client.users.cache.get(found);
+    return user;
   }
 
   async findBan(filter, guild) {
@@ -515,7 +515,7 @@ module.exports = class Functions {
         dmUsers: settings.dmUsers
       },
       panels: {
-        all: panels,
+        all: new Map(Object.entries(panels)),
         count: count
       }
     }

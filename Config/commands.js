@@ -489,7 +489,7 @@ module.exports = {
       clientPerms: [],
       cooldown: 3,
       minArgs: 0,
-      options: [],
+      options: ["new", "modify", "delete"],
       aliases: ["panel", "tpanels"],
       usage: "panels [new | modify | delete]",
       required: "ticket",
@@ -554,8 +554,8 @@ module.exports = {
     announce: {
       name: "Announce",
       description: "Sends an announcement to a channel.",
-      permissions: ["SEND_MESSAGES"],
-      clientPerms: ["SEND_MESSAGES"],
+      permissions: ["MENTION_EVERYONE"],
+      clientPerms: ["MENTION_EVERYONE"],
       cooldown: 3,
       minArgs: 1,
       options: ["everyone", "here", "role"],
@@ -612,7 +612,7 @@ module.exports = {
       clientPerms: ["BAN_MEMBERS"],
       cooldown: 4,
       minArgs: 1,
-      options: ["softban"],
+      options: [],
       aliases: [],
       usage: "ban <user> [reason]",
       required: "mod",
@@ -1103,6 +1103,19 @@ module.exports = {
     }
   },
   support: {
+    bug: {
+      name: "Bug Report",
+      description: "Submits a bug report to the support server.",
+      permissions: [],
+      clientPerms: [],
+      cooldown: 10,
+      minArgs: 1,
+      options: [],
+      aliases: [],
+      usage: "bug new",
+      required: "support",
+      commandName: "bug"
+    },
     error: {
       name: "Error",
       description: "Retrieves error information from an error ID.",
@@ -1175,13 +1188,13 @@ module.exports = {
     devhelp: {
       name: "Developer Help",
       description: "Shows a list of developer commands.",
-      permissions: ["BOT_DEVELOPER"],
+      permissions: ["ALL"],
       clientPerms: [],
       cooldown: 0,
       minArgs: 0,
       options: [],
       aliases: ["dhelp"],
-      usage: "devmode [option]",
+      usage: "devhelp [option]",
       required: "dev",
       commandName: "devhelp"
     },
@@ -1345,6 +1358,19 @@ module.exports = {
       required: "dev",
       commandName: "test"
     },
+    unblacklist: {
+      name: "Un-Blacklist",
+      description: "Un-blacklists users from Logic Link.",
+      permissions: ["BOT_DEVELOPER"],
+      clientPerms: [],
+      cooldown: 0,
+      minArgs: 1,
+      options: [],
+      aliases: [],
+      usage: "unblacklist <user>",
+      required: "dev",
+      commandName: "unblacklist",
+    },
   },
   total: {
     general: ["avatar", "botinfo", "help", "info", "invite", "membercount", "pastebin", "ping", "ticket", "uptime", "voice", "whois"],
@@ -1356,11 +1382,9 @@ module.exports = {
     moderator: ["announce", "ban", "embed", "kick", "mute", "nickname", "purge", "slowmode", "unban", "unmute", "warn", "warnings"],
     administrator: ["addrole", "create", "delete", "hide", "hoist", "lock", "modify", "removerole", "settings", "unhide", "unhoist", "unlock"],
     support: ["error", "shelp"],
-    developer: ["devhelp", "devlock", "devmode", "eval", "logs", "reload", "reset", "restart", "shutdown", "test"]
+    developer: ["blacklist", "devhelp", "devlock", "devmode", "eval", "logs", "reload", "reset", "restart", "shutdown", "test", "unblacklist"]
   },
-  all: ["admin", "avatar", "ban", "botinfo", "create", "delete", "devlock", "eval", "help", "invite", "kick", "membercount", "mute", "nickname", "ping", "purge", "reload", "restart", "roles", "settings", "shutdown", "slowmode", "test", "ticket", "unban", "unmute", "uptime", "voice"],
-  settingsOptions: ["prefix", "modrole", "adminrole", "logchannel", "mutedrole", "welcome", "welcomerole", "welcomechannel"],
-  settingsOptionsAliases: ["pre", "mod", "moderatorrole", "admin", "administratorrole", "log", "logchan", "muted", "welc","welcomesystem", "welcrole", "welcchan", "welcomechan"],
+  all: ["addrole", "addroles", "create", "delete", "hide", "hoist", "lock", "modify", "removerole", "removeroles", "settings", "unhide", "unhoist", "unlock", "blacklist", "devhelp", "devlock", "devmode", "eval", "logs", "reload", "reset", "restart", "shutdown", "test", "unblacklist", "avatar", "botinfo", "help", "info", "invite", "membercount", "pastebin", "ping", "ticket", "uptime", "voice", "whois", "announce", "ban", "embed", "kick", "mute", "nickname", "purge", "slowmode", "unban", "unmute", "warn", "warnings", "error", "shelp", "panels", "thelp", "tsettings"],
   aliases: {
     "av": "avatar",
     "binfo": "botinfo",
@@ -1422,6 +1446,11 @@ module.exports = {
     "tpanels": "panels",
     "ticketpanel": "panels",
     "panel": "panels",
-    "errors": "error"
+    "errors": "error",
+    "blacklists": "blacklist",
+    "bl": "blacklist",
+    "bls": "blacklist",
+    "ubl": "unblacklist",
+    "ubls": "unblacklist"
   }
 }

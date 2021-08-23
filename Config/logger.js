@@ -52,10 +52,12 @@ module.exports = class Logger {
     try {
       const count = await this.client.db.logs.count;
       const data = await this.client.db.logs.get(id);
+      
+      if (!data) return "No ID Provided";
       const logId = id ? id.toString() : (count + 1).toString();
       var details = data.details;
 
-      if (!data.content) return "Invalid ID provided";
+      if (!data.content) return "Invalid ID Provided";
       if (!details) details = [];
       details.push(content);
 

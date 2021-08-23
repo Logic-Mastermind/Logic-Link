@@ -17,9 +17,18 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
   try {
     if (!secArg) {
-      const hasSupportRole = tsettings.panels.all.some(p => message.member.roles.cache.has(p.supportRole));
-      const noPanels = tsettings.panels.count == 0 ? true : false;
+      var hasSupportRole = false;
 
+      for (const [key, val] of Object.entries(tsettings.panels.all)) {
+        for (const role of val.support) {
+          if (message.member.roles.cache.has(role)) {
+            hasSupportRole = true;
+            break;
+          }
+        }
+      }
+
+      const noPanels = tsettings.panels.count == 0 ? true : false;
       const supportPermissions = `${hasSupportRole || message.member.hasPermission("ADMINISTRATOR") || message.member.roles.cache.has(settings.adminRole) ? `${client.util.support} ` : `${client.util.error} `}`;
 
       const adminPermissions = `${message.member.hasPermission("ADMINISTRATOR") || message.member.roles.cache.has(settings.adminRole) ? `${client.util.settings} ` : `${client.util.error} `}`;

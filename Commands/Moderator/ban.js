@@ -24,9 +24,10 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   try {
     var member = message.mentions.members.first();
     var softBan = (extra.commandName == "softban" || extra.commandName == "sban") ? true : false;
+    var tempBan = (extra.commandName == "tempban" || extra.commandName == "tban") ? true : false;
 
     if (!member) member = await client.functions.findMember(secArg, message.guild);
-    if (!member) member = await client.functions.findUser(secArg);
+    if (!member) member = await client.functions.findUser(secArg, true);
     if (secArg.toLowerCase() == "me") member = message.member
 
     var reason = args.slice(1).join(" ");
@@ -39,23 +40,23 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       }
 
       if (member.id === client.user.id) {
-        const errorEmbed = client.embeds.error(command, `${responses.botBan}Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`)
+        const errorEmbed = client.embeds.error(softBan ? command.option.soft : command, `${responses.botBan}Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`)
         return message.lineReply(errorEmbed)
 
       } else if (member.id == message.author.id) {
-        const errorEmbed = client.embeds.error(command, `${responses.selfWarning}Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`);
+        const errorEmbed = client.embeds.error(softBan ? command.option.soft : command, `${responses.selfWarning}Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`);
         return message.lineReply(errorEmbed)
       }
 
       if (member.id == message.guild.owner.id) {
-        const errorEmbed = client.embeds.error(command, `${responses.serverOwner}Server Owner - <@${member.guild.owner.id}>\nTargetted Member - <@${member.id}>`);
+        const errorEmbed = client.embeds.error(softBan ? command.option.soft : command, `${responses.serverOwner}Server Owner - <@${member.guild.owner.id}>\nTargetted Member - <@${member.id}>`);
         return message.lineReply(errorEmbed)
       }
 
       if (member.user) {
         if ((message.author.id !== message.guild.owner.id) && member.roles.highest) {
           if (message.member.roles.highest.position <= member.roles.highest.position) {
-            const embed = client.embeds.error(command, `${responses.hierarchy}Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nInitiator - <@${message.author.id}>: Top Role Position \`${message.member.roles.highest.position}\`.`);
+            const embed = client.embeds.error(softBan ? command.option.soft : command, `${responses.hierarchy}Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nInitiator - <@${message.author.id}>: Top Role Position \`${message.member.roles.highest.position}\`.`);
             return message.lineReply(embed);
           }
         }
@@ -63,13 +64,13 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         if (member.roles.highest) {
           if (clientMember.roles.highest.position <= member.roles.highest.position) {
             const clientTopRole = clientMember.roles.highest;
-            const embed = client.embeds.error(command, `${responses.botHierarchy}Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nClient Member - <@${clientMember.id}>: Top Role Position \`${clientTopRole.position}\`.`);
+            const embed = client.embeds.error(softBan ? command.option.soft : command, `${responses.botHierarchy}Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nClient Member - <@${clientMember.id}>: Top Role Position \`${clientTopRole.position}\`.`);
             return message.lineReply(embed);
           }
         }
       }
 
-      const pendingEmbed = client.embeds.pending(command, responses.pending);
+      const pendingEmbed = client.embeds.pending(softBan ? command.option.soft : command, responses.pending);
       const editMsg = await message.lineReply(pendingEmbed);
 
       const bannedEmbed = client.embeds.orange(`User Banned`, `You have been banned from \`${message.guild.name}\`${message.guild.name.endsWith(".") ? `` : `.`}\n\n**Reason**\n${reason}`)
@@ -80,17 +81,17 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       function banMember() {
         message.guild.members.ban(member, { days: softBan ? 0 : 7, reason: `${member.user ? member.user.tag : member.tag} was banned. Responsible User: ${message.author.tag}` })
         .then(() => {
-          const successEmbed = client.embeds.success(command, `Banned <@${member.id}> from the server.\n\n**Reason**\n${reason}`);
+          const successEmbed = client.embeds.success(softBan ? command.option.soft : command, `Banned <@${member.id}> from the server.\n\n**Reason**\n${reason}`);
 
           editMsg.edit(successEmbed)
         })
         .catch(async (error) => {
-          const errorEmbed = await client.embeds.errorInfo(command, message, error);
+          const errorEmbed = await client.embeds.errorInfo(softBan ? command.option.soft : command, message, error);
           editMsg.edit(errorEmbed)
         })
       }
     } else {
-      const errorEmbed = client.embeds.noMember(command, secArg);
+      const errorEmbed = client.embeds.noMember(softBan ? command.option.soft : command, secArg);
       message.lineReply(errorEmbed)
     }
   } catch (error) {

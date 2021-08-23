@@ -16,10 +16,18 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   }
 
   try {
+    if (secArg == "view") {
+      const blacklists = await Array.from(client.db.blacklists.fetchEverything().filter(x => x.blacklisted).keys());
+
+      const embed = client.embeds.blue(command, `${blacklists.length == 0 ? `No users are currently blacklisted.` : `A total of \`${blacklists.length}\` user${blacklists.length == 1 ? ` is` : `s are`} currently blacklisted.\n\n**Users**\n<@${blacklists.join(">\n<@")}>`}`);
+      return message.lineReply(embed);
+    }
+
     var user = message.mentions.users.first();
     var reason = client.util.reason;
+
     if (!user) user = await client.functions.findUser(secArg);
-    if (thirdArg) reason = args.slice(1).join(" ")
+    if (thirdArg) reason = args.slice(1).join(" ");
 
     if (user) {
       const blacklistInfo = client.db.blacklists.get(user.id);

@@ -1,6 +1,6 @@
 {
   "name": "Logic-Link",
-  "version": "2.2.9",
+  "version": "2.3.3",
   "main": "index.js",
   "description": "Logic Link is a powerful utility/moderation bot with advanced customization and automation options.",
   "scripts": {

@@ -32,6 +32,22 @@ module.exports = {
     
     return button
   },
+  confirm: (id) => {
+    const button = new Buttons.MessageButton();
+    button.setLabel("Confirm");
+    button.setStyle("green");
+    button.setID(id);
+
+    return button
+  },
+  cancel: (id) => {
+    const button = new Buttons.MessageButton();
+    button.setLabel("Cancel");
+    button.setStyle("red");
+    button.setID(id);
+    
+    return button
+  },
   grey: (text, id) => {
     const button = new Buttons.MessageButton();
     button.setLabel(text);

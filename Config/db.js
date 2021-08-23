@@ -48,7 +48,7 @@ module.exports = {
     dataDir: "./Data/",
     autoEnsure: {
       count: 0,
-      panels: []
+      panels: {}
     }
   }),
   mutes: new Enmap({

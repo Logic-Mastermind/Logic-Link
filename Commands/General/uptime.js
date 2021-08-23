@@ -16,7 +16,12 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   }
 
   try {
-    const uptimeEmbed = client.embeds.green(command, `Logic Link has been online since <t:${client.readySince}:f>.\n\n**Relative Time**\n<t:${client.readySince}:R>.`);
+    const fields = [
+      { name: `Relative`, value: `<t:${client.readySince}:R>`, inline: true },
+      { name: `Exact`, value: `<t:${client.readySince}:d>`, inline: true }
+    ];
+
+    const uptimeEmbed = client.embeds.fieldSuccess(command, `Logic Link has been online since <t:${client.readySince}:t>.`, fields);
 
     message.lineReply(uptimeEmbed)
   } catch (error) {

@@ -287,6 +287,18 @@ module.exports = class Embeds {
     return embed
   }
 
+  fieldGreen(command, description, fields) {
+    const embed = new Discord.MessageEmbed()
+    embed.setTitle(command.name || command);
+    embed.setColor(`GREEN`);
+    embed.setDescription(`${description}`);
+    if (fields) embed.addFields(fields);
+    embed.setFooter(footer1, footer2);
+    embed.setTimestamp();
+
+    return embed
+  }
+
   fieldError(command, description, fields) {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name || command);

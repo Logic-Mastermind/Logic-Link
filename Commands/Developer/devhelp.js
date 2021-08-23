@@ -16,8 +16,9 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   }
 
   try {
+    const isDev = message.author.id == client.util.devId;
     const cmdArray = [
-      { name: `${client.util.integration} Developer Commands`, value: `${code}\n${client.command.total.developer.join("\n")}${code}`, inline: true }
+      { name: `${isDev ? `${client.util.integration}` : `${client.util.error}`} Developer Commands`, value: `${code}\n${client.command.total.developer.join("\n")}${code}`, inline: true }
     ]
 
     if (!secArg) {

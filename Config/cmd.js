@@ -19,6 +19,10 @@ module.exports = {
     category: "moderator",
     commandName: "ban"
   },
+  bug: {
+    category: "support",
+    commandName: "bug"
+  },
   embed: {
     category: "moderator",
     commandName: "embed"
@@ -206,6 +210,10 @@ module.exports = {
   uptime: {
     category: "general",
     commandName: "uptime"
+  },
+  unblacklist: {
+    category: "developer",
+    commandName: "unblacklist"
   },
   voice: {
     category: "general",
