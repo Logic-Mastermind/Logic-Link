@@ -483,17 +483,7 @@ module.exports = class Functions {
 
   async getSettings(guild) {
     const settings = await this.client.db.settings.get(guild.id);
-    const settingsObj = {
-      prefix: settings.prefix,
-      modRole: settings.modRole,
-      adminRole: settings.adminRole,
-      logChannel: settings.logChannel,
-      welcomeChannel: settings.welcomeChannel,
-      welcomeRole: settings.welcomeRole,
-      mutedRole: settings.mutedRole,
-      welcomeSystem: settings.welcomeSystem,
-      mutedRoleConfig: settings.mutedRoleConfig
-    }
+    const settingsObj = settings;
 
     settingsObj.modRoleObj = await guild.roles.cache.get(settingsObj.modRole);
     settingsObj.adminRoleObj = await guild.roles.cache.get(settingsObj.adminRole);
@@ -672,5 +662,9 @@ module.exports = class Functions {
     const msg = await channel.send(embeds[num - 1]);
     idObj[num - 1] = msg.id;
     return idObj;
+  }
+
+  sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
   }
 }

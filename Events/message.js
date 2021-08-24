@@ -24,12 +24,14 @@ module.exports = async (client, message) => {
     var allArgs = message.content.split(/ +/g);
     var pingPrefixes = [`<@${client.user.id}>`, `<@!${client.user.id}>`];
     var blacklistInfo = client.db.blacklists.get(message.author.id);
+    var userInfo = client.db.userInfo.get(`${message.author.id}-${message.guild.id}`);
 
     if (blacklistInfo.blacklisted) {
       const embed = client.embeds.error(command, `You are currently blacklisted from using Logic Link.\n\n**Reason**\n${blacklistInfo.reason}`);
       return message.lineReply(embed);
     }
 
+    if (userInfo.inPrompt) return;
     if (message.author.id == client.util.devId) {
       if (message.content.startsWith(".")) prefix = ".";
       if (message.content.startsWith("-")) prefix = "-";

@@ -28,7 +28,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         }
       }
 
-      const noPanels = tsettings.panels.count == 0 ? true : false;
+      const noPanels = tsettings.panels.count == 0
       const supportPermissions = `${hasSupportRole || message.member.hasPermission("ADMINISTRATOR") || message.member.roles.cache.has(settings.adminRole) ? `${client.util.support} ` : `${client.util.error} `}`;
 
       const adminPermissions = `${message.member.hasPermission("ADMINISTRATOR") || message.member.roles.cache.has(settings.adminRole) ? `${client.util.settings} ` : `${client.util.error} `}`;

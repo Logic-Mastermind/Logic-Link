@@ -20,7 +20,8 @@ module.exports = {
       welcomeRole: null,
       mutedRole: null,
       welcomeSystem: false,
-      mutedRoleConfig: false
+      mutedRoleConfig: false,
+      panelSetup: false
     }
   }),
   first: new Enmap({
@@ -138,7 +139,8 @@ module.exports = {
     autoFetch: true,
     dataDir: "./Data/",
     autoEnsure: {
-      warnings: []
+      warnings: [],
+      inPrompt: false
     }
   }),
   blacklists: new Enmap({

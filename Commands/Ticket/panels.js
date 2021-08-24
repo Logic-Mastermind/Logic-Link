@@ -17,13 +17,31 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
   try {
     if (!secArg) {
-      const fields = [{
-        name: `${client.util.panel} Panel`,
-        value: `placeholder`,
-        inline: false
-      }];
+      const panelCount = tsettings.panels.count;
+      const fields = [];
 
-      const embed = client.embeds.field(command, `${client.util.welcomeBotInfo}\n\n**Panels**\nBelow shows a list of ticket panels.\nIf you would like details about this command, run: \`${guildPrefix}help panels\`.\n\n${code}Panels${code}\u200b`, fields);
+      tsettings.panels.all.forEach((v, k) => {
+        if (v.id == "1" || v.id == "2") {
+          var opened = message.guild.channels.cache.get(v.opened);
+          var closed = message.guild.channels.cache.get(v.closed);
+
+          fields[k - 1] = {
+            name: `${client.util.panel} Panel: \`${v.id}\``,
+            value: `${client.util.text} Name: \`${v.name}\`\n${client.util.category} Opened Category: \`#${opened.name}\`\n${client.util.category} Closed Category: \`#${closed.name}\`\n${client.util.override} Claiming: \`${v.claiming ? `On` : `Off`}\`\n${client.util.channel} Panel Channel: <#${v.channel}>`,
+            inline: true
+          }
+        }
+      })
+
+      if (panelCount == 0) {
+        fields[0] = {
+          name: `${client.util.panel} Panel: \`None\``,
+          value: `There are no panels to show for now.`,
+          inline: false
+        }
+      }
+
+      const embed = client.embeds.field(command, `${client.util.welcomeBotInfo}\n\n**Panels**\nBelow shows a list of ticket panels.\nIf you would like details about this command, run: \`${guildPrefix}help panels\`.\nThis server has ${panelCount == 0 ? `no` : `\`${panelCount}\``} panel${panelCount == 1 ? `` : `s`}.\n\n${code}Panels${code}${(panelCount == 0 && (message.member.hasPermission("ADMINISTRATOR") || message.member.roles.cache.has(settings.adminRole))) ? `\n${client.util.warn} This server does not have any panels. Run \`${guildPrefix}panels new\` to create one.` : ``}\u200b`, fields);
       message.lineReply(embed);
 
     } else {
@@ -41,20 +59,30 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             channel: `Where should this panel be sent?\nMention or type the name of the channel that you would like this panel to be sent.`
           }
 
+          const title = {
+            name: `Panel Name`,
+            opened: `Opened Category`,
+            closed: `Closed Category`,
+            claiming: `Ticket Claiming`,
+            support: `Support Roles`,
+            additional: `Additional Roles`,
+            channel: `Panel Channel`
+          }
+
           const startEmbed = client.embeds.pending(command, `Starting panel setup prompt...`);
           if (settings.panelSetup) {
-            const embed = client.embeds.error(command.option.new, `A panel is already being created in this server, please wait until the prompt has completed.`);
+            const embed = client.embeds.error(command.option.new, `A panel is already being created in this server.`);
             return message.lineReply(embed);
           }
           
           const embeds = [
-            client.embeds.blue(command.option.new, prompt.name),
-            client.embeds.blue(command.option.new, prompt.opened),
-            client.embeds.blue(command.option.new, prompt.closed),
-            client.embeds.blue(command.option.new, prompt.claiming),
-            client.embeds.blue(command.option.new, prompt.support),
-            client.embeds.blue(command.option.new, prompt.additional),
-            client.embeds.blue(command.option.new, prompt.channel)
+            client.embeds.blue(title.name, prompt.name),
+            client.embeds.blue(title.opened, prompt.opened),
+            client.embeds.blue(title.closed, prompt.closed),
+            client.embeds.blue(title.claiming, prompt.claiming),
+            client.embeds.blue(title.support, prompt.support),
+            client.embeds.blue(title.additional, prompt.additional),
+            client.embeds.blue(title.channel, prompt.channel)
           ];
 
           const filter = (m) => m.author.id == message.author.id;
@@ -89,6 +117,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
           var collected = {};
           await client.db.settings.set(message.guild.id, true, "panelSetup");
+          await client.db.userInfo.set(`${message.author.id}-${message.guild.id}`, true, "inPrompt");
 
           collector.on("collect", async (msg) => {
             const msgArgs = msg.content.split(/ +/g);
@@ -98,7 +127,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               ++attempts.name;
 
               if (attempts.name > 4) {
-                const embed = client.embeds.error(command.option.new, `You have attempted this question too many times.`);
+                const embed = client.embeds.error(title.name, `You have attempted this question too many times.`);
 
                 editMsg.edit(embed);
                 attempted = true;
@@ -106,11 +135,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               if (client.util.skipAliases.includes(msg.content.toLowerCase())) {
-                const embed = client.embeds.error(command.option.new, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.name}`);
+                const embed = client.embeds.error(title.name, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.name}`);
                 return editMsg.edit(embed);
 
               } else if (client.util.cancelAliases.includes(msg.content.toLowerCase())) {
-                const embed = client.embeds.error(command.option.new, `This question has stopped looking for responses.`);
+                const embed = client.embeds.error(title.name, `This question has stopped looking for responses.`);
 
                 editMsg.edit(embed);
                 cancelled = true;
@@ -118,29 +147,29 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               if (msg.content.length > 50) {
-                const embed = client.embeds.error(command.option.new, `This name is greater than 50 characters, please try again.\n\n**Original Question**\n${prompt.name}`);
+                const embed = client.embeds.error(title.name, `This name is greater than 50 characters, please try again.\n\n**Original Question**\n${prompt.name}`);
                 return editMsg.edit(embed);
 
               } else if (msg.content.length < 3) {
-                const embed = client.embeds.error(command.option.new, `This name is less than 3 characters, please try again.\n\n**Original Question**\n${prompt.name}`);
+                const embed = client.embeds.error(title.name, `This name is less than 3 characters, please try again.\n\n**Original Question**\n${prompt.name}`);
                 return editMsg.edit(embed);
               }
 
               var taken = null;
-              for (const [key, val] of Object.entries(tsettings.panels.all)) {
-                if (val.name == msg.content) {
+              for (const pan of tsettings.panels.all.values()) {
+                if (pan.name == msg.content) {
                   taken = true;
                   break;
                 }
               }
 
               if (taken) {
-                const embed = client.embeds.error(command.option.new, `This name has already been used in another panel, please try again.\n\n**Original Question**\n${prompt.name}`);
+                const embed = client.embeds.error(title.name, `This name has already been used in another panel, please try again.\n\n**Original Question**\n${prompt.name}`);
                 return editMsg.edit(embed);
               }
 
               collected.name = msg.content;
-              const embed = client.embeds.success(command.option.new, `Panel name has been set to: \`${collected.name}\`.`);
+              const embed = client.embeds.success(title.name, `Panel name has been set to: \`${collected.name}\`.`);
               editMsg.edit(embed);
 
               current = 2;
@@ -151,7 +180,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               ++attempts.opened;
 
               if (attempts.opened > 4) {
-                const embed = client.embeds.error(command.option.new, `You have attempted this question too many times.`);
+                const embed = client.embeds.error(title.opened, `You have attempted this question too many times.`);
 
                 editMsg.edit(embed);
                 attempted = true;
@@ -159,11 +188,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               if (client.util.skipAliases.includes(msg.content.toLowerCase())) {
-                const embed = client.embeds.error(command.option.new, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.opened}`);
+                const embed = client.embeds.error(title.opened, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.opened}`);
                 return editMsg.edit(embed);
 
               } else if (client.util.cancelAliases.includes(msg.content.toLowerCase())) {
-                const embed = client.embeds.error(command.option.new, `This question has stopped looking for responses.`);
+                const embed = client.embeds.error(title.opened, `This question has stopped looking for responses.`);
 
                 editMsg.edit(embed);
                 cancelled = true;
@@ -172,17 +201,17 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
               var category = await client.functions.findCategory(msgArgs.join(" "), msg.guild);
               if (!category) {
-                const embed = client.embeds.error(command.option.new, `I could not record any categories from your message, please try again.\n\n**Original Question**\n${prompt.opened}`);
+                const embed = client.embeds.error(title.opened, `I could not record any categories from your message, please try again.\n\n**Original Question**\n${prompt.opened}`);
                 return editMsg.edit(embed);
               }
 
               if (!category.permissionsFor(clientMember).has("MANAGE_CHANNELS")) {
-                const embed = client.embeds.error(command.option.new, `I do not have the required permissions in this category, please try again.\n\n**Original Question**\n${prompt.opened}`);
+                const embed = client.embeds.error(title.opened, `I do not have the required permissions in this category, please try again.\n\n**Original Question**\n${prompt.opened}`);
                 return editMsg.edit(embed);
               }
 
               collected.opened = category.id;
-              const embed = client.embeds.success(command.option.new, `Panel opened category has been set to: \`#${category.name}\`.`);
+              const embed = client.embeds.success(title.opened, `Panel opened category has been set to: \`#${category.name}\`.`);
               editMsg.edit(embed);
 
               current = 3;
@@ -193,7 +222,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               ++attempts.closed;
 
               if (attempts.closed > 4) {
-                const embed = client.embeds.error(command.option.new, `You have attempted this question too many times.`);
+                const embed = client.embeds.error(title.closed, `You have attempted this question too many times.`);
 
                 editMsg.edit(embed);
                 attempted = true;
@@ -201,11 +230,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               if (client.util.skipAliases.includes(msg.content.toLowerCase())) {
-                const embed = client.embeds.error(command.option.new, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.closed}`);
+                const embed = client.embeds.error(title.closed, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.closed}`);
                 return editMsg.edit(embed);
 
               } else if (client.util.cancelAliases.includes(msg.content.toLowerCase())) {
-                const embed = client.embeds.error(command.option.new, `This question has stopped looking for responses.`);
+                const embed = client.embeds.error(title.closed, `This question has stopped looking for responses.`);
 
                 editMsg.edit(embed);
                 cancelled = true;
@@ -214,17 +243,17 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
               var category = await client.functions.findCategory(msgArgs.join(" "), msg.guild);
               if (!category) {
-                const embed = client.embeds.error(command.option.new, `I could not record any categories from your message, please try again.\n\n**Original Question**\n${prompt.closed}`);
+                const embed = client.embeds.error(title.closed, `I could not record any categories from your message, please try again.\n\n**Original Question**\n${prompt.closed}`);
                 return editMsg.edit(embed);
               }
 
               if (!category.permissionsFor(clientMember).has("MANAGE_CHANNELS")) {
-                const embed = client.embeds.error(command.option.new, `I do not have the \`MANAGE_CHANNELS\` permission in this category, please try again.\n\n**Original Question**\n${prompt.closed}`);
+                const embed = client.embeds.error(title.closed, `I do not have the \`MANAGE_CHANNELS\` permission in this category, please try again.\n\n**Original Question**\n${prompt.closed}`);
                 return editMsg.edit(embed);
               }
 
               collected.closed = category.id;
-              const embed = client.embeds.success(command.option.new, `Panel closed category has been set to: \`${category.name}\`.`);
+              const embed = client.embeds.success(title.closed, `Panel closed category has been set to: \`#${category.name}\`.`);
               editMsg.edit(embed);
 
               current = 4;
@@ -235,7 +264,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               ++attempts.claiming;
 
               if (attempts.claiming > 4) {
-                const embed = client.embeds.error(command.option.new, `You have attempted this question too many times.`);
+                const embed = client.embeds.error(title.claiming, `You have attempted this question too many times.`);
 
                 editMsg.edit(embed);
                 attempted = true;
@@ -243,11 +272,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               if (client.util.skipAliases.includes(msg.content.toLowerCase())) {
-                const embed = client.embeds.error(command.option.new, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.claiming}`);
+                const embed = client.embeds.error(title.claiming, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.claiming}`);
                 return editMsg.edit(embed);
 
               } else if (client.util.cancelAliases.includes(msg.content.toLowerCase())) {
-                const embed = client.embeds.error(command.option.new, `This question has stopped looking for responses.`);
+                const embed = client.embeds.error(title.claiming, `This question has stopped looking for responses.`);
 
                 editMsg.edit(embed);
                 cancelled = true;
@@ -259,12 +288,12 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               if (msg.content.includes("no") || msg.content.includes("off")) option = "false";
 
               if (!option) {
-                const embed = client.embeds.error(command.option.new, `An invalid option was recieved, please type \`on\` or \`off\`.\n\n**Original Question**\n${prompt.claiming}`);
+                const embed = client.embeds.error(title.claiming, `An invalid option was recieved, please type \`on\` or \`off\`.\n\n**Original Question**\n${prompt.claiming}`);
                 return editMsg.edit(embed);
               }
               
               collected.claiming = option == "true" ? true : false;
-              const embed = client.embeds.success(command.option.new, `Ticket claiming in this panel has been turned \`${option == "true" ? `on` : `off`}\`.`);
+              const embed = client.embeds.success(title.claiming, `Ticket claiming in this panel has been turned \`${option == "true" ? `on` : `off`}\`.`);
               editMsg.edit(embed);
 
               current = 5;
@@ -275,7 +304,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               ++attempts.support;
 
               if (attempts.support > 4) {
-                const embed = client.embeds.error(command.option.new, `You have attempted this question too many times.`);
+                const embed = client.embeds.error(title.support, `You have attempted this question too many times.`);
 
                 editMsg.edit(embed);
                 attempted = true;
@@ -283,11 +312,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               if (client.util.skipAliases.includes(msg.content.toLowerCase())) {
-                const embed = client.embeds.error(command.option.new, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.support}`);
+                const embed = client.embeds.error(title.support, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.support}`);
                 return editMsg.edit(embed);
 
               } else if (client.util.cancelAliases.includes(msg.content.toLowerCase())) {
-                const embed = client.embeds.error(command.option.new, `This question has stopped looking for responses.`);
+                const embed = client.embeds.error(title.support, `This question has stopped looking for responses.`);
 
                 editMsg.edit(embed);
                 cancelled = true;
@@ -309,12 +338,12 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
               roleObj = [...new Set(roleObj)];
               if (roleObj.length < 1) {
-                const embed = client.embeds.error(command.option.new, `I couldn't record any roles from your message, please try again.`);
+                const embed = client.embeds.error(title.support, `I couldn't record any roles from your message, please try again.`);
                 return editMsg.edit(embed);
               }
 
               collected.support = roleObj;
-              const embed = client.embeds.success(command.option.new, `I have collected \`${roleObj.length}\` role${roleObj.length == 1 ? `` : `s`} from your message.\n\n**Roles**\n<@&${roleObj.join(">\n<@&")}>`);
+              const embed = client.embeds.success(title.support, `I have collected \`${roleObj.length}\` role${roleObj.length == 1 ? `` : `s`} from your message.\n\n**Roles**\n<@&${roleObj.join(">\n<@&")}>`);
               editMsg.edit(embed);
 
               current = 6;
@@ -325,7 +354,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               ++attempts.additional;
 
               if (attempts.additional > 4) {
-                const embed = client.embeds.error(command.option.new, `You have attempted this question too many times.`);
+                const embed = client.embeds.error(title.additional, `You have attempted this question too many times.`);
 
                 editMsg.edit(embed);
                 attempted = true;
@@ -333,11 +362,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               if (client.util.skipAliases.includes(msg.content.toLowerCase())) {
-                const embed = client.embeds.error(command.option.new, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.additional}`);
+                const embed = client.embeds.error(title.additional, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.additional}`);
                 return editMsg.edit(embed);
 
               } else if (client.util.cancelAliases.includes(msg.content.toLowerCase())) {
-                const embed = client.embeds.error(command.option.new, `This question has stopped looking for responses.`);
+                const embed = client.embeds.error(title.additional, `This question has stopped looking for responses.`);
 
                 editMsg.edit(embed);
                 cancelled = true;
@@ -359,12 +388,12 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
               roleObj = [...new Set(roleObj)];
               if (roleObj.length < 1) {
-                const embed = client.embeds.error(command.option.new, `I couldn't record any roles from your message, please try again.`);
+                const embed = client.embeds.error(title.additional, `I couldn't record any roles from your message, please try again.`);
                 return editMsg.edit(embed);
               }
 
               collected.additional = roleObj;
-              const embed = client.embeds.success(command.option.new, `I have collected \`${roleObj.length}\` role${roleObj.length == 1 ? `` : `s`} from your message.\n\n**Roles**\n<@&${roleObj.join(">\n<@&")}>`);
+              const embed = client.embeds.success(title.additional, `I have collected \`${roleObj.length}\` role${roleObj.length == 1 ? `` : `s`} from your message.\n\n**Roles**\n<@&${roleObj.join(">\n<@&")}>`);
               editMsg.edit(embed);
 
               current = 7;
@@ -375,7 +404,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               ++attempts.channel;
 
               if (attempts.channel > 4) {
-                const embed = client.embeds.error(command.option.new, `You have attempted this question too many times.`);
+                const embed = client.embeds.error(title.channel, `You have attempted this question too many times.`);
 
                 editMsg.edit(embed);
                 attempted = true;
@@ -383,11 +412,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               if (client.util.skipAliases.includes(msg.content.toLowerCase())) {
-                const embed = client.embeds.error(command.option.new, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.channel}`);
+                const embed = client.embeds.error(title.channel, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.channel}`);
                 return editMsg.edit(embed);
 
               } else if (client.util.cancelAliases.includes(msg.content.toLowerCase())) {
-                const embed = client.embeds.error(command.option.new, `This question has stopped looking for responses.`);
+                const embed = client.embeds.error(title.channel, `This question has stopped looking for responses.`);
 
                 editMsg.edit(embed);
                 cancelled = true;
@@ -398,17 +427,17 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               if (!channel) channel = await client.functions.findChannel(msgArgs.join(" "), msg.guild);
 
               if (!channel) {
-                const embed = client.embeds.error(command.option.new, `I could not record any channels from your message, please try again.\n\n**Original Question**\n${prompt.closed}`);
+                const embed = client.embeds.error(title.channel, `I could not record any channels from your message, please try again.\n\n**Original Question**\n${prompt.closed}`);
                 return editMsg.edit(embed);
               }
 
               if (!channel.permissionsFor(clientMember).has("SEND_MESSAGES")) {
-                const embed = client.embeds.error(command.option.new, `I do not have the \`SEND_MESSAGES\` permission in this channel, please try again.\n\n**Original Question**\n${prompt.closed}`);
+                const embed = client.embeds.error(title.channel, `I do not have the \`SEND_MESSAGES\` permission in this channel, please try again.\n\n**Original Question**\n${prompt.closed}`);
                 return editMsg.edit(embed);
               }
 
               collected.channel = channel.id;
-              const embed = client.embeds.success(command.option.new, `Panel channel has been set to: <#${channel.id}>.`);
+              const embed = client.embeds.success(title.channel, `Panel channel has been set to: <#${channel.id}>.`);
               editMsg.edit(embed);
 
               finished = true;
@@ -417,7 +446,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
           });
 
           collector.on("end", async () => {
-            await client.db.settings.set(message.guild.id, true, "panelSetup");
+            await client.db.settings.set(message.guild.id, false, "panelSetup");
+            await client.db.userInfo.set(`${message.author.id}-${message.guild.id}`, false, "inPrompt");
 
             if (finished) {
               var categoryOpened = message.guild.channels.cache.get(collected.opened);
@@ -446,7 +476,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
                 if (button.id == "Panel_Config_Confirm") {
                   const newCount = tsettings.panels.count + 1;
-                  const panels = tsettings.panels.all;
+                  const panels = Object.fromEntries(tsettings.panels.all)
 
                   panels[newCount] = {
                     name: collected.name,
@@ -455,7 +485,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
                     claiming: collected.claiming,
                     channel: collected.channel,
                     support: collected.support,
-                    additional: collected.additional
+                    additional: collected.additional,
+                    id: newCount
                   }
 
                   await client.db.panels.set(message.guild.id, newCount, "count");
