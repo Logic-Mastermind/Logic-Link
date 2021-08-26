@@ -51,7 +51,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               newPrefix = client.util.defaultPrefix;
               const editMsg = await message.lineReply(pendingEmbed);
               await client.db.settings.set(message.guild.id, newPrefix, "prefix");
-              await Prefix.setPrefix(newPrefix, message.guild.id);
 
               const successEmbed = client.embeds.success(command.option.prefix, `Reset the server prefix to the default: \`${newPrefix}\`.`)
 
@@ -64,9 +63,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             }
 
             const editMsg = await message.lineReply(pendingEmbed);
-
             await client.db.settings.set(message.guild.id, newPrefix, "prefix");
-            await Prefix.setPrefix(newPrefix, message.guild.id);
             
             const successEmbed = client.embeds.success(command.option.prefix, `Set the server prefix to: \`${newPrefix}\`.`)
             editMsg.edit(successEmbed);

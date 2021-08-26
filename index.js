@@ -1,4 +1,3 @@
-const Prefix = require("discord-prefix");
 const Reply = require("discord-reply");
 const Discord = require('discord.js');
 const Enmap = require("enmap");
