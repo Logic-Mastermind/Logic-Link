@@ -15,6 +15,7 @@ const prompts = require("./Config/prompts.js");
 const db = require("./Config/db.js");
 const logger = require("./Config/logger.js");
 const util = require("./Config/util.js");
+const schemas = require("./Config/schemas.js");
 const os = require("os");
 
 const client = new Discord.Client({
@@ -31,7 +32,6 @@ const client = new Discord.Client({
   },
 });
 
-client.buttons = buttons;
 client.cmd = cmd;
 client.command = commands;
 client.config = config;
@@ -39,9 +39,12 @@ client.db = db;
 client.util = util;
 client.os = os;
 
+client.buttons = new buttons(client);
 client.embeds = new embeds(client);
 client.functions = new functions(client);
 client.logger = new logger(client);
+client.prompts = new prompts(client);
+client.schemas = new schemas(client);
 client.commands = new Enmap();
 
 client.ready = false;

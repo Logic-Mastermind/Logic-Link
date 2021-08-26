@@ -1,19 +1,15 @@
 const Discord = require("discord.js");
 const Buttons = require("discord-buttons");
-const Prefix = require("discord-prefix");
+const Fetch = require("node-fetch");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
-  var guildPrefix = Prefix.getPrefix(message.guild.id);
-  if (!guildPrefix) guildPrefix = client.util.defaultPrefix;
-
   const clientMember = message.guild.me;
+  const guildPrefix = await client.functions.fetchPrefix(message.guild);
+  
   const noArgs = await client.functions.getNoArgs(command, message.guild);
   const { secArg, thirdArg, fourthArg, fifthArg } = await client.functions.getArgs(args);
   const code = `\`\`\``;
-
-  const responses = {
-
-  }
+  const responses = {};
 
   try {
     var channel = message.mentions.channels.first();
@@ -22,13 +18,13 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
     if (command.options.includes(secArg)) {
       if (!fourthArg) {
-        const noArgsEmbed = client.embeds.noArgs(command.option[secArg], message.guild);
+        const noArgsEmbed = await client.embeds.noArgs(command.option[secArg], message.guild);
         return message.lineReply(noArgsEmbed);
       }
 
       if (secArg == "role") {
         if (!fifthArg) {
-          const noArgsEmbed = client.embeds.noArgs(command.option[secArg], message.guild);
+          const noArgsEmbed = await client.embeds.noArgs(command.option[secArg], message.guild);
           return message.lineReply(noArgsEmbed);
         }
 

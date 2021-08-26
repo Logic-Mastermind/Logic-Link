@@ -1,4 +1,6 @@
-const Discord = require("discord.js")
+const Discord = require("discord.js");
+const Buttons = require("discord-buttons");
+const Fetch = require("node-fetch");
 
 module.exports = async (client) => {
   client.functions.log(`\n[${client.user.tag}]\nTotal Channels: ${client.channels.cache.size}\nTotal Servers: ${client.guilds.cache.size}\nTotal Users: ${client.users.cache.size}`);

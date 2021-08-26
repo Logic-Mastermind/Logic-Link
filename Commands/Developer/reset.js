@@ -1,24 +1,20 @@
 const Discord = require("discord.js");
 const Buttons = require("discord-buttons");
-const Prefix = require("discord-prefix");
+const Fetch = require("node-fetch");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
-  var guildPrefix = Prefix.getPrefix(message.guild.id);
-  if (!guildPrefix) guildPrefix = client.util.defaultPrefix;
-
   const clientMember = message.guild.me;
+  const guildPrefix = await client.functions.fetchPrefix(message.guild);
+  
   const noArgs = await client.functions.getNoArgs(command, message.guild);
   const { secArg, thirdArg, fourthArg, fifthArg } = await client.functions.getArgs(args);
   const code = `\`\`\``;
-
-  const responses = {
-
-  }
+  const responses = {};
 
   try {
     if (secArg == "cooldown") {
       if (!thirdArg) {
-        const noArgsEmbed = client.embeds.noArgs(command.option.cooldown, message.guild);
+        const noArgsEmbed = await client.embeds.noArgs(command.option.cooldown, message.guild);
         return message.lineReply(noArgsEmbed);
       }
 
@@ -51,7 +47,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       }
     } else if (secArg == "settings" || secArg == "setting") {
       if (!thirdArg) {
-        const noArgsEmbed = client.embeds.noArgs(command.option.settings, message.guild);
+        const noArgsEmbed = await client.embeds.noArgs(command.option.settings, message.guild);
         return message.lineReply(noArgsEmbed);
       }
 

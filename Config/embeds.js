@@ -1,6 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
-const Prefix = require("discord-prefix");
 const ms = require("ms");
 const code = "```"
 
@@ -74,8 +72,8 @@ module.exports = class Embeds {
     return embed
   }
 
-  noArgs(command, guild) {
-    const guildPrefix = Prefix.getPrefix(guild.id);
+  async noArgs(command, guild) {
+    const guildPrefix = await this.client.functions.fetchPrefix(guild);
     const noArgs = {
       title: `${command.name}`,
       color: `ORANGE`,
@@ -313,7 +311,7 @@ module.exports = class Embeds {
 
   settingsNoArgs(command, description, prefix) {
     const embed = new Discord.MessageEmbed()
-    embed.setTitle(command.name);
+    embed.setTitle(command.name || command);
     embed.setColor(`BLUE`);
     embed.setDescription(`${command.description}\n\n**Current Setting**\n${description}\n\n**Usage**\n${code}${prefix}${command.usage}${code}\n**Usage Error**\nYou are missing required parameters needed to carry out this command.\nTo get more information, run: \`${prefix}help ${command.commandName}\`.`);
     embed.setFooter(footer1, footer2);
@@ -344,7 +342,7 @@ module.exports = class Embeds {
 
   noUser(command, arg) {
     const embed = new Discord.MessageEmbed()
-    embed.setTitle(command.name);
+    embed.setTitle(command.name || command);
     embed.setColor(`RED`);
     embed.setDescription(`${cross} No users were recorded from your message.\n\n**Detailed Info**\n\`${arg}\` is not a user.`);
     embed.setFooter(footer1, footer2);

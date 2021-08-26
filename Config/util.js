@@ -38,6 +38,7 @@ module.exports = {
   override: `<:IconBuildoverride:868118920140300339>`,
   calender: `<:IconCalendar:868118892432752641>`,
   panel: `<:ChannelNews:868119725945815110>`,
+  resetAliases: ["clear", "remove", "reset", "off"],
   permsArray: [
     'CREATE_INSTANT_INVITE', 'KICK_MEMBERS',
     'BAN_MEMBERS',           'ADMINISTRATOR',

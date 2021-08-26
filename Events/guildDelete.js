@@ -1,12 +1,10 @@
 const Discord = require("discord.js");
 const Buttons = require("discord-buttons");
-const Prefix = require("discord-prefix");
+const Fetch = require("node-fetch");
 
 module.exports = async (client, guild) => {
-  var guildPrefix = Prefix.getPrefix(guild.id);
-  if (!guildPrefix) guildPrefix = client.util.defaultPrefix;
-
   const clientMember = guild.me;
+  const guildPrefix = await client.functions.fetchPrefix(guild);
   const code = `\`\`\``;
 
   try {

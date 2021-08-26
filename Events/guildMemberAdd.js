@@ -1,12 +1,10 @@
 const Discord = require("discord.js");
 const Buttons = require("discord-buttons");
-const Prefix = require("discord-prefix");
+const Fetch = require("node-fetch");
 
 module.exports = async (client, member) => {
-  var guildPrefix = Prefix.getPrefix(member.guild.id);
-  if (!guildPrefix) guildPrefix = client.util.defaultPrefix;
-
   const clientMember = member.guild.me;
+  const guildPrefix = await client.functions.fetchPrefix(member.guild);
   const settings = await client.functions.getSettings(member.guild);
   const tsettings = await client.functions.getTicketData(member.guild);
   const code = `\`\`\``;
@@ -24,8 +22,7 @@ module.exports = async (client, member) => {
 
     if (channel) {
       if (!channel.permissionsFor(clientMember).has("SEND_MESSAGES")) return;
-
-      const embed = client.embeds.green(`Welcome`, `Hello <@${member.id}>.\nWelcome to \`${member.guild.name}\`, enjoy your stay!`);
+      const embed = client.embeds.green(`Welcome`, `${settings.welcomeMsg ? `${settings.welcomeMsg.replaceAll("[user]", `<@${member.id}>`).replaceAll("[tag]", `${member.user.tag}`).replaceAll("[id]", `${member.id}`).replaceAll("[username]", `${member.user.username}`)}` : `Hello <@${member.id}>.\nWelcome to \`${member.guild.name}\`, enjoy your stay!`}`);
 
       channel.send(embed);
     }

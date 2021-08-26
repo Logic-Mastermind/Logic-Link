@@ -1,7 +1,6 @@
 const Discord = require("discord.js");
 const Buttons = require("discord-buttons");
-const Prefix = require("discord-prefix");
-const Reply = require("discord-reply");
+const Fetch = require("node-fetch");
 const ms = require("ms");
 
 module.exports = async (client, message) => {
@@ -12,19 +11,13 @@ module.exports = async (client, message) => {
     const clientMember = message.guild.me;
     const code = `\`\`\``;
 
-    var guildPrefix = Prefix.getPrefix(message.guild.id);
-    if (!guildPrefix) {
-      Prefix.setPrefix(client.util.defaultPrefix, message.guild.id);
-      client.db.settings.set(message.guild.id, client.util.defaultPrefix, "prefix");
-      guildPrefix = client.util.defaultPrefix;
-    }
-
     var mentioned = false;
-    var prefix = guildPrefix;
     var allArgs = message.content.split(/ +/g);
+    var guildPrefix = await client.functions.fetchPrefix(message.guild);
     var pingPrefixes = [`<@${client.user.id}>`, `<@!${client.user.id}>`];
     var blacklistInfo = client.db.blacklists.get(message.author.id);
     var userInfo = client.db.userInfo.get(`${message.author.id}-${message.guild.id}`);
+    var prefix = guildPrefix;
 
     if (blacklistInfo.blacklisted) {
       const embed = client.embeds.error(command, `You are currently blacklisted from using Logic Link.\n\n**Reason**\n${blacklistInfo.reason}`);
@@ -172,7 +165,7 @@ module.exports = async (client, message) => {
         if (denied) return;
 
         await client.logger.updateLog(`User did not pass enough arguments.`, logId);
-        const embed = client.embeds.noArgs(command, message.guild);
+        const embed = await client.embeds.noArgs(command, message.guild);
         return message.lineReply(embed);
       }
     }

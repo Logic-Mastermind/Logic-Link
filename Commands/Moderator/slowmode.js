@@ -1,12 +1,11 @@
 const Discord = require("discord.js");
 const Buttons = require("discord-buttons");
-const Prefix = require("discord-prefix");
+const Fetch = require("node-fetch");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
-  var guildPrefix = Prefix.getPrefix(message.guild.id);
-  if (!guildPrefix) guildPrefix = client.util.defaultPrefix;
-
   const clientMember = message.guild.me;
+  const guildPrefix = await client.functions.fetchPrefix(message.guild);
+  
   const noArgs = await client.functions.getNoArgs(command, message.guild);
   const { secArg, thirdArg, fourthArg, fifthArg } = await client.functions.getArgs(args);
   const code = `\`\`\``;
@@ -60,7 +59,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         message.lineReply(embed);
 
       } else if (!slowmode.passed && channel && passed == "mention") {
-        const noArgsEmbed = client.embeds.noArgs(command, message.guild);
+        const noArgsEmbed = await client.embeds.noArgs(command, message.guild);
         message.lineReply(noArgsEmbed);
 
       } else if ((slowmode.passed && !slowmode.timeView && passed == "default") || (!slowmode.passed && passed == "default")) {

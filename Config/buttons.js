@@ -1,11 +1,12 @@
 const Discord = require("discord.js");
 const Buttons = require("discord-buttons");
-const Prefix = require("discord-prefix");
-const Reply = require("discord-reply");
-const code = "```"
 
-module.exports = {
-  new: (label, style, id, emoji, url, disabled) => {
+module.exports = class Buttons {
+  constructor(client) {
+    this.client = client;
+  }
+
+  new(label, style, id, emoji, url, disabled) {
     const button = new Buttons.MessageButton();
     if (label) button.setLabel(label);
     if (style) button.setStyle(style);
@@ -15,48 +16,54 @@ module.exports = {
     if (disabled == true) button.setDisabled();
 
     return button
-  },
-  accept: (id) => {
+  }
+
+  accept (id) {
     const button = new Buttons.MessageButton();
     button.setLabel("Accept");
     button.setStyle("green");
     button.setID(id);
 
     return button
-  },
-  decline: (id) => {
+  }
+
+  decline(id) {
     const button = new Buttons.MessageButton();
     button.setLabel("Decline");
     button.setStyle("red");
     button.setID(id);
     
     return button
-  },
-  confirm: (id) => {
+  }
+
+  confirm(id) {
     const button = new Buttons.MessageButton();
     button.setLabel("Confirm");
     button.setStyle("green");
     button.setID(id);
 
     return button
-  },
-  cancel: (id) => {
+  }
+
+  cancel(id) {
     const button = new Buttons.MessageButton();
     button.setLabel("Cancel");
     button.setStyle("red");
     button.setID(id);
     
     return button
-  },
-  grey: (text, id) => {
+  }
+
+  grey(text, id) {
     const button = new Buttons.MessageButton();
     button.setLabel(text);
     button.setStyle("grey");
     button.setID(id);
     
     return button
-  },
-  emoji: (id, emoji, style) => {
+  }
+
+  emoji(id, emoji, style) {
     const button = new Buttons.MessageButton();
     button.setLabel("");
     button.setEmoji(emoji)
@@ -64,5 +71,5 @@ module.exports = {
     button.setID(id);
     
     return button
-  },
+  }
 }

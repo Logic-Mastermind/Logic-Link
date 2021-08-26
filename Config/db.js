@@ -1,9 +1,4 @@
-const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
-const Prefix = require("discord-prefix");
-const Reply = require("discord-reply");
 const Enmap = require("enmap");
-const code = "```";
 
 module.exports = {
   settings: new Enmap({
@@ -18,6 +13,7 @@ module.exports = {
       logChannel: null,
       welcomeChannel: null,
       welcomeRole: null,
+      welcomeMsg: null,
       mutedRole: null,
       welcomeSystem: false,
       mutedRoleConfig: false,
@@ -25,7 +21,7 @@ module.exports = {
     }
   }),
   first: new Enmap({
-    name: "firstTime",
+    name: "first",
     fetchAll: false,
     autoFetch: true,
     dataDir: "./Data/",
@@ -49,7 +45,8 @@ module.exports = {
     dataDir: "./Data/",
     autoEnsure: {
       count: 0,
-      panels: {}
+      panels: {},
+      tickets: {}
     }
   }),
   mutes: new Enmap({

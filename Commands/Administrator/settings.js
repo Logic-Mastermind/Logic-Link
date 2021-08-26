@@ -1,19 +1,15 @@
 const Discord = require("discord.js");
 const Buttons = require("discord-buttons");
-const Prefix = require("discord-prefix");
+const Fetch = require("node-fetch");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
-  var guildPrefix = Prefix.getPrefix(message.guild.id);
-  if (!guildPrefix) guildPrefix = client.util.defaultPrefix;
-
   const clientMember = message.guild.me;
+  const guildPrefix = await client.functions.fetchPrefix(message.guild);
+  
   const noArgs = await client.functions.getNoArgs(command, message.guild);
   const { secArg, thirdArg, fourthArg, fifthArg } = await client.functions.getArgs(args);
   const code = `\`\`\``;
-
-  const responses = {
-    
-  }
+  const responses = {};
 
   try {
     if (!secArg) {
@@ -28,9 +24,9 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
       if (settings.welcomeSystem) {
         settingsArray.push(
-          {name: "Welcome Channel", value: `${settings.welcomeChannel ? `<#${settings.welcomeChannel}>` : `Not configured.`}`, inline: true},
-          {name: "Welcome Role", value: `${settings.welcomeRole ? `<@&${settings.welcomeRole}>` : `Not configured.`}`, inline: true },
-          { name: "\u200b", value: "\u200b", inline: true }
+          { name: "Welcome Channel", value: `${settings.welcomeChannel ? `<#${settings.welcomeChannel}>` : `Not configured.`}`, inline: true},
+          { name: "Welcome Role", value: `${settings.welcomeRole ? `<@&${settings.welcomeRole}>` : `Not configured.`}`, inline: true },
+          { name: "Welcome Message", value: `${settings.welcomeMsg ? `${settings.welcomeMsg}` : `Not configured.`}`, inline: true }
         )
       }
 
@@ -45,14 +41,14 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
           if (thirdArg) {
             const pendingEmbed = client.embeds.pending(command.option.prefix, `Saving the new prefix...`);
             var newPrefix = args.slice(1).join(" ");
-            if (newPrefix.toLowerCase() == "reset") newPrefix = client.util.defaultPrefix;
 
             if (newPrefix == settings.prefix) {
               const errorEmbed = client.embeds.error(command.option.prefix, `The server prefix has already been set to \`${newPrefix}\`.`);
               return message.lineReply(errorEmbed)
             }
 
-            if (thirdArg.toLowerCase() == "reset") {
+            if (client.util.resetAliases.includes(thirdArg.toLowerCase())) {
+              newPrefix = client.util.defaultPrefix;
               const editMsg = await message.lineReply(pendingEmbed);
               await client.db.settings.set(message.guild.id, newPrefix, "prefix");
               await Prefix.setPrefix(newPrefix, message.guild.id);
@@ -90,7 +86,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             var newRole = message.mentions.roles.first();
             if (!newRole) newRole = await client.functions.findRole(args.slice(1).join(" "), message.guild);
 
-            if (thirdArg.toLowerCase() == "reset" || thirdArg.toLowerCase() == "off") {
+            if (client.util.resetAliases.includes(thirdArg.toLowerCase())) {
               if (!settings.modRole) {
                 const errorEmbed = client.embeds.error(command.option.modrole, `This server does not have a moderator role.`);
                 
@@ -137,7 +133,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             var newRole = message.mentions.roles.first();
             if (!newRole) newRole = await client.functions.findRole(args.slice(1).join(" "), message.guild);
 
-            if (thirdArg.toLowerCase() == "reset" || thirdArg.toLowerCase() == "off") {
+            if (client.util.resetAliases.includes(thirdArg.toLowerCase())) {
               if (!settings.adminRole) {
                 const errorEmbed = client.embeds.error(command.option.adminrole, `This server does not have an administrator role.`);
 
@@ -185,7 +181,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             var newChannel = message.mentions.channels.first();
             if (!newChannel) newChannel = await client.functions.findChannel(args.slice(1).join(" "), message.guild);
 
-            if (thirdArg.toLowerCase() == "reset" || thirdArg.toLowerCase() == "off") {
+            if (client.util.resetAliases.includes(thirdArg.toLowerCase())) {
               if (!settings.logChannel) {
                 const errorEmbed = client.embeds.error(command.option.logchannel, `This server does not have a log channel.`);
                 
@@ -236,7 +232,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             var newRole = message.mentions.roles.first();
             if (!newRole) newRole = await client.functions.findRole(args.slice(1).join(" "), message.guild);
 
-            if (thirdArg.toLowerCase() == "reset" || thirdArg.toLowerCase() == "off") {
+            if (client.util.resetAliases.includes(thirdArg.toLowerCase())) {
               if (!settings.mutedRole) {
                 const errorEmbed = client.embeds.error(command.option.mutedrole, `This server does not have a muted role.`);
 
@@ -340,7 +336,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             var newRole = message.mentions.roles.first();
             if (!newRole) newRole = await client.functions.findRole(args.slice(1).join(" "), message.guild);
 
-            if (thirdArg.toLowerCase() == "reset" || thirdArg.toLowerCase() == "off") {
+            if (client.util.resetAliases.includes(thirdArg.toLowerCase())) {
               if (!settings.welcomeRole) {
                 const errorEmbed = client.embeds.error(command.option.welcomerole, `This server does not have a welcome role.`);
 
@@ -403,7 +399,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             var newChannel = message.mentions.channels.first();
             if (!newChannel) newChannel = await client.functions.findChannel(args.slice(1).join(" "), message.guild);
 
-            if (thirdArg.toLowerCase() == "reset" || thirdArg.toLowerCase() == "off") {
+            if (client.util.resetAliases.includes(thirdArg.toLowerCase())) {
               if (!settings.welcomeChannel) {
                 const errorEmbed = client.embeds.error(command.option.welcomechannel, `This server does not have a welcome channel.`);
                 
@@ -441,6 +437,47 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             }
           } else {
             const embed = client.embeds.settingsNoArgs(command.option.welcomechannel, `${settings.welcomeChannel ? `The current server welcome channel is <#${settings.welcomeChannel}>.` : `Welcome channel not configured.`}`, settings.prefix);
+
+            message.lineReply(embed)
+          }
+          break;
+        }
+        case "wm":
+        case "welcmsg":
+        case "welcmessage":
+        case "welcomemessage":
+        {
+          if (thirdArg) {
+            if (!settings.welcomeSystem) {
+              const errorEmbed = client.embeds.error(command.option.welcomemsg, `The welcome system has not been configured.`);
+              return message.lineReply(errorEmbed);
+            }
+
+            const pendingEmbed = client.embeds.pending(command.option.welcomemsg, `Saving the new welcome message...`);
+            var msg = args.slice(1).join(" ");
+
+            if (client.util.resetAliases.includes(thirdArg.toLowerCase())) {
+              if (!settings.welcomeMsg) {
+                const errorEmbed = client.embeds.error(command.option.welcomemsg, `This server does not have a welcome message.`);
+                
+                return message.lineReply(errorEmbed)
+              }
+
+              const editMsg = await message.lineReply(pendingEmbed);
+              await client.db.settings.delete(message.guild.id, "welcomeMsg");
+
+              const successEmbed = client.embeds.success(command.option.welcomemsg, `Removed the server welcome message.`)
+
+              return editMsg.edit(successEmbed);
+            }
+
+            const editMsg = await message.lineReply(pendingEmbed);
+            await client.db.settings.set(message.guild.id, msg, "welcomeMsg");
+            const successEmbed = client.embeds.success(command.option.welcomemsg, `Set the server welcome message to:\n\n\`${msg}\``);
+            editMsg.edit(successEmbed);
+
+          } else {
+            const embed = client.embeds.settingsNoArgs(command.option.welcomemsg, `${settings.welcomeMsg ? `The current server welcome message has been set to:\n\`${settings.welcomeMsg}\`` : `Welcome message not configured.`}`, settings.prefix);
 
             message.lineReply(embed)
           }

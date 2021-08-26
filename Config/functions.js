@@ -1,6 +1,6 @@
 const Discord = require("discord.js");
 const Buttons = require("discord-buttons");
-const Prefix = require("discord-prefix");
+const Fetch = require("node-fetch");
 const Chalk = require("chalk");
 const code = "```";
 
@@ -116,7 +116,7 @@ module.exports = class Functions {
   }
 
   async getNoArgs(command, guild) {
-    const guildPrefix = Prefix.getPrefix(guild.id);
+    const guildPrefix = await this.client.functions.fetchPrefix(guild);
     const noArgs = {
       title: `${command.name}`,
       color: `ORANGE`,
@@ -662,6 +662,22 @@ module.exports = class Functions {
     const msg = await channel.send(embeds[num - 1]);
     idObj[num - 1] = msg.id;
     return idObj;
+  }
+
+  async getMemory() {
+    const memory = await process.memoryUsage();
+    const memUnit = {};
+
+    for (const key in memory) {
+      memUnit[key] = Math.round(memory[key] / 1024 / 1024 * 100) / 100;
+    }
+
+    return memUnit
+  }
+
+  async fetchPrefix(guild = {}) {
+    const prefix = await this.client.db.settings.get(guild.id, "prefix") || null;
+    return prefix;
   }
 
   sleep(ms) {

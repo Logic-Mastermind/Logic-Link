@@ -1,6 +1,5 @@
 const Discord = require("discord.js");
 const Buttons = require("discord-buttons");
-const Prefix = require("discord-prefix");
 const Fetch = require("node-fetch");
 const Paste = require("pastebin-api").default;
 const YouTube = require("ytdl-core-discord");
@@ -8,17 +7,13 @@ const Chalk = require("chalk");
 const ms = require("ms");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
-  var guildPrefix = Prefix.getPrefix(message.guild.id);
-  if (!guildPrefix) guildPrefix = client.util.defaultPrefix;
-
   const clientMember = message.guild.me;
+  const guildPrefix = await client.functions.fetchPrefix(message.guild);
+  
   const noArgs = await client.functions.getNoArgs(command, message.guild);
   const { secArg, thirdArg, fourthArg, fifthArg } = await client.functions.getArgs(args);
   const code = `\`\`\``;
-
-  const responses = {
-
-  }
+  const responses = {};
 
   try {
     const guild = message.guild;
@@ -47,7 +42,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         if (execCode) {
           evaled = await eval(`${execCode}`);
         } else {
-          const embed = client.embeds.noArgs(command.option.silent, message.guild);
+          const embed = await client.embeds.noArgs(command.option.silent, message.guild);
           return message.lineReply(embed);
         }
       } else if (secArg == "async" || secArg == "a") {
@@ -56,7 +51,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         if (execCode) {
           evaled = await eval(`(async function() {return ${execCode}})()`);
         } else {
-          const embed = client.embeds.noArgs(command.option.async, message.guild);
+          const embed = await client.embeds.noArgs(command.option.async, message.guild);
           return message.lineReply(embed)
         }
       } else {
