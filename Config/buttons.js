@@ -1,7 +1,7 @@
 const Discord = require("discord.js");
 const Buttons = require("discord-buttons");
 
-module.exports = class Buttons {
+module.exports = class MessageButtons {
   constructor(client) {
     this.client = client;
   }
@@ -18,7 +18,7 @@ module.exports = class Buttons {
     return button
   }
 
-  accept (id) {
+  accept(id) {
     const button = new Buttons.MessageButton();
     button.setLabel("Accept");
     button.setStyle("green");

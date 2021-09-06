@@ -31,6 +31,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       await client.db.userInfo.set(`${member.id}-${member.guild.id}`, warnings, `warnings`);
       warnings = await client.db.userInfo.get(`${member.id}-${member.guild.id}`, `warnings`);
 
+      if (!member.user.bot) member.user.send(client.embeds.moderated("warn", message.guild, warning));
       const embed = client.embeds.success(command, `Logged a warning for <@${member.id}>${warnings.length == 1 ? `, this is their first warning` : ``}.`);
       message.lineReply(embed);
     } else {

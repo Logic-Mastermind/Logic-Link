@@ -320,8 +320,11 @@ module.exports = class Prompts {
         }
 
         if (this.client.util.skipAliases.includes(msg.content.toLowerCase())) {
-          const embed = this.client.embeds.error(title.additional, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.additional}`);
-          return editMsg.edit(embed);
+          const embed = this.client.embeds.success(title.additional, `This question has been skipped.`);
+          editMsg.edit(embed);
+          current = 7;
+          msgId = await this.client.functions.next(message.channel, msgId, embeds, 7);
+          return;
 
         } else if (this.client.util.cancelAliases.includes(msg.content.toLowerCase())) {
           const embed = this.client.embeds.error(title.additional, `This question has stopped looking for responses.`);
@@ -413,7 +416,7 @@ module.exports = class Prompts {
 
         const fields = [
           { name: `General Configuration`, value: `${this.client.util.text} Name: \`${collected.name}\`\n${this.client.util.category} Opened Category: \`#${categoryOpened.name}\`\n${this.client.util.category} Closed Category: \`#${categoryClosed.name}\`\n${this.client.util.override} Claiming: \`${collected.claiming ? `On` : `Off`}\`\n${this.client.util.channel} Panel Channel: <#${collected.channel}>\n\u200b`, inline: false },
-          { name: `Role Configuration`, value: `${this.client.util.moderator} Support Roles:\n<@&${collected.support.join(">\n<@&")}>\n\n${this.client.util.moderator} Additional Roles:\n<@&${collected.additional.join(">\n<@&")}>` }
+          { name: `Role Configuration`, value: `${this.client.util.moderator} Support Roles:\n<@&${collected.support.join(">\n<@&")}>${collected.additional ? `\n\n${this.client.util.moderator} Additional Roles:\n<@&${collected.additional.join(">\n<@&")}>` : ``}` }
         ];
 
         const confirmBtn = this.client.buttons.confirm("Panel_Config_Confirm");
@@ -428,12 +431,12 @@ module.exports = class Prompts {
 
         confirmCollector.on("collect", async (button) => {
           if (button.clicker.user.id !== message.author.id) {
-            const embed = this.client.embeds.permission(command.option.new, `ADMINISTRATOR`);
+            const embed = this.client.embeds.permission(command, `ADMINISTRATOR`);
             return button.reply.send({ embed: embed, ephemeral: true });
           }
 
           if (button.id == "Panel_Config_Confirm") {
-            const newCount = tsettings.panels.count + 1;
+            const newCount = (tsettings.panels.count + 1).toString();
             const panels = Object.fromEntries(tsettings.panels.all)
 
             panels[newCount] = {
@@ -443,7 +446,7 @@ module.exports = class Prompts {
               claiming: collected.claiming,
               channel: collected.channel,
               support: collected.support,
-              additional: collected.additional,
+              additional: collected.additional || [],
               ticket: `ticket-[number]`,
               claimed: `claimed-[number]`,
               createdAt: Date.now(),
@@ -451,9 +454,7 @@ module.exports = class Prompts {
               id: newCount
             }
 
-            await this.client.db.panels.set(message.guild.id, newCount, "count");
             await this.client.db.panels.set(message.guild.id, panels, "panels");
-
             const embed = this.client.embeds.success(command.option.new, `Created a new panel with the name: \`${collected.name}\`.`);
             await button.reply.send(embed);
 
@@ -492,5 +493,45 @@ module.exports = class Prompts {
         message.channel.send(embed);
       }
     });
+  }
+
+  async deletePanel(message, tsettings, panel, command, userMsg) {
+    const btnFilter = () => true;
+    const collector = message.createButtonCollector(btnFilter, { idle: 60000 });
+    var clicked = false;
+
+    collector.on("collect", async (button) => {
+      if (button.clicker.user.id !== userMsg.author.id) {
+        const embed = this.client.embeds.permission(command, `ADMINISTRATOR`);
+        return button.reply.send({ embed: embed, ephemeral: true });
+      }
+
+      if (button.id == "Panel_Delete_Confirm") {
+        clicked = true;
+        await tsettings.panels.all.delete(panel.id);
+        const panels = Object.fromEntries(tsettings.panels.all);
+
+        this.client.db.panels.set(message.guild.id, panels, "panels");
+        const embed = this.client.embeds.success(command.option.delete, `Deleted the panel with ID: \`${panel.id}\`.`);
+        await button.reply.send(embed);
+        message.delete();
+        collector.stop();
+
+      } else {
+        clicked = true;
+        const embed = this.client.embeds.success(command.option.delete, `Cancelled the panel deletetion.`);
+        await button.reply.send(embed);
+        message.delete();
+        collector.stop();
+      }
+    })
+
+    collector.on("end", async () => {
+      if (!clicked) {
+        const embed = this.client.embeds.error(command.option.delete, `This prompt has timed out due to inactivity.`);
+        await message.channel.send(embed);
+        message.delete();
+      }
+    })
   }
 }

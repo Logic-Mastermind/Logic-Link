@@ -282,7 +282,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         case "welcomesystem":
         {
           if (thirdArg) {
-            const pendingEmbed = client.embeds.pending(command.option.welcome, `Setting the welcome system on / off...`);
+            const pendingEmbed = client.embeds.pending(command.option.welcome, `Configuring the welcome system...`);
 
             if (thirdArg.toLowerCase().includes("on") || thirdArg.toLowerCase().includes("off")) {
               const editMsg = await message.lineReply(pendingEmbed);

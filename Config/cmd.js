@@ -19,6 +19,14 @@ module.exports = {
     category: "moderator",
     commandName: "ban"
   },
+  softban: {
+    category: "moderator",
+    commandName: "softban"
+  },
+  tempban: {
+    category: "moderator",
+    commandName: "tempban"
+  },
   bug: {
     category: "support",
     commandName: "bug"

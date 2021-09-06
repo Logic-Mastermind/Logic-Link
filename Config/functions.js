@@ -2,6 +2,7 @@ const Discord = require("discord.js");
 const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 const Chalk = require("chalk");
+const ms = require("ms");
 const code = "```";
 
 module.exports = class Functions {
@@ -406,7 +407,7 @@ module.exports = class Functions {
     return user
   }
 
-  async getTime (unsorted) {
+  async getTime(unsorted) {
     const endsWithAny = (suffixes, string) => suffixes.some((suffix) => string.endsWith(suffix));
     const timeUnits = {
       total: ["s", "sec", "secs", "second", "seconds", "m", "min", "mins", "minute", "minutes", "h", "hr", "hrs", "hour", "hours", "d", "dy", "dys", "day", "days", "w", "wk", "wks", "week", "weeks", "mn", "mo", "mon", "mth", "mths", "mnth", "mnths", "month", "months", "y", "yr", "yrs", "year", "years"],
@@ -421,53 +422,57 @@ module.exports = class Functions {
 
     var passed = false;
     var timeFromUnit = null;
-    var timeView = null;
+    var digit = null;
     var duration = null;
     var unit = null;
+    var hasNum = /\d/.test(unsorted);
 
     if (endsWithAny(timeUnits.total, unsorted) || (!isNaN(unsorted)) && (!isNaN(unsorted.split("")[0]))) {
-      passed = true
-      timeFromUnit = unsorted.match(/\d+/g);
-      timeView = timeFromUnit
+      if (hasNum) {
+        passed = true
+        timeFromUnit = unsorted.match(/\d+/g);
+        digit = timeFromUnit[0]
 
-      if (endsWithAny(timeUnits.minutes, unsorted)) {
-        duration = timeFromUnit * 60000;
-        unit = "minute";
+        if (endsWithAny(timeUnits.minutes, unsorted)) {
+          duration = timeFromUnit * 60000;
+          unit = "minute";
 
-      } else if (endsWithAny(timeUnits.hours, unsorted)) {
-        duration = timeFromUnit * 3600000
-        unit = "hour"
+        } else if (endsWithAny(timeUnits.hours, unsorted)) {
+          duration = timeFromUnit * 3600000
+          unit = "hour"
 
-      } else if (endsWithAny(timeUnits.days, unsorted)) {
-        duration = timeFromUnit * 86400000
-        unit = "day"
+        } else if (endsWithAny(timeUnits.days, unsorted)) {
+          duration = timeFromUnit * 86400000
+          unit = "day"
 
-      } else if (endsWithAny(timeUnits.weeks, unsorted)) {
-        duration = timeFromUnit * 604800000
-        unit = "week"
+        } else if (endsWithAny(timeUnits.weeks, unsorted)) {
+          duration = timeFromUnit * 604800000
+          unit = "week"
 
-      } else if (endsWithAny(timeUnits.months, unsorted)) {
-        duration = timeFromUnit * 2592000000
-        unit = "month"
+        } else if (endsWithAny(timeUnits.months, unsorted)) {
+          duration = timeFromUnit * 2592000000
+          unit = "month"
 
-      } else if (endsWithAny(timeUnits.years, unsorted)) {
-        duration = timeFromUnit * 31536000000
-        unit = "year"
+        } else if (endsWithAny(timeUnits.years, unsorted)) {
+          duration = timeFromUnit * 31536000000
+          unit = "year"
 
-      } else if (endsWithAny(timeUnits.seconds, unsorted)) {
-        duration = timeFromUnit * 1000
-        unit = "second"
+        } else if (endsWithAny(timeUnits.seconds, unsorted)) {
+          duration = timeFromUnit * 1000
+          unit = "second"
 
-      } else {
-        duration = timeFromUnit * 60000
-        unit = "minute"
+        } else {
+          duration = timeFromUnit * 60000
+          unit = "minute"
+        }
       }
     }
 
     return {
       "passed": passed,
-      "timeView": timeView,
+      "digit": digit,
       "duration": duration,
+      "display": duration ? await ms(duration, { long: true }) : null,
       "unit": unit
     }
   }
@@ -498,15 +503,19 @@ module.exports = class Functions {
   async getTicketData(guild) {
     const settings = await this.client.db.tsettings.get(guild.id);
     const panels = await this.client.db.panels.get(guild.id, "panels");
-    const count = await this.client.db.panels.get(guild.id, "count");
+    const panelMap = await new Map(Object.entries(panels));
 
     return {
       settings: {
         dmUsers: settings.dmUsers
       },
       panels: {
-        all: new Map(Object.entries(panels)),
-        count: count
+        all: panelMap,
+        count: panelMap.size
+      },
+      tickets: {
+        all: null,
+        count: null
       }
     }
   }
@@ -678,6 +687,19 @@ module.exports = class Functions {
   async fetchPrefix(guild = {}) {
     const prefix = await this.client.db.settings.get(guild.id, "prefix") || null;
     return prefix;
+  }
+
+  async tryCatch(callback, params) {
+    try {
+      var data = null;
+      if (params) data = await callback(...params);
+      else data = await callback();
+
+      return [data, null];
+
+    } catch (error) {
+      return [null, error];
+    }
   }
 
   sleep(ms) {

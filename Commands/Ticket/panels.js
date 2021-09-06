@@ -78,18 +78,46 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         case "mod":
         case "modify":
         {
+          if (thirdArg) {
+            if (panelIds.includes(thirdArg)) {
+
+            } else {
+              const embed = client.embeds.error(command.option.modify, `\`${thirdArg}\` is not a valid panel ID.`);
+              message.lineReply(embed);
+            }
+          } else {
+            const embed = await client.embeds.noArgs(command.option.modify, message.guild);
+            message.lineReply(embed);
+          }
           break;
         }
         case "d":
         case "del":
         case "delete":
         {
+          if (thirdArg) {
+            if (panelIds.includes(thirdArg)) {
+              const panelInfo = tsettings.panels.all.get(thirdArg);
+              const confirmBtn = client.buttons.confirm("Panel_Delete_Confirm");
+              const cancelBtn = client.buttons.cancel("Panel_Delete_Cancel");
+
+              const embed = client.embeds.blue(command.option.delete, `Are you sure you would like to delete this panel?\nClick on a button below to either confirm or cancel your choice.\n\n**Panel Info**\n${client.util.clock} Created At: <t:${Math.round(panelInfo.createdAt / 1000)}:R>\n${client.util.moderator} Created By: <@${panelInfo.createdBy}>\n${client.util.text} Panel Name: \`${panelInfo.name}\``);
+
+              const confirmMsg = await message.channel.send({ embed: embed, buttons: [confirmBtn, cancelBtn] });
+              client.prompts.deletePanel(confirmMsg, tsettings, panelInfo, command, message);
+            } else {
+              const embed = client.embeds.error(command.option.delete, `\`${thirdArg}\` is not a valid panel ID.`);
+              message.lineReply(embed);
+            }
+          } else {
+            const embed = await client.embeds.noArgs(command.option.delete, message.guild);
+            message.lineReply(embed);
+          }
           break;
         }
         case "a":
         case "all":
         {
-
           break;
         }
         default:

@@ -79,5 +79,6 @@ module.exports = {
     "muted": "mutedRole",
     "welcome": "welcomeSystem",
     "mutedconfig": "mutedRoleConfig"
-  }
+  },
+  whitespace: `\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b`
 }

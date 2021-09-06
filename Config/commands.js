@@ -617,21 +617,32 @@ module.exports = {
       usage: "ban <user> [reason]",
       required: "mod",
       commandName: "ban",
-      option: {
-        soft: {
-          name: "Softban",
-          description: "Bans members from your server without deleting previous messages.",
-          permissions: ["BAN_MEMBERS"],
-          clientPerms: ["BAN_MEMBERS"],
-          cooldown: 4,
-          minArgs: 1,
-          options: [],
-          aliases: ["sban"],
-          usage: "softban <user> [reason]",
-          required: "mod",
-          commandName: "softban"
-        }
-      }
+    },
+    softban: {
+      name: "Softban",
+      description: "Bans members from your server without deleting previous messages.",
+      permissions: ["BAN_MEMBERS"],
+      clientPerms: ["BAN_MEMBERS"],
+      cooldown: 3,
+      minArgs: 1,
+      options: [],
+      aliases: ["sban"],
+      usage: "softban <user> [reason]",
+      required: "mod",
+      commandName: "softban"
+    },
+    tempban: {
+      name: "Tempban",
+      description: "Temporarily bans members from your server.",
+      permissions: ["BAN_MEMBERS"],
+      clientPerms: ["BAN_MEMBERS"],
+      cooldown: 3,
+      minArgs: 1,
+      options: [],
+      aliases: ["tban"],
+      usage: "tban <user> <duration> [reason]",
+      required: "mod",
+      commandName: "tempban"
     },
     embed: {
       name: "Embed",
@@ -1162,11 +1173,26 @@ module.exports = {
       clientPerms: [],
       cooldown: 0,
       minArgs: 1,
-      options: [],
+      options: ["view"],
       aliases: [],
       usage: "blacklist <user> [reason]",
       required: "dev",
       commandName: "blacklist",
+      option: {
+        view: {
+          name: "Blacklist - View",
+          description: "Shows a list of currently blacklisted users.",
+          permissions: ["BOT_DEVELOPER"],
+          clientPerms: [],
+          cooldown: 0,
+          minArgs: 1,
+          options: ["view"],
+          aliases: [],
+          usage: "blacklist <user> [reason]",
+          required: "dev",
+          commandName: "blacklist",
+        }
+      }
     },
     devlock: {
       name: "Developer Lock",
@@ -1446,8 +1472,6 @@ module.exports = {
     "sinfo": "info",
     "cinfo": "info",
     "rinfo": "info",
-    "softban": "ban",
-    "sban": "ban",
     "tickethelp": "thelp",
     "ticketsettings": "tsettings",
     "ticketsetting": "tsettings",
@@ -1462,6 +1486,8 @@ module.exports = {
     "bl": "blacklist",
     "bls": "blacklist",
     "ubl": "unblacklist",
-    "ubls": "unblacklist"
+    "ubls": "unblacklist",
+    "sban": "softban",
+    "tban": "tempban"
   }
 }

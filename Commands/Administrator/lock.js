@@ -37,7 +37,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     const lockedData = client.db.channelLocks.get(channel.id);
 
     if (channel.type == "voice" || channel.type == "category") {
-      const invalidEmbed = client.embeds.error(command, `\`${channel.name}\` is not a text channel.`);
+      const invalidEmbed = client.embeds.error(command, `<#${channel.id}> is not a text channel.`);
       return message.lineReply(invalidEmbed);
     }
 
@@ -51,24 +51,16 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     var failed = false;
 
     try {
+      channel.updateOverwrite(message.guild.roles.everyone, {
+        SEND_MESSAGES: false
+      }, `Locked the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
+
+      channel.updateOverwrite(message.member, {
+        SEND_MESSAGES: true
+      }, `Locked the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
+
       if (settings.adminRole) {
-        channel.updateOverwrite(message.guild.roles.everyone, {
-          SEND_MESSAGES: false
-        }, `Locked the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
-
-        channel.updateOverwrite(message.member, {
-          SEND_MESSAGES: true
-        }, `Locked the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
-
         channel.updateOverwrite(settings.adminRole, {
-          SEND_MESSAGES: true
-        }, `Locked the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
-      } else {
-        channel.updateOverwrite(message.guild.roles.everyone, {
-          SEND_MESSAGES: false
-        }, `Locked the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
-
-        channel.updateOverwrite(message.member, {
           SEND_MESSAGES: true
         }, `Locked the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
       }
@@ -84,7 +76,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         client.db.channelLocks.set(channel.id, channel.id, "channel");
         client.db.channelLocks.set(channel.id, Date.now(), "lockedAt");
 
-        const completedEmbed = client.embeds.success(command, `Locked \`${channel.name}\`.${reason == client.util.reason || !reason? `` : `\n\n**Reason**\n${reason}`}`);
+        const completedEmbed = client.embeds.success(command, `Locked <#${channel.id}> from other members.${reason == client.util.reason || !reason? `` : `\n\n**Reason**\n${reason}`}`);
 
         editMsg.edit(completedEmbed)
       }

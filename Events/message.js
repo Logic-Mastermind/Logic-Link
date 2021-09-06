@@ -60,6 +60,7 @@ module.exports = async (client, message) => {
     
     const hasPermission = (arr1, arr2) => arr1.some((e) => arr2.includes(e))
     const permissionWhitelist = ["delete", "lock", "hide", "unhide", "unlock"];
+    const checkBotPerms = ["addrole", "addroles", "hide", "hoist", "lock", "removerole", "removeroles", "unhide", "unhoist", "unlock"];
 
     async function filterPermissions() {
       if (permissionWhitelist.includes(command.commandName)) return null;
@@ -170,6 +171,14 @@ module.exports = async (client, message) => {
       }
     }
 
+    if (checkBotPerms.includes(command.commandName)) {
+      if (!clientMember.hasPermission(command.permissions)) {
+        await client.logger.updateLog(`Bot lacked permissions.`, logId);
+        const embed = client.embeds.botPermission(command);
+        return message.lineReply(embed);
+      }
+    }
+
     const extra = {
       commandName: commandName,
       allArgs: allArgs,
@@ -177,7 +186,7 @@ module.exports = async (client, message) => {
       logId: logId
     }
 
-    await client.logger.updateLog(`User passed all checks.`, logId);
+    await client.logger.updateLog(`All checks were passed.`, logId);
     await client.db.cooldown.set(message.author.id, now, command.commandName);
 
     cmd.run(client, message, args, command, settings, tsettings, extra);

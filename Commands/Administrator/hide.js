@@ -75,13 +75,17 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         client.db.channelHides.set(channel.id, message.author.id, "locker");
         client.db.channelHides.set(channel.id, channel.id, "channel");
         client.db.channelHides.set(channel.id, Date.now(), "lockedAt");
+        var compEmbed = null;
+        console.log(reason)
 
-        const completedEmbed = client.embeds.success(command, `Hid \`${channel.name}\` from other members.${reason == client.util.reason || !reason ? `` : `\n\n**Reason**\n${reason}`}`);
+        if (reason == client.util.reason || reason == "") compEmbed = client.embeds.success(command, `Hid \`${channel.name}\` from other members.`);
+        else compEmbed = client.embeds.fieldSuccess(command, `Hid \`${channel.name}\` from other members.`, [{ name: "Reason", value: reason, inline: true }])
 
-        editMsg.edit(completedEmbed)
+        editMsg.edit(compEmbed)
       }
     }
   } catch (error) {
     client.functions.sendErrorMsg(error, true, message, command);
+    client.logger.updateLog(`An unexpected error occured.`, extra.logId);
   }
 }

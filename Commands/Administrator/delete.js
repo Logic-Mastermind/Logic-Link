@@ -68,7 +68,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
           msg.edit(errorEmbed, null)
         }
       })
-      return
+      return;
     }
 
     async function deleteRole() {
@@ -144,5 +144,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     }
   } catch (error) {
     client.functions.sendErrorMsg(error, true, message, command);
+    client.logger.updateLog(`An unexpected error occured.`, extra.logId);
   }
 }

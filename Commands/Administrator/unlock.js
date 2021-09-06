@@ -34,7 +34,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     const lockedData = client.db.channelLocks.get(channel.id);
 
     if (channel.type == "voice" || channel.type == "category") {
-      const invalidEmbed = client.embeds.error(command, `\`${channel.name}\` is not a text channel.`);
+      const invalidEmbed = client.embeds.error(command, `<#${channel.id}> is not a text channel.`);
       return message.lineReply(invalidEmbed);
     }
 
@@ -48,26 +48,18 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     var failed = false;
 
     try {
+      channel.updateOverwrite(message.guild.roles.everyone, {
+        SEND_MESSAGES: null
+      }, `Un-Locked the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
+
+      channel.updateOverwrite(message.member, {
+        SEND_MESSAGES: null
+      }, `Un-Locked the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
+
       if (settings.adminRole) {
-        channel.updateOverwrite(message.guild.roles.everyone, {
-          SEND_MESSAGES: null
-        }, `Un-Locked the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
-
-        channel.updateOverwrite(message.member, {
-          SEND_MESSAGES: null
-        }, `Un-Locked the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
-
         channel.updateOverwrite(settings.adminRole, {
           SEND_MESSAGES: null
-        }, `Un-Locked the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
-      } else {
-        channel.updateOverwrite(message.guild.roles.everyone, {
-          SEND_MESSAGES: null
-        }, `Un-Locked the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
-
-        channel.updateOverwrite(message.member, {
-          SEND_MESSAGES: null
-        }, `Un-Locked the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
+        }, `Locked the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
       }
     } catch (error) {
       failed = true;
@@ -78,7 +70,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       if (failed == false) {
         client.db.channelLocks.delete(channel.id)
 
-        const completedEmbed = client.embeds.success(command, `Un-locked \`${channel.name}\`.${reason == client.util.reason || !reason ? `` : `\n\n**Reason**\n${reason}`}`);
+        const completedEmbed = client.embeds.success(command, `Un-locked <#${channel.id}> from other members.${reason == client.util.reason || !reason ? `` : `\n\n**Reason**\n${reason}`}`);
 
         editMsg.edit(completedEmbed)
       }

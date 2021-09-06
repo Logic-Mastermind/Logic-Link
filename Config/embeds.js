@@ -7,6 +7,8 @@ const footer2 = `https://cdn.discordapp.com/emojis/775848533298905130.png?v=1`;
 
 const cross = "<:Cross:867955785978761266>";
 const check = "<:Check:867931890437476353>";
+const error = "<:MessageFail:868113159737720912>";
+const warn = "<:Warn:868113114221121586>";
 
 module.exports = class Embeds {
   constructor(client) {
@@ -128,7 +130,7 @@ module.exports = class Embeds {
     const embed = new Discord.MessageEmbed()
     .setTitle(command.name || command)
     .setColor(`RED`)
-    .setDescription(`${cross} ${description}`)
+    .setDescription(`${this.client.util.error} ${description}`)
     .setFooter(footer1, footer2)
     .setTimestamp();
 
@@ -301,7 +303,7 @@ module.exports = class Embeds {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name || command);
     embed.setColor(`RED`);
-    embed.setDescription(`${cross} ${description}`);
+    embed.setDescription(`${error} ${description}`);
     if (fields) embed.addFields(fields);
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
@@ -344,7 +346,7 @@ module.exports = class Embeds {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name || command);
     embed.setColor(`RED`);
-    embed.setDescription(`${cross} No users were recorded from your message.\n\n**Detailed Info**\n\`${arg}\` is not a user.`);
+    embed.setDescription(`${error} I could not record any users from your message.\n\n**Detailed Info**\n\`${arg}\` is not a user.`);
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
@@ -355,7 +357,7 @@ module.exports = class Embeds {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name);
     embed.setColor(`RED`);
-    embed.setDescription(`${cross} No members were recorded from your message.\n\n**Detailed Info**\n\`${arg}\` is not a member.`);
+    embed.setDescription(`${error} I could not record any server members from your message.\n\n**Detailed Info**\n\`${arg}\` is not a member.`);
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
@@ -366,7 +368,7 @@ module.exports = class Embeds {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name);
     embed.setColor(`RED`);
-    embed.setDescription(`${cross} No roles were recorded from your message.\n\n**Detailed Info**\n\`${arg}\` is not a role.`);
+    embed.setDescription(`${error} I could not record any roles from your message.\n\n**Detailed Info**\n\`${arg}\` is not a role.`);
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
@@ -377,7 +379,7 @@ module.exports = class Embeds {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name);
     embed.setColor(`RED`);
-    embed.setDescription(`${cross} No channels were recorded from your message.\n\n**Detailed Info**\n\`${arg}\` is not a channel.`);
+    embed.setDescription(`${error} I could not record any channels from your message.\n\n**Detailed Info**\n\`${arg}\` is not a channel.`);
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
@@ -388,7 +390,7 @@ module.exports = class Embeds {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name);
     embed.setColor(`RED`);
-    embed.setDescription(`${cross} No commands were recorded from your message.\n\n**Detailed Info**\n\`${arg}\` is not a command.`);
+    embed.setDescription(`${error} I could not record any commands from your message.\n\n**Detailed Info**\n\`${arg}\` is not a command.`);
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
@@ -399,7 +401,7 @@ module.exports = class Embeds {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name);
     embed.setColor(`RED`);
-    embed.setDescription(`${cross} No members or roles were recorded from your message.\n\n**Detailed Info**\n\`${arg1}\` is not a member.${arg2 ? `\n\`${arg2}\` is not a role.` : ``}`);
+    embed.setDescription(`${error} I could not record any members or roles from your message.\n\n**Detailed Info**\n\`${arg1}\` is not a member.${arg2 ? `\n\`${arg2}\` is not a role.` : ``}`);
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
@@ -410,7 +412,7 @@ module.exports = class Embeds {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name);
     embed.setColor(`RED`);
-    embed.setDescription(`${cross} No roles or channels were recorded from your message.\n\n**Detailed Info**\n\`${arg}\` is not a role or channel.`);
+    embed.setDescription(`${error} I could not record any roles or channels from your message.\n\n**Detailed Info**\n\`${arg}\` is not a role or channel.`);
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
@@ -421,8 +423,62 @@ module.exports = class Embeds {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name);
     embed.setColor(`RED`);
-    embed.setDescription(`${cross} No valid ${other ? other : type}s were recorded from your message.\n\n**Detailed Info**\n\`${arg}\` is not a valid ${type}.`);
+    embed.setDescription(`${error} No valid ${other ? other : type}s were recorded from your message.\n\n**Detailed Info**\n\`${arg}\` is not a valid ${type}.`);
     embed.setFooter(footer1, footer2);
+    embed.setTimestamp();
+
+    return embed
+  }
+
+  detailed(command, content, ...descriptions) {
+    const embed = new Discord.MessageEmbed()
+    embed.setTitle(command.name);
+    embed.setColor(`RED`);
+    embed.setDescription(`${error} ${content}\n\n**Detailed Info**\n${descriptions.join("\n")}`);
+    embed.setFooter(footer1, footer2);
+    embed.setTimestamp();
+
+    return embed
+  }
+
+  moderated(type, guild, reason, duration) {
+    var content = null;
+    var title = null;
+
+    switch (type) {
+      case "ban":
+      {
+        content = `You have been banned from \`${guild.name}\`.`;
+        title = "User Banned";
+        break;
+      }
+      case "kick":
+      {
+        content = `You have been kicked from \`${guild.name}\`.`;
+        title = "User Kicked";
+        break;
+      }
+      case "mute":
+      {
+        content = `You have been muted in \`${guild.name}\`.`;
+        title = "User Muted";
+        break;
+      }
+      case "warn":
+      {
+        content = `You have been warned in \`${guild.name}\`.`;
+        title = "User Warned";
+        break;
+      }
+    }
+
+    const embed = new Discord.MessageEmbed();
+    embed.setTitle(title);
+    embed.setColor("ORANGE");
+    embed.setDescription(`${warn} ${content}`);
+    embed.setFooter(footer1, footer2);
+    embed.addField("Reason", reason, false);
+    if (duration) embed.addField("Duration", ms(duration, { long: true }));
     embed.setTimestamp();
 
     return embed

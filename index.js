@@ -11,7 +11,7 @@ const config = require("./Config/config.js");
 const embeds = require("./Config/embeds.js");
 const functions = require("./Config/functions.js");
 const prompts = require("./Config/prompts.js");
-const db = require("./Config/db.js");
+const database = require("./Config/database.js");
 const logger = require("./Config/logger.js");
 const util = require("./Config/util.js");
 const schemas = require("./Config/schemas.js");
@@ -34,7 +34,7 @@ const client = new Discord.Client({
 client.cmd = cmd;
 client.command = commands;
 client.config = config;
-client.db = db;
+client.db = database;
 client.util = util;
 client.os = os;
 

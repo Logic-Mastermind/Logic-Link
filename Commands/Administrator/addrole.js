@@ -12,8 +12,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
   const responses = {
     pending: `Adding the role to the user...`,
-    botHierarchy: `This role has a higher or equal position as my top role.\n\n**Detailed Info**\n`,
-    hierarchy: `This role has a higher or equal position as your top role.\n\n**Detailed Info**\n`
+    botHierarchy: `This role has a higher or equal position as my top role.`,
+    hierarchy: `This role has a higher or equal position as your top role.`
   }
 
   try {
@@ -26,46 +26,43 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     if (secArg.toLowerCase() == "me") member = message.member;
 
     if (member && role) {
-      if (member.roles.cache.has(role.id)) {
-        client.logger.updateLog(`Member already had role.`, extra.logId);
-        const embed = client.embeds.error(command, `\`${member.user.tag}\` already has the <@&${role.id}> role.`);
-        return message.lineReply(embed)
-      }
-
-      const pendingEmbed = client.embeds.pending(command, responses.pending);
-      const editMsg = await message.lineReply(pendingEmbed)
-
-      if (!clientMember.hasPermission(command.clientPerms)) {
-        const errorEmbed = client.embeds.botPermission(command)
-        return editMsg.edit(errorEmbed)
-      }
-
       if (clientMember.roles.highest.position <= role.position) {
-        client.logger.updateLog(`Role has higher than bot.`, extra.logId);
-        const clientTopRole = clientMember.roles.highest;
-        const embed = client.embeds.error(command, `${responses.botHierarchy}Mentioned Role - <@&${role.id}>: Position \`${role.position}\`.\nMy Top Role - <@&${clientTopRole.id}>: Position \`${clientTopRole.position}\`.`);
-        return editMsg.edit(embed);
+        client.logger.updateLog(`Role position was higher than or equal to bot.`, extra.logId);
+        const topRole = clientMember.roles.highest;
+
+        const embed = client.embeds.detailed(command, responses.botHierarchy, `Mentioned Role - <@&${role.id}>: Position \`${role.position}\`.`, `My Top Role - <@&${topRole.id}>: Position \`${topRole.position}\`.`);
+        return message.lineReply(embed);
       }
 
       if (message.author.id !== message.guild.owner.id) {
         if (message.member.roles.highest.position <= role.position) {
-          client.logger.updateLog(`Role was higher than user.`, extra.logId);
-          const embed = client.embeds.error(command, `${responses.hierarchy}Mentioned Role - <@&${role.id}>: Position \`${role.position}\`.\nYour Top Role - <@&${message.member.roles.highest.id}>: Position \`${message.member.roles.highest.position}\`.`);
-          return editMsg.edit(embed);
+          client.logger.updateLog(`Role position was higher than or equal to user.`, extra.logId);
+          const topRole = message.member.roles.highest;
+
+          const embed = client.embeds.detailed(command, responses.hierarchy, `Mentioned Role - <@&${role.id}>: Position \`${role.position}\`.`, `Your Top Role - <@&${topRole.id}>: Position \`${topRole.position}\`.`);
+          return message.lineReply(embed);
         }
       }
 
-      member.roles.add(role, `Added the "${role.name}" role to ${member.user.tag}. Responsible User: ${message.author.tag}`)
-      .then((r) => {
-        client.logger.updateLog(`Added role successfully.`, extra.logId);
-        const successEmbed = client.embeds.success(command, `Added the <@&${role.id}> role to <@${member.id}>.`);
-        editMsg.edit(successEmbed)
-      })
+      if (member.roles.cache.has(role.id)) {
+        client.logger.updateLog(`Member already had role.`, extra.logId);
+        const embed = client.embeds.error(command, `<@${member.id}> already has the <@&${role.id}> role.`);
+        return message.lineReply(embed)
+      }
+
+      const pendingEmbed = client.embeds.pending(command, responses.pending);
+      const editMsg = await message.lineReply(pendingEmbed);
+
+      await member.roles.add(role, `Added the "${role.name}" role to ${member.user.tag}. Responsible User: ${message.author.tag}`)
       .catch(async (error) => {
-        client.logger.updateLog(`An error occured.`, extra.logId);
+        client.logger.updateLog(`An error occured while adding a role.`, extra.logId);
         const errorEmbed = await client.embeds.errorInfo(command, error);
         editMsg.edit(errorEmbed)
       })
+
+      client.logger.updateLog(`Added role successfully.`, extra.logId);
+      const successEmbed = client.embeds.success(command, `Added the <@&${role.id}> role to <@${member.id}>.`);
+      editMsg.edit(successEmbed)
     } else {
       if (!thirdArg && member) {
         client.logger.updateLog(`User did not pass enough arguments.`, extra.logId);
@@ -91,5 +88,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     }
   } catch (error) {
     client.functions.sendErrorMsg(error, true, message, command);
+    client.logger.updateLog(`An unexpected error occured.`, extra.logId);
   }
 }

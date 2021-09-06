@@ -30,11 +30,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         return message.lineReply(embed);
       }
 
-      if (!message.member.hasPermission(command.permissions)) {
-        const embed = client.embeds.permission(command);
-        return message.lineReply(embed);
-      }
-
       if (clientMember.roles.highest.position <= role.position) {
         const clientTopRole = clientMember.roles.highest;
         const embed = client.embeds.error(command, `${responses.botHierarchy}Mentioned Role - <@&${role.id}>: Position \`${role.position}\`.\nMy Top Role - <@&${clientTopRole.id}>: Position \`${clientTopRole.position}\`.`);
