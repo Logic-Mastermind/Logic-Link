@@ -17,6 +17,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     var allLogs = [];
     var persist = false;
     var devLog = client.db.devSettings.get(client.util.devId, "logsCleared");
+    var canLog = client.db.devSettings.get(client.util.devId, "allowLog");
 
     if (secArg) {
       if (secArg == "clr" || secArg == "clear") {
@@ -27,6 +28,26 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       } else if (secArg == "perst" || secArg == "persist" || secArg == "persistent") {
         logs = await client.db.logs.fetchEverything();
         persist = true;
+
+      } else if (secArg == "off") {
+        if (!canLog) {
+          const embed = client.embeds.error(command, `Logs have already been turned off.`);
+          return message.lineReply(embed);
+        }
+
+        client.db.devSettings.set(client.util.devId, false, "allowLog");
+        const embed = client.embeds.success(command, `Turned off logs for the bot developer.`);
+        return message.lineReply(embed);
+
+      } else if (secArg == "on") {
+        if (canLog) {
+          const embed = client.embeds.error(command, `Logs have already been turned on.`);
+          return message.lineReply(embed);
+        }
+
+        client.db.devSettings.set(client.util.devId, true, "allowLog");
+        const embed = client.embeds.success(command, `Turned on logs for the bot developer.`);
+        return message.lineReply(embed);
 
       } else if (!isNaN(secArg)) {
         var logData = await client.db.logs.get(secArg);
@@ -40,7 +61,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       }
     }
 
-    if (logs.size == 0) {
+    if (logs.size <= 1) {
       const embed = client.embeds.error(command, `There are no logs to show.`);
       return message.lineReply(embed);
     }
@@ -70,6 +91,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
     if (pages[0]) client.functions.paginate(msg, pages)
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
+    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
   }
 }

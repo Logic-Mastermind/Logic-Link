@@ -72,4 +72,31 @@ module.exports = class MessageButtons {
     
     return button
   }
+
+  async selectMenu(placeholder, options, id, min, max) {
+    const optionsArray = [];
+
+    if (options) {
+      for await (const option of options) {
+        const { label, value, id, emoji, def } = option;
+        const menuOption = new Buttons.MessageMenuOption();
+        if (emoji) menuOption.setEmoji(emoji);
+        if (def) menuOption.setDefault(def);
+
+        menuOption.setValue(id);
+        menuOption.setLabel(label);
+        menuOption.setDescription(value);
+        optionsArray.push(menuOption);
+      }
+    }
+
+    const menu = new Buttons.MessageMenu();
+    if (options) menu.addOptions(optionsArray);
+    if (id) menu.setID(id);
+    menu.setPlaceholder(placeholder);
+    menu.setMinValues(min);
+    menu.setMaxValues(max);
+
+    return menu;
+  }
 }

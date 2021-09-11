@@ -26,6 +26,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     const pingedEmbed = client.embeds.fieldSuccess(command, `Logic Link is online.`, fields);
     msg.edit(pingedEmbed);
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
+    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
   }
 }

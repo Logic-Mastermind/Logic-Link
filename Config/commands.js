@@ -5,12 +5,13 @@ module.exports = {
       description: "Fetches the profile avatar of any user.",
       permissions: ["ALL"],
       clientPerms: [],
-      cooldown: 1,
+      cooldown: 2,
       minArgs: 0,
       options: [],
       aliases: ["av"],
       usage: "avatar [user]",
       required: "none",
+      category: "General",
       commandName: "avatar"
     },
     botinfo: {
@@ -18,12 +19,13 @@ module.exports = {
       description: "Provides information about Logic Link.",
       permissions: ["ALL"],
       clientPerms: [],
-      cooldown: 1,
+      cooldown: 2,
       minArgs: 0,
       options: [],
       aliases: ["binfo"],
       usage: "botinfo",
       required: "none",
+      category: "General",
       commandName: "botinfo"
     },
     help: {
@@ -31,26 +33,56 @@ module.exports = {
       description: "Provides a list of commands.",
       permissions: ["ALL"],
       clientPerms: [],
-      cooldown: 1,
+      cooldown: 2,
       minArgs: 0,
       options: [],
       aliases: ["cmd", "cmds", "commands"],
       usage: "help [command name]",
       required: "none",
+      category: "General",
       commandName: "help"
     },
-    info: {
-      name: "Info",
-      description: "Provides info about your server, channels and roles.",
+    serverinfo: {
+      name: "Server Info",
+      description: "Provides info about your server.",
       permissions: ["ALL"],
       clientPerms: [],
-      cooldown: 1,
+      cooldown: 2,
       minArgs: 0,
       options: [],
-      aliases: ["serverinfo", "channelinfo", "roleinfo"],
-      usage: "info <item>",
+      aliases: ["sinfo"],
+      usage: "serverinfo",
       required: "none",
-      commandName: "info"
+      category: "General",
+      commandName: "serverinfo"
+    },
+    roleinfo: {
+      name: "Role Info",
+      description: "Provides info about a specific role.",
+      permissions: ["ALL"],
+      clientPerms: [],
+      cooldown: 2,
+      minArgs: 1,
+      options: [],
+      aliases: ["rinfo"],
+      usage: "roleinfo <role>",
+      required: "none",
+      category: "General",
+      commandName: "roleinfo"
+    },
+    channelinfo: {
+      name: "Channel Info",
+      description: "Provides info about a specific channel.",
+      permissions: ["ALL"],
+      clientPerms: [],
+      cooldown: 2,
+      minArgs: 0,
+      options: [],
+      aliases: ["cinfo"],
+      usage: "channelinfo <channel>",
+      required: "none",
+      category: "General",
+      commandName: "channelinfo"
     },
     invite: {
       name: "Bot Invite",
@@ -63,6 +95,7 @@ module.exports = {
       aliases: ["inv"],
       usage: "invite",
       required: "none",
+      category: "General",
       commandName: "invite"
     },
     membercount: {
@@ -76,6 +109,7 @@ module.exports = {
       aliases: ["mcount", "mc"],
       usage: "membercount",
       required: "none",
+      category: "General",
       commandName: "membercount"
     },
     pastebin: {
@@ -89,6 +123,7 @@ module.exports = {
       aliases: ["paste"],
       usage: "pastebin <option>",
       required: "none",
+      category: "General",
       commandName: "pastebin"
     },
     ping: {
@@ -102,277 +137,8 @@ module.exports = {
       aliases: [],
       usage: "ping",
       required: "none",
+      category: "General",
       commandName: "ping"
-    },
-    ticket: {
-      name: "Ticket",
-      description: "Allows you to create and manage tickets.",
-      permissions: ["ALL"],
-      options: ["help", "new", "panelinfo", "stats", "tag", "ticketinfo", "add", "claim", "close", "delete", "open", "remove", "rename", "panel", "settings", "tags", "view"],
-      aliases: ["tickets", "tck", "t"],
-      usage: "ticket [option] [option parameter]",
-      required: "none",
-      commandName: "ticket",
-      option: {
-        help: {
-          name: "Help",
-          description: "The ticket help command is used to provide helpful information about certain commands.",
-          permissions: ["ALL"],
-          aliases: [],
-          usage: "help [command name]",
-          required: "none",
-          commandName: "help"
-        },
-        new: {
-          name: "New",
-          description: "The ticket new command is used to open a new ticket in the provided panel.",
-          permissions: ["ALL"],
-          aliases: ["new"],
-          usage: "new <panel name>",
-          required: "none",
-          commandName: "new"
-        },
-        panelinfo: {
-          name: "panel info",
-          description: "The ticket panelinfo command is used to provide information about a certain panel.",
-          permissions: ["ALL"],
-          aliases: ["panelinfo"],
-          usage: "panelinfo <panel name>",
-          required: "none",
-          commandName: "panelinfo"
-        },
-        stats: {
-          name: "stats",
-          description: "The ticket stats command is used to provide information about the server ticket system.",
-          permissions: ["ALL"],
-          aliases: [],
-          usage: "stats",
-          required: "none",
-          commandName: "stats"
-        },
-        tag: {
-          name: "tag",
-          description: "The ticket tag command is used to reveal information that was previously stored by a server admin.",
-          permissions: ["ALL"],
-          aliases: ["tag"],
-          usage: "tag [tag name]",
-          required: "none",
-          commandName: "tag"
-        },
-        ticketinfo: {
-          name: "ticket info",
-          description: "The ticket ticketinfo command is used to provide information about a certain ticket.",
-          permissions: ["ALL"],
-          aliases: ["ticketinfo"],
-          usage: "ticketinfo <channel id>",
-          required: "none",
-          commandName: "ticketinfo"
-        },
-        add: {
-          name: "add",
-          description: "The ticket add command is used to add users or roles to a ticket.",
-          permissions: "SUPPORT_TEAM",
-          aliases: ["add"],
-          usage: "add <user | role>",
-          required: "support",
-          commandName: "add"
-        },
-        claim: {
-          name: "claim",
-          description: "The ticket claim command is used to designate support team members to different tickets with a claiming system.",
-          permissions: "SUPPORT_TEAM",
-          aliases: ["claim"],
-          usage: "claim [channel id]",
-          required: "support",
-          commandName: "claim"
-        },
-        close: {
-          name: "close",
-          description: "The ticket close command is used to remove access to a ticket from the user who opened it.",
-          permissions: "SUPPORT_TEAM",
-          aliases: ["close"],
-          usage: "close [channel id]",
-          required: "support",
-          commandName: "close"
-        },
-        delete: {
-          name: "delete",
-          description: "The ticket delete command is used to delete a ticket.",
-          permissions: "SUPPORT_TEAM",
-          aliases: [],
-          usage: "delete [channel id]",
-          required: "support",
-          commandName: "delete"
-        },
-        open: {
-          name: "open",
-          description: "The ticket open command is used to re-open previously closed tickets back to the user who opened it.",
-          permissions: "SUPPORT_TEAM",
-          aliases: ["open", "reopen"],
-          usage: "help [command name]",
-          required: "support",
-          commandName: "open"
-        },
-        remove: {
-          name: "remove",
-          description: "The ticket remove command is used to remove users or roles from having access to a ticket.",
-          permissions: "SUPPORT_TEAM",
-          aliases: ["remove"],
-          usage: "remove <users | roles>",
-          required: "support",
-          commandName: "remove"
-        },
-        rename: {
-          name: "rename",
-          description: "The ticket rename command is used to change the name of a ticket.",
-          permissions: "SUPPORT_TEAM",
-          aliases: [],
-          usage: "rename <new name>",
-          required: "support",
-          commandName: "rename"
-        },
-        panel: {
-          name: "panel",
-          description: "The ticket panel command is used to list and configure panel settings.",
-          permissions: ["ALL"],
-          options: ["new", "modify", "delete"],
-          aliases: ["panel", "panels"],
-          usage: "panel <option>",
-          required: "admin",
-          commandName: "panel",
-          option: {
-            new: {
-              name: "new",
-              description: "The ticket panel new command is used to create a new ticket panel for your server.",
-              permissions: ["ALL"],
-              aliases: ["ticket panel n"],
-              usage: "new",
-              required: "admin",
-              commandName: "new"
-            },
-            modify: {
-              name: "modify",
-              description: "The ticket panel modify command is used to edit the configurations of a panel.",
-              permissions: ["ALL"],
-              options: ["name", "category_opened", "category_closed", "ticket_name", "claiming", "claimed_ticket_name", "support_roles", "additional_roles", "panel_channel"],
-              aliases: ["ticket panel m"],
-              usage: "modify <panel id> <option> <option parameter>",
-              required: "admin",
-              commandName: "modify",
-              option: {
-                name: {
-                  name: "name",
-                  description: "The ticket panel modify name command is used to edit the name of a panel.",
-                  permissions: ["ALL"],
-                  aliases: [],
-                  usage: "modify <panel id> name <new name>",
-                  required: "admin",
-                  commandName: "name"
-                },
-                category_opened: {
-                  name: "category opened",
-                  description: "The ticket panel modify category_opened command is used to edit the category where opened tickets will be moved to.",
-                  permissions: ["ALL"],
-                  aliases: ["ticket panel modify cat_opened", "ticket panel modify cat_open"],
-                  usage: "modify <panel id> category_opened <category id>",
-                  required: "admin",
-                  commandName: "category_opened"
-                },
-                category_closed: {
-                  name: "category closed",
-                  description: "The ticket panel modify category_closed command is used to edit the category where closed tickets will be moved to.",
-                  permissions: ["ALL"],
-                  aliases: ["ticket panel modify cat_closed", "ticket panel modify cat_close"],
-                  usage: "modify <panel id> category_closed <category id>",
-                  required: "admin",
-                  commandName: "category_closed"
-                },
-                ticket_name: {
-                  name: "ticket name",
-                  description: "The ticket panel modify ticket_name command is used to edit the name of newly opened tickets",
-                  permissions: ["ALL"],
-                  aliases: ["ticket panel modify t_name"],
-                  usage: "modify <panel id> ticket_name <new name>",
-                  required: "admin",
-                  commandName: "ticket_name"
-                },
-                claiming: {
-                  name: "claiming",
-                  description: "The ticket panel modify claiming command is used to turn the claiming system on or off.",
-                  permissions: ["ALL"],
-                  aliases: ["ticket panel modify claim"],
-                  usage: "modify <panel id> claim <on | off>",
-                  required: "admin",
-                  commandName: "claiming"
-                },
-                claimed_ticket_name: {
-                  name: "claimed ticket name",
-                  description: "The ticket panel modify claimed_ticket_name command is used to edit the name of claimed tickets.",
-                  permissions: ["ALL"],
-                  aliases: ["ticket panel modify claimed_name"],
-                  usage: "modify <panel id> claimed_ticket_name <new name>",
-                  required: "admin",
-                  commandName: "claimed_ticket_name"
-                },
-                support_roles: {
-                  name: "support roles",
-                  description: "The ticket panel modify support_roles command is used to edit the roles that are allowed to view and type in all tickets.",
-                  permissions: ["all"],
-                  aliases: ["ticket panel modify support", "ticket panel modify s_roles", "ticket panel modify s_role"],
-                  usage: "modify <panel id> support_roles <new roles>",
-                  required: "admin",
-                  commandName: "support_roles"
-                },
-                additional_roles: {
-                  name: "additional roles",
-                  description: "The ticket panel modify additional_roles command is used to edit the roles that are able to view all tickets",
-                  permissions: ["all"],
-                  aliases: ["ticket panel modify additional", "ticket panel modify a_roles", "ticket panel modify s_role"],
-                  usage: "modify <panel id> additional_roles <new roles>",
-                  required: "admin",
-                  commandName: "additional_roles"
-                },
-                panel_channel: {
-                  name: "panel channel",
-                  description: "The ticket panel modify panel_channel command is used to edit the channel that the panel is sent to.",
-                  permissions: ["all"],
-                  aliases: ["ticket panel modify p_channel"],
-                  usage: "modify <panel id> panel_channel <new channel>",
-                  required: "admin",
-                  commandName: "panel_channel"
-                },
-              }
-            },
-          }
-        },
-        settings: {
-          name: "settings",
-          description: "The ticket settings command is used to list and configure global ticket settings.",
-          permissions: ["ALL"],
-          aliases: [],
-          usage: "settings [option name]",
-          required: "admin",
-          commandName: "settings"
-        },
-        tags: {
-          name: "tags",
-          description: "The ticket tags command is used to configure tags to be used by normal members.",
-          permissions: ["ALL"],
-          aliases: ["tags"],
-          usage: "tags <new | modify | delete>",
-          required: "admin",
-          commandName: "tags"
-        },
-        view: {
-          name: "view",
-          description: "The ticket view command is used to show a list of all active tickets and information about them.",
-          permissions: ["ALL"],
-          aliases: [],
-          usage: "view",
-          required: "admin",
-          commandName: "view"
-        },
-      }
     },
     uptime: {
       name: "Up-Time",
@@ -382,9 +148,10 @@ module.exports = {
       cooldown: 1,
       minArgs: 0,
       options: [],
-      aliases: ["up-time"],
+      aliases: ["up-time", "upt"],
       usage: "uptime",
       required: "none",
+      category: "General",
       commandName: "uptime"
     },
     voice: {
@@ -398,6 +165,7 @@ module.exports = {
       aliases: ["vc"],
       usage: "voice <option>",
       required: "none",
+      category: "General",
       commandName: "voice",
       option: {
         connect: {
@@ -411,6 +179,7 @@ module.exports = {
           aliases: [],
           usage: "voice connect",
           required: "none",
+          category: "General",
           commandName: "voice connect"
         },
         disconnect: {
@@ -424,6 +193,7 @@ module.exports = {
           aliases: [],
           usage: "voice disconnect",
           required: "none",
+          category: "General",
           commandName: "voice disconnect"
         },
         play: {
@@ -437,6 +207,7 @@ module.exports = {
           aliases: [],
           usage: "voice play <search query>",
           required: "none",
+          category: "General",
           commandName: "voice play"
         },
         pause: {
@@ -450,6 +221,7 @@ module.exports = {
           aliases: [],
           usage: "voice pause",
           required: "none",
+          category: "General",
           commandName: "voice pause"
         }
       }
@@ -462,9 +234,10 @@ module.exports = {
       cooldown: 3,
       minArgs: 0,
       options: [],
-      aliases: ["who-is"],
+      aliases: ["who-is", "userinfo", "uinfo", "who"],
       usage: "whois [user]",
       required: "none",
+      category: "General",
       commandName: "whois"
     }
   },
@@ -480,6 +253,7 @@ module.exports = {
       aliases: ["tickethelp"],
       usage: "thelp [command]",
       required: "ticket",
+      category: "Ticket",
       commandName: "thelp"
     },
     panels: {
@@ -493,6 +267,7 @@ module.exports = {
       aliases: ["panel", "tpanels"],
       usage: "panels [new | modify | delete]",
       required: "ticket",
+      category: "Ticket",
       commandName: "panels",
       option: {
         new: {
@@ -506,6 +281,7 @@ module.exports = {
           aliases: [],
           usage: "panels new",
           required: "ticket",
+          category: "Ticket",
           commandName: "panels new",
         },
         modify: {
@@ -519,6 +295,7 @@ module.exports = {
           aliases: [],
           usage: "panels modify <panel id> [option] [option parameter]",
           required: "ticket",
+          category: "Ticket",
           commandName: "panels modify",
         },
         delete: {
@@ -532,6 +309,7 @@ module.exports = {
           aliases: [],
           usage: "panels delete <panel id>",
           required: "ticket",
+          category: "Ticket",
           commandName: "panels delete",
         }
       }
@@ -547,6 +325,7 @@ module.exports = {
       aliases: ["ticketsettings", "tset"],
       usage: "tsettings [setting] [option parameter]",
       required: "ticket",
+      category: "Ticket",
       commandName: "tsettings"
     }
   },
@@ -562,6 +341,7 @@ module.exports = {
       aliases: ["announcement", "anounce"],
       usage: "announce [option] <channel> <announcement>",
       required: "mod",
+      category: "Moderator",
       commandName: "announce",
       option: {
         everyone: {
@@ -575,6 +355,7 @@ module.exports = {
           aliases: [],
           usage: "announce everyone <channel> <announcement>",
           required: "admin",
+          category: "Moderator",
           commandName: "announce everyone"
         },
         here: {
@@ -588,6 +369,7 @@ module.exports = {
           aliases: [],
           usage: "announce here <channel> <announcement>",
           required: "admin",
+          category: "Moderator",
           commandName: "announce here"
         },
         role: {
@@ -601,6 +383,7 @@ module.exports = {
           aliases: [],
           usage: "announce role <role> <channel> <announcement>",
           required: "admin",
+          category: "Moderator",
           commandName: "announce role"
         }
       }
@@ -616,6 +399,7 @@ module.exports = {
       aliases: [],
       usage: "ban <user> [reason]",
       required: "mod",
+      category: "Moderator",
       commandName: "ban",
     },
     softban: {
@@ -623,12 +407,13 @@ module.exports = {
       description: "Bans members from your server without deleting previous messages.",
       permissions: ["BAN_MEMBERS"],
       clientPerms: ["BAN_MEMBERS"],
-      cooldown: 3,
+      cooldown: 4,
       minArgs: 1,
       options: [],
       aliases: ["sban"],
       usage: "softban <user> [reason]",
       required: "mod",
+      category: "Moderator",
       commandName: "softban"
     },
     tempban: {
@@ -636,12 +421,13 @@ module.exports = {
       description: "Temporarily bans members from your server.",
       permissions: ["BAN_MEMBERS"],
       clientPerms: ["BAN_MEMBERS"],
-      cooldown: 3,
+      cooldown: 4,
       minArgs: 1,
       options: [],
       aliases: ["tban"],
       usage: "tban <user> <duration> [reason]",
       required: "mod",
+      category: "Moderator",
       commandName: "tempban"
     },
     embed: {
@@ -655,6 +441,7 @@ module.exports = {
       aliases: ["emb"],
       usage: "embed ~<title>~ <description>",
       required: "mod",
+      category: "Moderator",
       commandName: "embed"
     },
     kick: {
@@ -668,6 +455,7 @@ module.exports = {
       aliases: [],
       usage: "kick <user> [reason]",
       required: "mod",
+      category: "Moderator",
       commandName: "kick"
     },
     mute: {
@@ -681,6 +469,7 @@ module.exports = {
       aliases: [],
       usage: "mute <user> [duration] [reason]",
       required: "mod",
+      category: "Moderator",
       commandName: "mute"
     },
     nickname: {
@@ -694,6 +483,7 @@ module.exports = {
       aliases: [],
       usage: "nickname <user> <new nickname | reset>",
       required: "mod",
+      category: "Moderator",
       commandName: "nickname"
     },
     purge: {
@@ -707,6 +497,7 @@ module.exports = {
       aliases: [],
       usage: "purge <number>",
       required: "mod",
+      category: "Moderator",
       commandName: "purge"
     },
     slowmode: {
@@ -720,6 +511,7 @@ module.exports = {
       aliases: ["slow", "smode"],
       usage: "slowmode [channel] <number | off>",
       required: "mod",
+      category: "Moderator",
       commandName: "slowmode"
     },
     unban: {
@@ -733,6 +525,7 @@ module.exports = {
       aliases: ["un-ban"],
       usage: "unban <user> [reason]",
       required: "mod",
+      category: "Moderator",
       commandName: "unban"
     },
     unmute: {
@@ -746,6 +539,7 @@ module.exports = {
       aliases: ["un-mute"],
       usage: "unmute <user> [reason]",
       required: "mod",
+      category: "Moderator",
       commandName: "unmute"
     },
     warn: {
@@ -759,6 +553,7 @@ module.exports = {
       aliases: [],
       usage: "warn <user> [warning]",
       required: "mod",
+      category: "Moderator",
       commandName: "warn"
     },
     warnings: {
@@ -772,6 +567,7 @@ module.exports = {
       aliases: [],
       usage: "warnings <member>",
       required: "mod",
+      category: "Moderator",
       commandName: "warnings"
     }
   },
@@ -787,6 +583,7 @@ module.exports = {
       aliases: ["giverole"],
       usage: "addrole <user> <role>",
       required: "admin",
+      category: "Administrator",
       commandName: "addrole",
     },
     addroles: {
@@ -800,6 +597,7 @@ module.exports = {
       aliases: ["giveroles"],
       usage: "addroles <user> <roles>",
       required: "admin",
+      category: "Administrator",
       commandName: "addroles",
     },
     create: {
@@ -813,6 +611,7 @@ module.exports = {
       aliases: ["crt"],
       usage: "create <option> <name>",
       required: "admin",
+      category: "Administrator",
       commandName: "create",
       option: {
         channel: {
@@ -825,6 +624,7 @@ module.exports = {
           aliases: [],
           usage: "create channel <name>",
           required: "admin",
+          category: "Administrator",
           commandName: "create channel"
         },
         role: {
@@ -837,6 +637,7 @@ module.exports = {
           aliases: [],
           usage: "create role <name>",
           required: "admin",
+          category: "Administrator",
           commandName: "create role"
         },
         voice: {
@@ -849,6 +650,7 @@ module.exports = {
           aliases: [],
           usage: "create voice <name>",
           required: "admin",
+          category: "Administrator",
           commandName: "create voice"
         }
       }
@@ -864,6 +666,7 @@ module.exports = {
       aliases: [],
       usage: "delete <role | channel>",
       required: "admin",
+      category: "Administrator",
       commandName: "delete",
       option: {
         channel: {
@@ -876,6 +679,7 @@ module.exports = {
           aliases: [],
           usage: "delete <channel>",
           required: "admin",
+          category: "Administrator",
           commandName: "delete channel"
         },
         role: {
@@ -888,6 +692,7 @@ module.exports = {
           aliases: [],
           usage: "delete <role>",
           required: "admin",
+          category: "Administrator",
           commandName: "delete role"
         }
       }
@@ -903,6 +708,7 @@ module.exports = {
       aliases: [],
       usage: "hide [channel] [reason]",
       required: "admin",
+      category: "Administrator",
       commandName: "hide"
     },
     hoist: {
@@ -916,6 +722,7 @@ module.exports = {
       aliases: [],
       usage: "hoist <role>",
       required: "admin",
+      category: "Administrator",
       commandName: "hoist"
     },
     lock: {
@@ -929,6 +736,7 @@ module.exports = {
       aliases: [],
       usage: "lock [channel] [reason]",
       required: "admin",
+      category: "Administrator",
       commandName: "lock"
     },
     removerole: {
@@ -942,6 +750,7 @@ module.exports = {
       aliases: ["takerole"],
       usage: "removerole <user> <role>",
       required: "admin",
+      category: "Administrator",
       commandName: "removerole",
     },
     removeroles: {
@@ -955,6 +764,7 @@ module.exports = {
       aliases: ["takeroles"],
       usage: "removeroles <user> <roles>",
       required: "admin",
+      category: "Administrator",
       commandName: "removeroles",
     },
     modify: {
@@ -968,6 +778,7 @@ module.exports = {
       aliases: [],
       usage: "modify <channel / role> <option> <option parameter>",
       required: "admin",
+      category: "Administrator",
       commandName: "modify"
     },
     settings: {
@@ -981,6 +792,7 @@ module.exports = {
       aliases: ["setting", "set"],
       usage: "settings [option] [option parameter]",
       required: "admin",
+      category: "Administrator",
       commandName: "settings",
       option: {
         prefix: {
@@ -992,6 +804,7 @@ module.exports = {
           aliases: ["settings pre"],
           usage: "settings prefix <new prefix>",
           required: "admin",
+          category: "Administrator",
           commandName: "settings prefix"
         },
         adminrole: {
@@ -1003,6 +816,7 @@ module.exports = {
           aliases: ["settings admin", "settings administratorrole"],
           usage: "settings adminrole <role>",
           required: "admin",
+          category: "Administrator",
           commandName: "settings adminrole"
         },
         modrole: {
@@ -1014,6 +828,7 @@ module.exports = {
           aliases: ["settings mod", "settings moderatorrole"],
           usage: "settings modrole <role>",
           required: "admin",
+          category: "Administrator",
           commandName: "settings modrole"
         },
         logchannel: {
@@ -1025,6 +840,7 @@ module.exports = {
           aliases: ["settings log", "settings logchan"],
           usage: "settings logchannel <channel>",
           required: "admin",
+          category: "Administrator",
           commandName: "settings logchannel"
         },
         mutedrole: {
@@ -1036,6 +852,7 @@ module.exports = {
           aliases: ["settings muted"],
           usage: "settings mutedrole <role>",
           required: "admin",
+          category: "Administrator",
           commandName: "settings mutedrole"
         },
         welcome: {
@@ -1047,6 +864,7 @@ module.exports = {
           aliases: ["settings welc", "settings welcomesystem"],
           usage: "settings welcome <on | off>",
           required: "admin",
+          category: "Administrator",
           commandName: "settings welcome"
         },
         welcomechannel: {
@@ -1058,6 +876,7 @@ module.exports = {
           aliases: ["settings welcomechan", "settings welcchan"],
           usage: "settings welcomechannel <channel>",
           required: "admin",
+          category: "Administrator",
           commandName: "settings welcomechannel"
         },
         welcomerole: {
@@ -1069,6 +888,7 @@ module.exports = {
           aliases: ["settings welcrole"],
           usage: "settings welcomerole <role>",
           required: "admin",
+          category: "Administrator",
           commandName: "settings welcomerole"
         },
         welcomemsg: {
@@ -1080,6 +900,7 @@ module.exports = {
           aliases: ["settings welcmsg"],
           usage: "settings welcomemsg <msg>",
           required: "admin",
+          category: "Administrator",
           commandName: "settings welcomemsg"
         },
       }
@@ -1095,6 +916,7 @@ module.exports = {
       aliases: ["un-hoist"],
       usage: "unhoist <role>",
       required: "admin",
+      category: "Administrator",
       commandName: "unhoist"
     },
     unhide: {
@@ -1108,6 +930,7 @@ module.exports = {
       aliases: [],
       usage: "unhide [channel] [reason]",
       required: "admin",
+      category: "Administrator",
       commandName: "unhide"
     },
     unlock: {
@@ -1121,6 +944,7 @@ module.exports = {
       aliases: ["un-lock"],
       usage: "unlock [channel] [reason]",
       required: "admin",
+      category: "Administrator",
       commandName: "unlock"
     }
   },
@@ -1136,6 +960,7 @@ module.exports = {
       aliases: [],
       usage: "bug new",
       required: "support",
+      category: "Support",
       commandName: "bug"
     },
     error: {
@@ -1149,6 +974,7 @@ module.exports = {
       aliases: [],
       usage: "error <id>",
       required: "support",
+      category: "Support",
       commandName: "error"
     },
     shelp: {
@@ -1162,6 +988,7 @@ module.exports = {
       aliases: [],
       usage: "shelp [command]",
       required: "support",
+      category: "Support",
       commandName: "shelp"
     }
   },
@@ -1177,6 +1004,7 @@ module.exports = {
       aliases: [],
       usage: "blacklist <user> [reason]",
       required: "dev",
+      category: "Developer",
       commandName: "blacklist",
       option: {
         view: {
@@ -1190,6 +1018,7 @@ module.exports = {
           aliases: [],
           usage: "blacklist <user> [reason]",
           required: "dev",
+          category: "Developer",
           commandName: "blacklist",
         }
       }
@@ -1205,6 +1034,7 @@ module.exports = {
       aliases: ["dlock", "dl", "developerlock"],
       usage: "devlock <command> [guild] [option | reason]",
       required: "dev",
+      category: "Developer",
       commandName: "devlock",
       option: {
         view: {
@@ -1218,6 +1048,7 @@ module.exports = {
           aliases: ["check"],
           usage: "devlock view",
           required: "dev",
+          category: "Developer",
           commandName: "devlock view",
         }
       }
@@ -1233,6 +1064,7 @@ module.exports = {
       aliases: ["dhelp"],
       usage: "devhelp [option]",
       required: "dev",
+      category: "Developer",
       commandName: "devhelp"
     },
     devmode: {
@@ -1246,6 +1078,7 @@ module.exports = {
       aliases: ["dmode", "devm"],
       usage: "devmode <on | off>",
       required: "dev",
+      category: "Developer",
       commandName: "devmode"
     },
     eval: {
@@ -1259,6 +1092,7 @@ module.exports = {
       aliases: ["e"],
       usage: "eval [option] <code>",
       required: "dev",
+      category: "Developer",
       commandName: "eval",
       option: {
         silent: {
@@ -1272,6 +1106,7 @@ module.exports = {
           aliases: ["s"],
           usage: "eval silent <code>",
           required: "dev",
+          category: "Developer",
           commandName: "eval silent",
         },
         async: {
@@ -1285,6 +1120,7 @@ module.exports = {
           aliases: ["a"],
           usage: "eval async <code>",
           required: "dev",
+          category: "Developer",
           commandName: "eval async",
         }
       }
@@ -1300,6 +1136,7 @@ module.exports = {
       aliases: [],
       usage: "logs <option>",
       required: "dev",
+      category: "Developer",
       commandName: "logs"
     },
     reload: {
@@ -1313,6 +1150,7 @@ module.exports = {
       aliases: ["rld"],
       usage: "reload <command name>",
       required: "dev",
+      category: "Developer",
       commandName: "reload"
     },
     reset: {
@@ -1326,6 +1164,7 @@ module.exports = {
       aliases: ["rst"],
       usage: "reset <option> <option parameter>",
       required: "dev",
+      category: "Developer",
       commandName: "reset",
       option: {
         cooldown: {
@@ -1339,6 +1178,7 @@ module.exports = {
           aliases: [],
           usage: "reset cooldown <user> [command]",
           required: "dev",
+          category: "Developer",
           commandName: "reset cooldown",
         },
         settings: {
@@ -1352,6 +1192,7 @@ module.exports = {
           aliases: [],
           usage: "reset settings <guild> [setting]",
           required: "dev",
+          category: "Developer",
           commandName: "reset settings",
         }
       }
@@ -1367,6 +1208,7 @@ module.exports = {
       aliases: ["rstart", "rst"],
       usage: "restart",
       required: "dev",
+      category: "Developer",
       commandName: "restart"
     },
     shutdown: {
@@ -1380,6 +1222,7 @@ module.exports = {
       aliases: [],
       usage: "shutdown",
       required: "dev",
+      category: "Developer",
       commandName: "shutdown"
     },
     test: {
@@ -1393,6 +1236,7 @@ module.exports = {
       aliases: [],
       usage: "test",
       required: "dev",
+      category: "Developer",
       commandName: "test"
     },
     unblacklist: {
@@ -1406,11 +1250,12 @@ module.exports = {
       aliases: [],
       usage: "unblacklist <user>",
       required: "dev",
+      category: "Developer",
       commandName: "unblacklist",
     },
   },
   total: {
-    general: ["avatar", "botinfo", "help", "info", "invite", "membercount", "pastebin", "ping", "ticket", "uptime", "voice", "whois"],
+    general: ["avatar", "botinfo", "help", "invite", "membercount", "pastebin", "ping", "ticket", "uptime", "voice", "whois"],
     ticket: {
       basic: ["thelp"],
       support: [],
@@ -1421,7 +1266,15 @@ module.exports = {
     support: ["error", "shelp"],
     developer: ["blacklist", "devhelp", "devlock", "devmode", "eval", "logs", "reload", "reset", "restart", "shutdown", "test", "unblacklist"]
   },
-  all: ["addrole", "addroles", "create", "delete", "hide", "hoist", "lock", "modify", "removerole", "removeroles", "settings", "unhide", "unhoist", "unlock", "blacklist", "devhelp", "devlock", "devmode", "eval", "logs", "reload", "reset", "restart", "shutdown", "test", "unblacklist", "avatar", "botinfo", "help", "info", "invite", "membercount", "pastebin", "ping", "ticket", "uptime", "voice", "whois", "announce", "ban", "embed", "kick", "mute", "nickname", "purge", "slowmode", "unban", "unmute", "warn", "warnings", "error", "shelp", "panels", "thelp", "tsettings"],
+  all: ["addrole", "addroles", "create", "delete", "hide", "hoist", "lock", "modify", "removerole", "removeroles", "settings", "unhide", "unhoist", "unlock", "blacklist", "devhelp", "devlock", "devmode", "eval", "logs", "reload", "reset", "restart", "shutdown", "test", "unblacklist", "avatar", "botinfo", "help", "invite", "membercount", "pastebin", "ping", "ticket", "uptime", "voice", "whois", "announce", "ban", "embed", "kick", "mute", "nickname", "purge", "slowmode", "unban", "unmute", "warn", "warnings", "error", "shelp", "panels", "thelp", "tsettings"],
+  categories: [
+    "Administrator",
+    "Developer",
+    "General",
+    "Moderator",
+    "Support",
+    "Ticket"
+  ],
   aliases: {
     "av": "avatar",
     "binfo": "botinfo",
@@ -1466,12 +1319,6 @@ module.exports = {
     "dhelp": "devhelp",
     "emb": "embed",
     "log": "logs",
-    "serverinfo": "info",
-    "channelinfo": "info",
-    "roleinfo": "info",
-    "sinfo": "info",
-    "cinfo": "info",
-    "rinfo": "info",
     "tickethelp": "thelp",
     "ticketsettings": "tsettings",
     "ticketsetting": "tsettings",
@@ -1488,6 +1335,12 @@ module.exports = {
     "ubl": "unblacklist",
     "ubls": "unblacklist",
     "sban": "softban",
-    "tban": "tempban"
+    "tban": "tempban",
+    "cinfo": "channelinfo",
+    "rinfo": "roleinfo",
+    "sinfo": "serverinfo",
+    "userinfo": "whois",
+    "uinfo": "whois",
+    "who": "whois"
   }
 }

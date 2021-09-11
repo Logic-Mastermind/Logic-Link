@@ -12,49 +12,26 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const responses = {};
 
   try {
-    var commandName = args.join(" ");
-    var commandObject = null;
-    var commandPath = null;
+    var cmd = await client.functions.findCommand(secArg);
 
-    if (client.command.aliases[commandName]) {
-      commandObject = client.cmd[client.command.aliases[commandName]];
+    if (cmd) {
+      const path = `../${cmd.category}/${cmd.commandName}.js`;
+      const pendEmbed = client.embeds.pending(command, `Reloading the command...`);
+      const editMsg = await message.lineReply(pendEmbed);
+
+      delete require.cache[require.resolve(path)];
+      const embed = client.embeds.success(command, `Reloaded the \`${cmd.commandName}\` command.`);
+      const props = require(path);
+
+      await client.commands.delete(cmd.commandName);
+      await client.commands.set(cmd.commandName, props);
+      editMsg.edit(embed);
+      
     } else {
-      commandObject = client.cmd[commandName]
+      const embed = client.embeds.detailed(command, `I could not record any commands from your message.`, `\`${secArg}\` is not a valid command.`);
+      message.lineReply(embed);
     }
-
-    if (!commandObject) {
-      const errorEmbed = client.embeds.error(command, `\`${commandName}\` is not a valid command.`);
-      return message.lineReply(errorEmbed);
-    }
-
-    if (commandObject.category == "general") {
-      commandPath = `../General/${commandObject.commandName}.js`
-
-    } else if (commandObject.category == "ticket") {
-      commandPath = `../Ticket/${commandObject.commandName}.js`
-
-    } else if (commandObject.category == "moderator") {
-      commandPath = `../Moderator/${commandObject.commandName}.js`
-
-    } else if (commandObject.category == "administrator") {
-      commandPath = `../Administrator/${commandObject.commandName}.js`
-
-    } else if (commandObject.category == "support") {
-      commandPath = `../Support/${commandObject.commandName}.js`
-
-    } else if (commandObject.category == "developer") {
-      commandPath = `../Developer/${commandObject.commandName}.js`
-    }
-
-    const successEmbed = client.embeds.success(command, `Reloaded the \`${commandObject.commandName}\` command.`)
-    delete require.cache[require.resolve(commandPath)];
-    const props = require(commandPath);
-
-    client.commands.delete(commandName);
-    client.commands.set(commandName, props);
-    message.lineReply(successEmbed);
-
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
+    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
   }
 }

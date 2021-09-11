@@ -110,7 +110,8 @@ module.exports = {
     dataDir: "./Data/",
     autoEnsure: {
       devMode: false,
-      logsCleared: null
+      logsCleared: null,
+      allowLog: true
     }
   }),
   errors: new Enmap({

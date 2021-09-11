@@ -101,9 +101,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
           try {
             const videoStream = await YouTube(video.videoId);
             await connection.play(videoStream, { type: "opus" })
+            await clientMember.voice.setSelfDeaf(true);
 
             const successEmbed = client.embeds.success(command.option.play, `Playing \`${video.title}\` from [YouTube](${video.url}).`);
             editMsg.edit(successEmbed);
+
           } catch (error) {
             const errorEmbed = client.embeds.errorInfo(command.option.play, message, error);
             editMsg.edit(errorEmbed);
@@ -153,6 +155,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       }
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
+    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
   }
 }

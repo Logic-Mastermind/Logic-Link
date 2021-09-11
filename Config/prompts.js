@@ -1,8 +1,154 @@
 const Discord = require("discord.js");
+const code = "```";
 
 module.exports = class Prompts {
   constructor(client) {
     this.client = client;
+  }
+
+  async helpMenu(msg, message, modPermissions, adminPermissions, ticketPermissions, supportPermissions, guildPrefix, noPanel) {
+    const filter = () => true;
+    const collector = msg.createMenuCollector(filter, { idle: 60 * 1000 });
+    const original = msg.embeds[0];
+    const select = msg.components[0].components[0];
+
+    collector.on("collect", async (menu) => {
+      if (menu.clicker.id !== message.author.id) return menu.reply.defer();
+      const client = this.client;
+      const backBtn = client.buttons.grey("Back", "Help_Menu:Back");
+      await menu.reply.defer();
+
+      switch (menu.values[0]) {
+        case "Help_Menu:General":
+        {
+          const helpEmbed = client.embeds.helpCategory("General", `${client.util.members} `, guildPrefix);
+          await msg.edit(helpEmbed, { button: backBtn });
+          break;
+        }
+        case "Help_Menu:Moderator":
+        {
+          const helpEmbed = client.embeds.helpCategory("Moderator", modPermissions, guildPrefix);
+          await msg.edit(helpEmbed, { button: backBtn });
+          break;
+        }
+        case "Help_Menu:Administrator":
+        {
+          const helpEmbed = client.embeds.helpCategory("Administrator", adminPermissions, guildPrefix);
+          await msg.edit(helpEmbed, { button: backBtn });
+          break;
+        }
+        case "Help_Menu:Ticket":
+        {
+          const helpEmbed = client.embeds.helpCategory("Ticket", `${client.util.members} `, guildPrefix, ticketPermissions, adminPermissions, noPanel);
+          await msg.edit(helpEmbed, { button: backBtn });
+          break;
+        }
+        case "Help_Menu:Support":
+        {
+          const helpEmbed = client.embeds.helpCategory("Support", supportPermissions, guildPrefix);
+          await msg.edit(helpEmbed, { button: backBtn });
+          break;
+        }
+        case "Help_Menu:Developer":
+        {
+          const helpEmbed = client.embeds.helpCategory("Developer", `${client.util.integration} `, guildPrefix);
+          await msg.edit(helpEmbed, { button: backBtn });
+          break;
+        }
+      }
+
+      const btnCollector = await msg.createButtonCollector(filter, { idle: 60 * 6000 });
+      btnCollector.on("collect", async (btn) => {
+        if (btn.clicker.id !== message.author.id) return;
+        await btn.reply.defer();
+
+        msg.edit(original, select);
+      })
+
+    })
+
+    collector.on("end", async () => {
+      msg.edit(original, null);
+    })
+  }
+
+  async bugReport(message, command) {
+    const clientMember = message.guild.me;
+    const prompt = {
+      description: `Please describe the bug in full detail.\nProvide images or videos if you can.`,
+      reproduction: `What are the steps that were taken to produce the bug?\nType out each step individually in a separate message.`,
+      expected: `What result was expected to happen?`,
+      actual: `What result actually happened?`
+    }
+
+    const title = {
+      description: `Bug Description`,
+      reproduction: `Reproduction Steps`,
+      expected: `Expected Results`,
+      actual: `Actual Results`
+    }
+
+    const startEmbed = this.client.embeds.pending(command, `Starting bug report prompt...`);
+    const embeds = [
+      this.client.embeds.blue(title.name, prompt.name),
+      this.client.embeds.blue(title.opened, prompt.opened),
+      this.client.embeds.blue(title.closed, prompt.closed),
+      this.client.embeds.blue(title.claiming, prompt.claiming),
+      this.client.embeds.blue(title.support, prompt.support),
+      this.client.embeds.blue(title.additional, prompt.additional),
+      this.client.embeds.blue(title.channel, prompt.channel)
+    ];
+
+    const filter = (m) => m.author.id == message.author.id;
+    const collector = message.channel.createMessageCollector(filter, { idle: 60 * 1000 });
+    const startMsg = await message.lineReply(startEmbed);
+    startMsg.edit(embeds[0]);
+
+    var current = 1;
+    var cancelled = false;
+    var finished = false;
+    var attempted = false;
+
+    var msgId = [
+      startMsg.id,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+
+    var collected = {};
+    await this.client.db.userInfo.set(`${message.author.id}-${message.guild.id}`, true, "inPrompt");
+
+    collector.on("collect", async (msg) => {
+      const msgArgs = msg.content.split(/ +/g);
+
+      if (current == 1) {
+        const editMsg = msg.channel.messages.cache.get(msgId[0]);
+
+        if (this.client.util.skipAliases.includes(msg.content.toLowerCase())) {
+          const embed = this.client.embeds.error(title.description, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.description}`);
+          return editMsg.edit(embed);
+
+        } else if (this.client.util.cancelAliases.includes(msg.content.toLowerCase())) {
+          const embed = this.client.embeds.error(title.description, `This question has stopped looking for responses.`);
+
+          editMsg.edit(embed);
+          cancelled = true;
+          return collector.stop();
+        }
+
+        collected.description = msg.content;
+        const embed = this.client.embeds.success(title.name, `Bug description set to:\n${code}${msg.content}${code}`);
+        editMsg.edit(embed);
+
+        current = 2;
+        msgId = await this.client.functions.next(message.channel, msgId, embeds, 2);
+
+      }
+    })
   }
 
   async newPanel(settings, tsettings, message, command) {

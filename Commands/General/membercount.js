@@ -20,6 +20,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
     message.lineReply(memberCountEmbed)
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
+    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
   }
 }

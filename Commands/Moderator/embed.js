@@ -12,8 +12,9 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const responses = {};
 
   try {
-    var title = args.join(" ").split('~')[1];
-    var description = title ? args.join(" ").split(`${title}~`)[1] : args.join(" ");
+    var args = args.join(" ");
+    var title = args.split('~')[1];
+    var description = title ? args.split(`${title}~`)[1] : args;
 
     if (title) {
       if (title.length > 256) {
@@ -32,6 +33,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     message.delete({ timeout: 5000 });
 
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
+    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
   }
 }

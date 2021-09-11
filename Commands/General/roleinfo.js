@@ -12,17 +12,25 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const responses = {};
 
   try {
-    var member = message.mentions.members.first();
-    if (secArg && (!member)) member = await client.functions.findMember(args.join(" "), message.guild);
-    if (!secArg && !member) member = await message.member;
+    var role = message.mentions.roles.first();
+    if (!role) role = await client.functions.findRole(args.join(" "), message.guild);
 
-    if (member) {
-      const avatar = await member.user.displayAvatarURL({ dynamic: true, size: 1024 })
-      const embed = client.embeds.image(command, `\`${member.displayName}\`'s Avatar`, avatar);
-
+    if (role) {
+      const info = {
+        name: role.name,
+        permissions: await client.functions.getPermissions(role),
+        color: `#${role.color.toString(16).toUpperCase()}`,
+        hoist: role.hoist ? `Role Hoisted` : `Role Not Hoisted`,
+        mentionable: role.mentionable ? `Role Mentionable` : `Role Not Mentionable`,
+        guild: message.guild,
+        position: role.rawPosition,
+        id: role.id
+      }
+      
+      const embed = client.embeds.itemInfo(command, "role", info);
       message.lineReply(embed);
     } else {
-      const embed = client.embeds.noMember(command, args.join(" "));
+      const embed = client.embeds.noRole(command, args.join(" "));
       message.lineReply(embed);
     }
   } catch (error) {

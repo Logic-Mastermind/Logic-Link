@@ -78,6 +78,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       }
     }, purgeNumber < 350 ? 1200 : 700)
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
+    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
   }
 }

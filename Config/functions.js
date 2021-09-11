@@ -10,7 +10,7 @@ module.exports = class Functions {
     this.client = client;
   }
 
-  async sendErrorMsg(error, send, message, command) {
+  async sendErrorMsg(error, send, message, command, logId) {
     const whClient = new Discord.WebhookClient(`874010484234399745`, `-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa`);
 
     const errorId = await this.getRandomString(10);
@@ -54,6 +54,8 @@ module.exports = class Functions {
     stackEmbed.setDescription(catcher.field3.description);
     stackEmbed.setFooter(catcher.footer1, catcher.footer2)
     stackEmbed.setTimestamp();
+
+    if (logId) this.client.logger.updateLog(`An unexpected error occured.`, logId);
 
     whClient.send({
       username: "Logic Link",
@@ -272,29 +274,53 @@ module.exports = class Functions {
 
       if (!member) member = guild.members.cache.find(m => m.user.username.toLowerCase() === filter.toLowerCase() || m.displayName.toLowerCase() == filter.toLowerCase());
 
-      if (!member) member = guild.members.cache.filter(m => m.user.username.toLowerCase().includes(filter.toLowerCase()) || m.displayName.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-        if (found == false) {
-          found = key
-        }
-      })
+      if (!safe) {
+        if (!member) member = guild.members.cache.filter(m => m.user.username.toLowerCase().includes(filter.toLowerCase()) || m.displayName.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
+          if (found == false) {
+            found = key
+          }
+        })
+      } else {
+        if (!member) member = guild.members.cache.filter(m => m.user.username.toLowerCase().startsWith(filter.toLowerCase()) || m.displayName.toLowerCase().startsWith(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
+          if (found == false) {
+            found = key
+          }
+        })
+      }
     } else if (filter.includes("#")) {
       member = guild.members.cache.find(m => m.user.tag.toLowerCase() == filter.toLowerCase());
 
       if (!member) member = guild.members.cache.find(m => m.user.username.toLowerCase() === filter.toLowerCase() || m.displayName.toLowerCase() == filter.toLowerCase());
 
-      if (!member) member = guild.members.cache.filter(m => m.user.username.toLowerCase().includes(filter.toLowerCase()) || m.displayName.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-        if (found == false) {
-          found = key
-        }
-      })
+      if (!safe) {
+        if (!member) member = guild.members.cache.filter(m => m.user.username.toLowerCase().includes(filter.toLowerCase()) || m.displayName.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
+          if (found == false) {
+            found = key
+          }
+        })
+      } else {
+        if (!member) member = guild.members.cache.filter(m => m.user.username.toLowerCase().startsWith(filter.toLowerCase()) || m.displayName.toLowerCase().startsWith(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
+          if (found == false) {
+            found = key
+          }
+        })
+      }
     } else {
       if (!member) member = guild.members.cache.find(m => m.user.username.toLowerCase() === filter.toLowerCase() || m.displayName.toLowerCase() == filter.toLowerCase());
 
-      if (!member) member = guild.members.cache.filter(m => m.user.username.toLowerCase().includes(filter.toLowerCase()) || m.displayName.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-        if (found == false) {
-          found = key
-        }
-      })
+      if (!safe) {
+        if (!member) member = guild.members.cache.filter(m => m.user.username.toLowerCase().includes(filter.toLowerCase()) || m.displayName.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
+          if (found == false) {
+            found = key
+          }
+        })
+      } else {
+        if (!member) member = guild.members.cache.filter(m => m.user.username.toLowerCase().startsWith(filter.toLowerCase()) || m.displayName.toLowerCase().startsWith(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
+          if (found == false) {
+            found = key
+          }
+        })
+      }
     }
 
     if (found !== false) member = guild.members.cache.get(found);
@@ -527,37 +553,64 @@ module.exports = class Functions {
   }
 
   async findCommand(filter) {
-    var commandName = null;
-    var command = this.client.cmd[filter];
-    var newCmd = null;
-
-    if (command) {
-      if (command.category == "general") newCmd = this.client.command.general[command.commandName];
-      if (command.category == "ticket") newCmd = this.client.command.ticket[command.commandName];
-      if (command.category == "administrator") newCmd = this.client.command.administrator[command.commandName];
-      if (command.category == "moderator") newCmd = this.client.command.moderator[command.commandName];
-      if (command.category == "support") newCmd = this.client.command.support[command.commandName];
-      if (command.category == "developer") newCmd = this.client.command.developer[command.commandName];
-      
-    } else if (this.client.command.aliases[filter]) {
-      commandName = this.client.command.aliases[filter];
-      command = this.client.cmd[commandName];
-
-      if (commandName) {
-        if (command.category == "general") newCmd = this.client.command.general[command.commandName];
-        if (command.category == "ticket") newCmd = this.client.command.ticket[command.commandName];
-        if (command.category == "administrator") newCmd = this.client.command.administrator[command.commandName];
-        if (command.category == "moderator") newCmd = this.client.command.moderator[command.commandName];
-        if (command.category == "support") newCmd = this.client.command.support[command.commandName];
-        if (command.category == "developer") newCmd = this.client.command.developer[command.commandName];
+    var command = null;
+    var client = this.client;
+    var alias = client.command.aliases[filter];
+    if (alias) filter = alias;
+    
+    for (const [name, info] of Object.entries(client.command.general)) {
+      if (command) break;
+      if (filter == info.commandName || info.aliases.includes(filter)) {
+        command = info;
+        break;
       }
     }
 
-    return newCmd
+    for (const [name, info] of Object.entries(client.command.administrator)) {
+      if (command) break;
+      if (filter == info.commandName || info.aliases.includes(filter)) {
+        command = info;
+        break;
+      }
+    }
+
+    for (const [name, info] of Object.entries(client.command.moderator)) {
+      if (command) break;
+      if (filter == info.commandName || info.aliases.includes(filter)) {
+        command = info;
+        break;
+      }
+    }
+
+    for (const [name, info] of Object.entries(client.command.developer)) {
+      if (command) break;
+      if (filter == info.commandName || info.aliases.includes(filter)) {
+        command = info;
+        break;
+      }
+    }
+
+    for (const [name, info] of Object.entries(client.command.support)) {
+      if (command) break;
+      if (filter == info.commandName || info.aliases.includes(filter)) {
+        command = info;
+        break;
+      }
+    }
+
+    for (const [name, info] of Object.entries(client.command.ticket)) {
+      if (command) break;
+      if (filter == info.commandName || info.aliases.includes(filter)) {
+        command = info;
+        break;
+      }
+    }
+
+    return command
   }
 
   async paginate(message = {}, pages, filter = () => true, timeout = 60000) {
-    if (!message.components[0].components[0] && !message.components[0].components[1]) return console.log("Message has no button components.")
+    if (!message.components[0].components[0] && !message.components[0].components[1]) return console.log("Message has 1 one no button components.")
 
     const original = await message.embeds[0];
     const collector = await message.createButtonCollector(filter, { idle: timeout });
@@ -641,7 +694,7 @@ module.exports = class Functions {
     }
   }
 
-  async capitalizeFirst(array) {
+  async upperFirstAll(array) {
     var newArray = [];
     for (var word of array) {
       newArray.push(word.charAt(0).toUpperCase() + word.slice(1));
@@ -700,6 +753,82 @@ module.exports = class Functions {
     } catch (error) {
       return [null, error];
     }
+  }
+
+  async getBadges(user) {
+    const flags = await user.flags;
+    const replaced = [];
+
+    if (!flags) return ["No Badges"];
+    if (flags.bitfield == 0) return ["No Badges"];
+
+    for await (const flag of flags.toArray()) {
+      if (flag == "DISCORD_EMPLOYEE") replaced.push(this.client.util.discordStaff);
+      if (flag == "PARTNERED_SERVER_OWNER") replaced.push(this.client.util.partnered);
+      if (flag == "HYPESQUAD_EVENTS") replaced.push(this.client.util.hypesquad);
+      if (flag == "BUGHUNTER_LEVEL_1") replaced.push(this.client.util.bugHunter);
+      if (flag == "BUGHUNTER_LEVEL_2") replaced.push(this.client.util.bugHunterLvl2);
+      if (flag == "HOUSE_BRILLIANCE") replaced.push(this.client.util.brilliance);
+      if (flag == "HOUSE_BRAVERY") replaced.push(this.client.util.bravery);
+      if (flag == "HOUSE_BALANCE") replaced.push(this.client.util.balance);
+      if (flag == "EARLY_SUPPORTER") replaced.push(this.client.util.earlySupporter);
+      if (flag == "CERTIFIED_DISCORD_MODERATOR") replaced.push(this.client.util.certifiedMod);
+      if (flag == "EARLY_VERIFIED_DEVELOPER" || flag == "VERIFIED_DEVELOPER") replaced.push(this.client.util.hypesquad);
+    }
+
+    return replaced;
+  }
+
+  async getPermissions(member) {
+    const unsPerms = member.permissions ? member.permissions.toArray() : [null];
+    const client = this.client;
+    const newPerms = [];
+
+    for (var perm of unsPerms) {
+      if (unsPerms[0] == null) {
+        newPerms.push("No Permissions");
+        break;
+      }
+
+      if (unsPerms.includes("ADMINISTRATOR")) {
+        newPerms.push("Administrator");
+        break;
+      }
+
+      if (this.client.util.keyPerms.includes(perm)) {
+        perm = await perm.replaceAll("_", " ");
+        perm = await perm.toLowerCase();
+
+        var permSplit = await client.functions.upperFirstAll(perm.split(" "));
+        perm = permSplit.join(" ");
+        newPerms.push(perm);
+      }
+    }
+
+    if (!newPerms[0]) newPerms.push("No Key Permissions");
+    return newPerms
+  }
+
+  async getPermOverwrites(channel) {
+    const overwrites = channel.permissionOverwrites;
+    const everyone = channel.guild.roles.everyone;
+    const compact = [];
+
+    for await (const [key, perm] of overwrites.entries()) {
+      if (key == everyone.id) continue;
+      const mention = perm.type == "role" ? `<@&${key}>` : perm.type == "member" ? `<@${key}>` : `null`;
+      compact.push(mention);
+    }
+
+    return compact[0] ? compact : "No Permission Overwrites";
+  }
+
+  async emojiId(emoji) {
+    return emoji.split(":")[2].split(">")[0];
+  }
+
+  async upperFirst(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
   sleep(ms) {

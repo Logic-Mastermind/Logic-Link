@@ -107,9 +107,9 @@ module.exports = class Embeds {
 
   pending(command, msg) {
     const embed = new Discord.MessageEmbed()
-    .setTitle(command.name)
+    .setTitle(command.name || command)
     .setColor(`BLUE`)
-    .setDescription(`${msg ? msg : `Loading...`} <a:Loading:866730924606226462>`)
+    .setDescription(`${this.client.util.clock} ${msg ? msg : `Loading...`} ${this.client.util.pending}`)
     .setFooter(footer1, footer2)
     .setTimestamp();
 
@@ -265,7 +265,7 @@ module.exports = class Embeds {
 
   field(command, description, fields) {
     const embed = new Discord.MessageEmbed()
-    embed.setTitle(command.name);
+    embed.setTitle(command.name || command);
     embed.setColor(`BLUE`);
     embed.setDescription(`${description}`);
     if (fields) embed.addFields(fields);
@@ -482,5 +482,97 @@ module.exports = class Embeds {
     embed.setTimestamp();
 
     return embed
+  }
+
+  helpCategory(category, emoji, prefix, tckSup, tckAdm, noPanel) {
+    const lowerCat = category.toLowerCase();
+    var cmdArray = null;
+    
+    if (category == "Ticket") {
+      cmdArray = [
+        { name: `${this.client.util.members} Basic Commands`, value: `${code}\n${this.client.command.total.ticket.basic.join("\n")}${code}`, inline: true },
+        { name: `${tckSup}Support Commands`, value: `${code}\n${this.client.command.total.ticket.support.join("\n")}${code}`, inline: true },
+        { name: `${tckAdm}Administrator Commands`, value: `${code}\n${this.client.command.total.ticket.admin.join("\n")}${code}`, inline: true }
+      ]
+    } else {
+      cmdArray = [
+        { name: `${emoji}${category} Commands`, value: `${code}\n${this.client.category.get(category).join("\n")}${code}`, inline: true },
+        { name: this.client.util.whitespace, value: `\u200b`, inline: true },
+        { name: this.client.util.whitespace, value: `\u200b`, inline: true }
+      ]
+    }
+
+    const helpEmbed = this.field(`Help - ${category}`, `${this.client.util.welcomeBotInfo}\n\n**Command List**\nBelow shows a list of all ${lowerCat} commands.\nTo get more details about a particular command, run: \`${prefix}help [command]\`.\nIf you would like a detailed guide on the help menu, run \`${prefix}help guide\`.\n\n${code}${category} Commands${code}\u200b${noPanel ? `\n${this.client.util.warn} This server does not have any panels. Run \`${prefix}panels new\` to create one.\n` : ``}`, cmdArray);
+
+    return helpEmbed;
+  }
+
+  itemInfo(command, type, info) {
+    const embed = new Discord.MessageEmbed();
+    embed.setTitle(command.name || command);
+    embed.setColor("GREEN");
+    embed.setFooter(footer1, footer2);
+    embed.setTimestamp();
+
+    if (type == "user") {
+      const roles = info.roles[0] ? `<@&${info.roles.join(">, <@&")}>` : "No Roles";
+      const roleCount = roles !== "No Roles" ? info.roles.length : 0;
+
+      embed.addFields([
+        { name: "Created At", value: `<t:${info.createdAt}:D>`, inline: true },
+        { name: "Joined At", value: `<t:${info.joinedAt}:D>`, inline: true },
+        { name: `Roles [${roleCount}]`, value: roles, inline: false },
+        { name: "Permissions", value: info.permissions.join(" "), inline: false },
+        { name: "Badges", value: info.badges.join(" "), inline: false },
+      ]);
+
+      embed.setThumbnail(info.profile);
+      embed.setDescription(`${check} Showing whois information for: <@${info.user.id}>.\n\u200b`);
+    } else if (type == "guild") {
+      embed.addFields([
+        { name: "Server Owner", value: `<@${info.owner}>`, inline: true },
+        { name: "Created At", value: `<t:${info.createdAt}:D>`, inline: true },
+        { name: "\u200b", value: "\u200b", inline: true },
+        { name: "Roles", value: info.roles, inline: true },
+        { name: "Emojis", value: info.emojis, inline: true },
+        { name: "Members", value: info.members, inline: true },
+        { name: "Channels", value: info.channels, inline: false },
+        { name: "Boosts", value: info.boosts, inline: false },
+      ]);
+
+      embed.setThumbnail(info.icon);
+      embed.setDescription(`${check} Showing server information for ${info.guild.name}.\n\u200b`);
+    } else if (type == "channel") {
+      const nsfw = info.nsfw ? `NSFW.` : `Not NSFW.`;
+
+      embed.addFields([
+        { name: "Name", value: `\`${info.name}\``, inline: true },
+        { name: "ID", value: `\`${info.id}\``, inline: true },
+        { name: "\u200b", value: "\u200b", inline: true },
+        { name: "Type", value: info.type, inline: true },
+        { name: "NSFW", value: nsfw, inline: true },
+        { name: "Category", value: info.category ? `#${info.category.name}` : `No Channel Category.`, inline: true },
+        { name: "Topic", value: info.topic || "No Channel Topic", inline: false },
+        { name: "Permission Overwrites", value: info.overwrites, inline: true },
+        { name: "Raw Position", value: info.position, inline: true }
+      ]);
+
+      embed.setDescription(`${check} Showing channel information for: <#${info.id}>.\n\u200b`);
+    } else if (type == "role") {
+      embed.addFields([
+        { name: "Name", value: `\`${info.name}\``, inline: true },
+        { name: "ID", value: `\`${info.id}\``, inline: true },
+        { name: "\u200b", value: "\u200b", inline: true },
+        { name: "Colour", value: info.color, inline: true },
+        { name: "Hoist", value: info.hoist, inline: true },
+        { name: "Mentionable", value: info.mentionable, inline: true },
+        { name: "Permissions", value: info.permissions, inline: false },
+        { name: "Raw Position", value: info.position, inline: true }
+      ]);
+
+      embed.setDescription(`${check} Showing role information for: <@&${info.id}>.\n\u200b`);
+    }
+
+    return embed;
   }
 }

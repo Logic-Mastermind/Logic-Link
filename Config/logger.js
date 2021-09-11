@@ -3,8 +3,13 @@ module.exports = class Logger {
     this.client = client;
   }
 
-  async log(content) {
+  async log(content, user) {
     try {
+      if (user) {
+        const canLog = this.client.db.devSettings.get(this.client.util.devId, "allowLog");
+        if (!canLog && (user.id == this.client.util.devId)) return "Developer Logs turned off.";
+      }
+
       const count = this.client.db.logs.count;
       const logId = (count + 1).toString();
 
@@ -18,8 +23,13 @@ module.exports = class Logger {
     }
   }
 
-  async warn(content) {
+  async warn(content, user) {
     try {
+      if (user) {
+        const canLog = this.client.db.devSettings.get(this.client.util.devId, "allowLog");
+        if (!canLog && (user.id == this.client.util.devId)) return "Developer Logs turned off.";
+      }
+
       const count = this.client.db.logs.count;
       const logId = (count + 1).toString();
 
@@ -33,8 +43,13 @@ module.exports = class Logger {
     }
   }
 
-  async error(content) {
+  async error(content, user) {
     try {
+      if (user) {
+        const canLog = this.client.db.devSettings.get(this.client.util.devId, "allowLog");
+        if (!canLog && (user.id == this.client.util.devId)) return "Developer Logs turned off.";
+      }
+
       const count = this.client.db.logs.count;
       const logId = (count + 1).toString();
 
@@ -50,6 +65,7 @@ module.exports = class Logger {
 
   async updateLog(content, id) {
     try {
+      if (typeof id === "string") return;
       const count = await this.client.db.logs.count;
       const data = await this.client.db.logs.get(id);
       

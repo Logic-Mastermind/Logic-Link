@@ -127,7 +127,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       }
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
-    client.logger.updateLog(`An unexpected error occured.`, extra.logId);
+    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
   }
 }

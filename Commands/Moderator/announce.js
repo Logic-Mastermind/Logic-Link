@@ -49,6 +49,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     }
 
     if (channel) {
+      announcement = await client.functions.upperFirst(announcement);
       const announceEmbed = client.embeds.blue("Announcement", announcement, true);
       const messageOptions = { embed: announceEmbed };
 
@@ -73,6 +74,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       message.lineReply(embed);
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
+    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
   }
 }

@@ -4,6 +4,7 @@ const Fetch = require("node-fetch");
 const Paste = require("pastebin-api").default;
 const YouTube = require("ytdl-core-discord");
 const Chalk = require("chalk");
+const FS = require("fs");
 const ms = require("ms");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
@@ -67,6 +68,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       message.lineReply(embed);
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
+    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
   }
 }

@@ -16,22 +16,9 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const responses = {};
 
   try {
-    if (secArg == "1") {
-      return tyuytre
-    }
-
-    const embeds = [
-      client.embeds.orange(command.name, "Page 1"),
-      client.embeds.orange(command.name, "Page 2"),
-      client.embeds.orange(command.name, "Page 3"),
-      client.embeds.orange(command.name, "Page 4"),
-      client.embeds.orange(command.name, "Page 5"),
-    ];
-
-    const msg = await message.channel.send({ embed: client.embeds.green(command, "Starter Page"), buttons: [client.buttons.grey("<", "hi").setDisabled(), client.buttons.grey(">", "bye")] });
-
-    client.functions.paginate(msg, embeds);
+    const member = await client.functions.findMember(secArg, message.guild);
+    console.log(await member.user.flags)
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
+    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
   }
 }

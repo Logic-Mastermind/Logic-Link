@@ -11,13 +11,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const code = `\`\`\``;
 
   const responses = {
-    selfWarning: `You are attempting to ban yourself from the server.\n\n**Detailed Info**\n`,
-    botBan: `You are attempting to ban me from the server.\n\n**Detailed Info**\n`,
-    serverOwner: `You are attempting to ban the server owner.\n\n**Detailed Info**\n`,
-    hierarchy: `This member has a higher or equal role position as your top role.\n\n**Detailed Info**\n`,
-    botHierarchy: `This member has a higher or equal role position as my top role.\n\n**Detailed Info**\n`,
-    noUser: `No members were recorded from your message.`,
-    pending: `Banning the member from the server...`
+    selfWarning: `You are attempting to ban yourself from the server.`,
+    botBan: `You are attempting to ban me from the server.`,
+    serverOwner: `You are attempting to ban the server owner.`,
+    hierarchy: `This member has a higher or equal role position as your top role.`,
+    botHierarchy: `This member has a higher or equal role position as my top role.`,
   }
 
   try {
@@ -36,23 +34,23 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       }
 
       if (member.id === client.user.id) {
-        const errorEmbed = client.embeds.error(command, `${responses.botBan}Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`)
-        return message.lineReply(errorEmbed)
+        const errorEmbed = client.embeds.detailed(command, responses.botBan, `Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`);
+        return message.lineReply(errorEmbed);
 
       } else if (member.id == message.author.id) {
-        const errorEmbed = client.embeds.error(command, `${responses.selfWarning}Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`);
-        return message.lineReply(errorEmbed)
+        const errorEmbed = client.embeds.detailed(command, responses.selfWarning, `Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`);
+        return message.lineReply(errorEmbed);
       }
 
       if (member.id == message.guild.owner.id) {
-        const errorEmbed = client.embeds.error(command, `${responses.serverOwner}Server Owner - <@${member.guild.owner.id}>\nTargetted Member - <@${member.id}>`);
-        return message.lineReply(errorEmbed)
+        const errorEmbed = client.embeds.error(command, responses.serverOwner, `Server Owner - <@${member.guild.owner.id}>\nTargetted Member - <@${member.id}>`);
+        return message.lineReply(errorEmbed);
       }
 
       if (member.user) {
         if ((message.author.id !== message.guild.owner.id) && member.roles.highest) {
           if (message.member.roles.highest.position <= member.roles.highest.position) {
-            const embed = client.embeds.error(command, `${responses.hierarchy}Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nInitiator - <@${message.author.id}>: Top Role Position \`${message.member.roles.highest.position}\`.`);
+            const embed = client.embeds.detailed(command, responses.hierarchy, `Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nInitiator - <@${message.author.id}>: Top Role Position \`${message.member.roles.highest.position}\`.`);
             return message.lineReply(embed);
           }
         }
@@ -60,13 +58,13 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         if (member.roles.highest) {
           if (clientMember.roles.highest.position <= member.roles.highest.position) {
             const clientTopRole = clientMember.roles.highest;
-            const embed = client.embeds.error(command, `${responses.botHierarchy}Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nClient Member - <@${clientMember.id}>: Top Role Position \`${clientTopRole.position}\`.`);
+            const embed = client.embeds.detailed(command, responses.botHierarchy, `Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nClient Member - <@${clientMember.id}>: Top Role Position \`${clientTopRole.position}\`.`);
             return message.lineReply(embed);
           }
         }
       }
 
-      const pendingEmbed = client.embeds.pending(command, responses.pending);
+      const pendingEmbed = client.embeds.pending(command, "Banning the member from the server...");
       const editMsg = await message.lineReply(pendingEmbed);
 
       const bannedEmbed = client.embeds.orange(`User Banned`, `You have been banned from \`${message.guild.name}\`${message.guild.name.endsWith(".") ? `` : `.`}\n\n**Reason**\n${reason}`)
@@ -91,6 +89,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       message.lineReply(errorEmbed)
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
+    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
   }
 }

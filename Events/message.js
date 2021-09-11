@@ -56,11 +56,11 @@ module.exports = async (client, message) => {
     const settings = await client.functions.getSettings(message.guild);
     const tsettings = await client.functions.getTicketData(message.guild);
     const devMode = client.db.devSettings.get(client.util.devId, "devMode");
-    const logId = await client.logger.log(`${message.author.tag} ran the ${command.commandName} command.`);
+    const logId = await client.logger.log(`${message.author.tag} ran the ${command.commandName} command.`, message.author);
     
     const hasPermission = (arr1, arr2) => arr1.some((e) => arr2.includes(e))
     const permissionWhitelist = ["delete", "lock", "hide", "unhide", "unlock"];
-    const checkBotPerms = ["addrole", "addroles", "hide", "hoist", "lock", "removerole", "removeroles", "unhide", "unhoist", "unlock"];
+    const checkBotPerms = ["addrole", "addroles", "hide", "hoist", "lock", "removerole", "removeroles", "unhide", "unhoist", "unlock", "ban", "kick", "purge", "slowmode"];
 
     async function filterPermissions() {
       if (permissionWhitelist.includes(command.commandName)) return null;
