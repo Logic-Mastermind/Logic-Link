@@ -15,8 +15,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const responses = {};
 
   try {
-    const member = await client.functions.findMember(secArg, message.guild);
-    console.log(await member.user.flags)
+    
   } catch (error) {
     client.functions.sendErrorMsg(error, true, message, command, extra.logId);
   }

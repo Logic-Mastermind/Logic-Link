@@ -12,23 +12,26 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
   try {
     var user = message.mentions.users.first();
+    var reason = client.util.reason;
+
     if (!user) user = await client.functions.findUser(secArg);
+    if (thirdArg) reason = args.slice(1).join(" ");
 
     if (user) {
       const blacklistInfo = client.db.blacklists.get(user.id);
 
       if (!blacklistInfo.blacklisted) {
-        const embed = client.embeds.error(command, `This user has not been blacklisted.`);
-        return message.lineReply(embed);
+        const embed = client.embeds.error(command, `This user is not blacklisted.`);
+        return message.reply({ embeds: [embed] });
       }
 
       await client.db.blacklists.delete(user.id);
-      const embed = client.embeds.success(command, `Un-blacklisted <@${user.id}> from Logic Link.`);
-      message.lineReply(embed);
+      const embed = client.embeds.success(command, `Un-blacklisted <@${user.id}> from Logic Link.`, [{ name: "Reason", value: reason, inline: true }]);
+      message.reply({ embeds: [embed] });
       
     } else {
       const embed = client.embeds.noUser(command, secArg);
-      message.lineReply(embed);
+      message.reply({ embeds: [embed] });
     }
   } catch (error) {
     client.functions.sendErrorMsg(error, true, message, command, extra.logId);

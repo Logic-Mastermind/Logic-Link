@@ -234,7 +234,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
                 return message.reply({ embeds: [embed] })
               }
 
-              const editMsg = await message.reply(pendingEmbed);
+              const editMsg = await message.reply({ embeds: [pendingEmbed] });
               await client.db.settings.delete(message.guild.id, "mutedRole");
               const successEmbed = client.embeds.success(command.option.mutedrole, `Removed the server muted role.`);
 
@@ -281,7 +281,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             const pendingEmbed = client.embeds.pending(command.option.welcome, `Configuring the welcome system...`);
 
             if (thirdArg.toLowerCase().includes("on") || thirdArg.toLowerCase().includes("off")) {
-              const editMsg = await message.reply(pendingEmbed);
+              const editMsg = await message.reply({ embeds: [pendingEmbed] });
 
               if (thirdArg.toLowerCase().includes("on")) {
                 if (settings.welcomeSystem) {
