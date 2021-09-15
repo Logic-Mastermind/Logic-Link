@@ -254,6 +254,7 @@ module.exports = {
       usage: "thelp [command]",
       required: "ticket",
       category: "Ticket",
+      subCategory: "Basic",
       commandName: "thelp"
     },
     panels: {
@@ -268,6 +269,7 @@ module.exports = {
       usage: "panels [new | modify | delete]",
       required: "ticket",
       category: "Ticket",
+      subCategory: "Administrator",
       commandName: "panels",
       option: {
         new: {
@@ -282,6 +284,7 @@ module.exports = {
           usage: "panels new",
           required: "ticket",
           category: "Ticket",
+          subCategory: "Administrator",
           commandName: "panels new",
         },
         modify: {
@@ -296,6 +299,7 @@ module.exports = {
           usage: "panels modify <panel id> [option] [option parameter]",
           required: "ticket",
           category: "Ticket",
+          subCategory: "Administrator",
           commandName: "panels modify",
         },
         delete: {
@@ -310,6 +314,7 @@ module.exports = {
           usage: "panels delete <panel id>",
           required: "ticket",
           category: "Ticket",
+          subCategory: "Administrator",
           commandName: "panels delete",
         }
       }
@@ -326,6 +331,7 @@ module.exports = {
       usage: "tsettings [setting] [option parameter]",
       required: "ticket",
       category: "Ticket",
+      subCategory: "Administrator",
       commandName: "tsettings"
     }
   },
@@ -580,7 +586,7 @@ module.exports = {
       cooldown: 2,
       minArgs: 1,
       options: [],
-      aliases: ["giverole"],
+      aliases: ["giverole", "ar"],
       usage: "addrole <user> <role>",
       required: "admin",
       category: "Administrator",
@@ -594,7 +600,7 @@ module.exports = {
       cooldown: 10,
       minArgs: 1,
       options: [],
-      aliases: ["giveroles"],
+      aliases: ["giveroles", "ars"],
       usage: "addroles <user> <roles>",
       required: "admin",
       category: "Administrator",
@@ -747,7 +753,7 @@ module.exports = {
       cooldown: 2,
       minArgs: 1,
       options: [],
-      aliases: ["takerole"],
+      aliases: ["takerole", "rr"],
       usage: "removerole <user> <role>",
       required: "admin",
       category: "Administrator",
@@ -761,25 +767,11 @@ module.exports = {
       cooldown: 10,
       minArgs: 1,
       options: [],
-      aliases: ["takeroles"],
+      aliases: ["takeroles", "rrs"],
       usage: "removeroles <user> <roles>",
       required: "admin",
       category: "Administrator",
       commandName: "removeroles",
-    },
-    modify: {
-      name: "Modify",
-      description: "Allows you to modify role and channel properties.",
-      permissions: "MANAGE_ROLES",
-      clientPerms: ["MANAGE_ROLES"],
-      cooldown: 2,
-      minArgs: 1,
-      options: ["name", "colour", "mention"],
-      aliases: [],
-      usage: "modify <channel / role> <option> <option parameter>",
-      required: "admin",
-      category: "Administrator",
-      commandName: "modify"
     },
     settings: {
       name: "Settings",
@@ -1254,19 +1246,6 @@ module.exports = {
       commandName: "unblacklist",
     },
   },
-  total: {
-    general: ["avatar", "botinfo", "help", "invite", "membercount", "pastebin", "ping", "ticket", "uptime", "voice", "whois"],
-    ticket: {
-      basic: ["thelp"],
-      support: [],
-      admin: ["panels", "tsettings"]
-    },
-    moderator: ["announce", "ban", "embed", "kick", "mute", "nickname", "purge", "slowmode", "unban", "unmute", "warn", "warnings"],
-    administrator: ["addrole", "create", "delete", "hide", "hoist", "lock", "modify", "removerole", "settings", "unhide", "unhoist", "unlock"],
-    support: ["error", "shelp"],
-    developer: ["blacklist", "devhelp", "devlock", "devmode", "eval", "logs", "reload", "reset", "restart", "shutdown", "test", "unblacklist"]
-  },
-  all: ["addrole", "addroles", "create", "delete", "hide", "hoist", "lock", "modify", "removerole", "removeroles", "settings", "unhide", "unhoist", "unlock", "blacklist", "devhelp", "devlock", "devmode", "eval", "logs", "reload", "reset", "restart", "shutdown", "test", "unblacklist", "avatar", "botinfo", "help", "invite", "membercount", "pastebin", "ping", "ticket", "uptime", "voice", "whois", "announce", "ban", "embed", "kick", "mute", "nickname", "purge", "slowmode", "unban", "unmute", "warn", "warnings", "error", "shelp", "panels", "thelp", "tsettings"],
   categories: [
     "Administrator",
     "Developer",
@@ -1274,6 +1253,11 @@ module.exports = {
     "Moderator",
     "Support",
     "Ticket"
+  ],
+  ticketCategories: [
+    "Administrator",
+    "Basic",
+    "Support"
   ],
   aliases: {
     "av": "avatar",
@@ -1341,6 +1325,12 @@ module.exports = {
     "sinfo": "serverinfo",
     "userinfo": "whois",
     "uinfo": "whois",
-    "who": "whois"
+    "who": "whois",
+    "unb": "unblacklist",
+    "dvl": "devlock",
+    "ar": "addrole",
+    "ars": "addroles",
+    "rr": "removerole",
+    "rrs": "removeroles"
   }
 }

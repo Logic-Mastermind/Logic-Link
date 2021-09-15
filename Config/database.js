@@ -49,18 +49,13 @@ module.exports = {
       tickets: {}
     }
   }),
-  mutes: new Enmap({
-    name: "mutes",
+  timeouts: new Enmap({
+    name: "timeouts",
     fetchAll: true,
     autoFetch: true,
     dataDir: "./Data/",
     autoEnsure: {
-      end: null,
-      muted: null,
-      muter: null,
-      duration: null,
-      mutedTimestamp: null,
-      completed: false
+      type: null
     }
   }),
   devlock: new Enmap({

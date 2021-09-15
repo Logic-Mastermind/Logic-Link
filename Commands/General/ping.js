@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
@@ -13,7 +12,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
   try {
     const embed = client.embeds.pending(command, `Pinging...`);
-    const msg = await message.lineReply(embed);
+    const msg = await message.reply({ embeds: [embed] });
 
     const roundTrip = msg.createdTimestamp - message.createdTimestamp;
     const wsPing = client.ws.ping;
@@ -23,8 +22,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       { name: `Message Round Trip`, value: `${roundTrip}ms`, inline: true },      
     ];
 
-    const pingedEmbed = client.embeds.fieldSuccess(command, `Logic Link is online.`, fields);
-    msg.edit(pingedEmbed);
+    const embed1 = client.embeds.success(command, `Logic Link is online.`, fields);
+    msg.edit({ embeds: [embed1] });
   } catch (error) {
     client.functions.sendErrorMsg(error, true, message, command, extra.logId);
   }

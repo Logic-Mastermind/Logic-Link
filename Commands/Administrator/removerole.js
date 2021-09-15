@@ -1,83 +1,81 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
   const clientMember = message.guild.me;
   const guildPrefix = await client.functions.fetchPrefix(message.guild);
-  
+
   const noArgs = await client.functions.getNoArgs(command, message.guild);
   const { secArg, thirdArg, fourthArg, fifthArg } = await client.functions.getArgs(args);
   const code = `\`\`\``;
-
-  const responses = {
-    pending: `Removing the role from the user...`,
-    botHierarchy: `This role has a higher or equal position as my top role.\n\n**Detailed Info**\n`,
-    hierarchy: `This role has a higher or equal position as your top role.\n\n**Detailed Info**\n`
-  }
+  const responses = {};
 
   try {
     var role = message.mentions.roles.first();
     var member = message.mentions.members.first();
-    var fullRole = args.slice(1).join(" ")
+    var fullRole = args.slice(1).join(" ");
 
-    if (!role) role = await client.functions.findRole(fullRole, message.guild)
-    if (!member) member = await client.functions.findMember(secArg, message.guild)
+    if (!role) role = await client.functions.findRole(fullRole, message.guild);
+    if (!member) member = await client.functions.findMember(secArg, message.guild);
     if (secArg.toLowerCase() == "me") member = message.member;
 
     if (member && role) {
+      if (client.functions.hierarchy(clientMember, role, message.guild)) {
+        client.logger.updateLog(`Role position was higher than or equal to bot.`, extra.logId);
+
+        const topRole = clientMember.roles.highest;
+        const embed = client.embeds.detailed(command, client.util.botHierarchy, `Mentioned Role - <@&${role.id}>: Position \`${role.position}\`.`, `My Top Role - <@&${topRole.id}>: Position \`${topRole.position}\`.`);
+        return message.reply({ embeds: [embed] });
+      }
+
+      if (client.functions.hierarchy(member, role, message.guild)) {
+        client.logger.updateLog(`Role position was higher than or equal to user.`, extra.logId);
+        const topRole = message.member.roles.highest;
+
+        const embed = client.embeds.detailed(command, client.util.hierarchy, `Mentioned Role - <@&${role.id}>: Position \`${role.position}\`.`, `Your Top Role - <@&${topRole.id}>: Position \`${topRole.position}\`.`);
+        return message.reply({ embeds: [embed] });
+      }
+
       if (!member.roles.cache.has(role.id)) {
-        const embed = client.embeds.error(command, `\`${member.user.tag}\` does not have the <@&${role.id}> role.`);
-        return message.lineReply(embed)
+        client.logger.updateLog(`Member does not have role.`, extra.logId);
+        const embed = client.embeds.error(command, `<@${member.id}> does not have the <@&${role.id}> role.`);
+        return message.reply({ embeds: [embed] });
       }
 
-      const pendingEmbed = client.embeds.pending(command, responses.pending);
-      const editMsg = await message.lineReply(pendingEmbed)
+      const pendingEmbed = client.embeds.pending(command, "Removing the role...");
+      const editMsg = await message.reply({ embeds: [pendingEmbed] });
 
-      if (!clientMember.hasPermission(command.clientPerms)) {
-        const errorEmbed = client.embeds.botPermission(command)
-        return editMsg.edit(errorEmbed)
-      }
-
-      if (clientMember.roles.highest.position <= role.position) {
-        const clientTopRole = clientMember.roles.highest;
-        const embed = client.embeds.error(command, `${responses.botHierarchy}Mentioned Role - <@&${role.id}>: Position \`${role.position}\`.\nMy Top Role - <@&${clientTopRole.id}>: Position \`${clientTopRole.position}\`.`);
-        return editMsg.edit(embed);
-      }
-
-      if (message.author.id !== message.guild.owner.id) {
-        if (message.member.roles.highest.position <= role.position) {
-          const embed = client.embeds.error(command, `${responses.hierarchy}Mentioned Role - <@&${role.id}>: Position \`${role.position}\`.\nYour Top Role - <@&${message.member.roles.highest.id}>: Position \`${message.member.roles.highest.position}\`.`);
-          return editMsg.edit(embed);
-        }
-      }
-
-      member.roles.remove(role, `Removed the "${role.name}" role from ${member.user.tag}. Responsible User: ${message.author.tag}`)
-      .then((r) => {
-        const successEmbed = client.embeds.success(command, `Removed the <@&${role.id}> role from <@${member.id}>.`);
-        editMsg.edit(successEmbed)
-      })
+      await member.roles.remove(role, `Removed the "${role.name}" role from ${member.user.tag}. Responsible User: ${message.author.tag}`)
       .catch(async (error) => {
-        const errorEmbed = await client.embeds.errorInfo(command, error);
-        editMsg.edit(errorEmbed)
+        client.logger.updateLog(`An error occured while removing a role.`, extra.logId);
+        const embed = await client.embeds.errorInfo(command, message, error);
+        editMsg.edit({ embeds: [embed] });
       })
+
+      client.logger.updateLog(`Removed role successfully.`, extra.logId);
+      const successEmbed = client.embeds.success(command, `Removed the <@&${role.id}> role from <@${member.id}>.`);
+      editMsg.edit({ embeds: [successEmbed] });
     } else {
       if (!thirdArg && member) {
+        client.logger.updateLog(`User did not pass enough arguments.`, extra.logId);
         const embed = await client.embeds.noArgs(command, message.guild);
-        message.lineReply(embed);
+        message.reply({ embeds: [embed] });
 
       } else if (!member) {
         if (!thirdArg) {
-          const errorEmbed = client.embeds.noMember(command, secArg);
-          message.lineReply(errorEmbed);
+          client.logger.updateLog(`Member does not exist.`, extra.logId);
+          const embed = client.embeds.noMember(command, secArg);
+          message.reply({ embeds: [embed] });
 
         } else {
-          const errorEmbed = client.embeds.noMembersOrRoles(command, secArg, thirdArg);
-          message.lineReply(errorEmbed);
+          client.logger.updateLog(`Member and role does not exist.`, extra.logId);
+          const embed = client.embeds.noMembersOrRoles(command, secArg, thirdArg);
+          message.reply({ embeds: [embed] });
         }
       } else {
-        const errorEmbed = client.embeds.noRole(command, thirdArg);
-        message.lineReply(errorEmbed);
+        client.logger.updateLog(`Role does not exist.`, extra.logId);
+        const embed = client.embeds.noRole(command, thirdArg);
+        message.reply({ embeds: [embed] });
       }
     }
   } catch (error) {

@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
@@ -19,7 +18,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       const info = {
         name: role.name,
         permissions: await client.functions.getPermissions(role),
-        color: `#${role.color.toString(16).toUpperCase()}`,
+        color: `${role.color.toString(16) == 0 ? `Default Colour` : `#${role.color.toString(16)}`}`,
         hoist: role.hoist ? `Role Hoisted` : `Role Not Hoisted`,
         mentionable: role.mentionable ? `Role Mentionable` : `Role Not Mentionable`,
         guild: message.guild,

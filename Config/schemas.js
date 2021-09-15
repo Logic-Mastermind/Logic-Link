@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 const FS = require("fs");
 
@@ -21,26 +20,42 @@ module.exports = class Schemas {
         General: [],
         Moderator: [],
         Support: [],
-        Ticket: []
+        Ticket: { Basic: [], Support: [], Administrator: [] }
       };
 
       for (const category of client.command.categories) {
-        FS.readdir(`./Commands/${category}/`, (error, files) => {
+        if (category == "Ticket") continue;
+
+        FS.readdir(`/home/runner/Logic-Link/Commands/${category}/`, (error, files) => {
           if (error) return console.error(error);
           files.forEach((file) => {
             if (!file.endsWith(".js")) return;
-            let cmd = require(`./Commands/${category}/${file}`);
+            let cmd = require(`/home/runner/Logic-Link/Commands/${category}/${file}`);
             let name = file.split(".")[0];
             
             client.functions.log(`Loading ${name}.`);
-            client.commands.delete(name);
             client.commands.set(name, cmd);
             cmds[category].push(name);
           });
-
           client.category.set(category, cmds[category]);
         })
-      } 
+      }
+
+      for (const category of client.command.ticketCategories) {
+        FS.readdir(`/home/runner/Logic-Link/Commands/Ticket/${category}/`, (error, files) => {
+          if (error) return console.error(error);
+          files.forEach((file) => {
+            if (!file.endsWith(".js")) return;
+            let cmd = require(`/home/runner/Logic-Link/Commands/Ticket/${category}/${file}`);
+            let name = file.split(".")[0];
+            
+            client.functions.log(`Loading ${name}.`);
+            client.commands.set(name, cmd);
+            cmds["Ticket"][category].push(name);
+          });
+          if (category == "Support") client.category.set("Ticket", cmds["Ticket"]);
+        })
+      }
 
       FS.readdir("/home/runner/Logic-Link/Events/", (error, files) => {
         if (error) return console.error(error);

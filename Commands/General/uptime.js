@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
@@ -17,7 +16,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       { name: `Exact`, value: `<t:${client.readySince}:d>`, inline: true }
     ];
 
-    const uptimeEmbed = client.embeds.fieldSuccess(command, `Logic Link has been online since <t:${client.readySince}:t>.`, fields);
+    const uptimeEmbed = client.embeds.success(command, `Logic Link has been online since <t:${client.readySince}:t>.`, fields);
     message.lineReply(uptimeEmbed);
     
   } catch (error) {

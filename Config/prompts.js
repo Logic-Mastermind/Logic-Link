@@ -6,6 +6,53 @@ module.exports = class Prompts {
     this.client = client;
   }
 
+  async deleteConfirmation(message, command, responses) {
+    const client = this.client;
+    const conditionsEmbed = client.embeds.orange(command, responses.conditions);
+    const filter = () => true;
+    var clicked = false;
+
+    const acceptButton = client.buttons.accept("Delete_Conditions_Accept");
+    const declineButton = client.buttons.decline("Delete_Conditions_Decline");
+
+    const msg = await message.channel.send(conditionsEmbed, { buttons: [acceptButton, declineButton] });
+    const collector = msg.createButtonCollector(filter, { idle: 60000 });
+
+    collector.on("collect", async (button) => {
+      const btnClicker = await button.clicker.user;
+      const acceptEmbed = client.embeds.success(command,`Accepted the command conditions.`);
+      const declineEmbed = client.embeds.error(command, `Declined the command conditions.`);
+
+      if (btnClicker.id == message.author.id) {
+        clicked = true
+        if (button.id == "Delete_Conditions_Accept") {
+          client.db.first.set(btnClicker.id, false, "deleteCmd");
+          msg.edit(acceptEmbed, null);
+          button.reply.defer();
+
+        } else if (button.id == "Delete_Conditions_Decline") {
+          msg.edit(declineEmbed, null);
+          button.reply.defer();
+        }
+      } else {
+        if (button.id == "Delete_Conditions_Accept") {
+          client.db.first.set(btnClicker.id, false, "deleteCmd")
+          button.reply.send(``, { embed: acceptEmbed, ephemeral: true });
+
+        } else if (button.id == "Delete_Conditions_Decline") {
+          button.reply.send(``, { embed: declineEmbed, ephemeral: true });
+        }
+      }
+    })
+
+    collector.on("end", async (collected) => {
+      if (!clicked) {
+        const errorEmbed = client.embeds.error(command, `This prompt has ended due to inactivity.`);
+        msg.edit(errorEmbed, null);
+      }
+    })
+  }
+
   async helpMenu(msg, message, modPermissions, adminPermissions, ticketPermissions, supportPermissions, guildPrefix, noPanel) {
     const filter = () => true;
     const collector = msg.createMenuCollector(filter, { idle: 60 * 1000 });

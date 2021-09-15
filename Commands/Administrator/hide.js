@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
@@ -14,73 +13,68 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   try {
     var channel = message.mentions.channels.first();
     var reason = client.util.reason;
+    var fields = [];
 
     if (!channel && secArg) channel = await client.functions.findChannel(secArg, message.guild);
     if (!channel) reason = args.join(" ");
     else reason = args.slice(1).join(" ");
 
     if (!channel && secArg) {
-      reason = args.join(" ")
+      reason = args.join(" ");
       channel = message.channel;
+
     } else if (!channel && !secArg) {
-      channel = message.channel
+      channel = message.channel;
     }
 
-    if (!channel.permissionsFor(message.member).has(command.permissions) && !message.member.roles.cache.has(settings.adminRole)) {
+    const memPerms = channel.permissionsFor(message.member).has(command.permissions);
+    if (!memPerms && !client.functions.isAdmin(command, message.member, message.guild)) {
       const embed = client.embeds.permission(command);
-      return message.lineReply(embed);
+      return message.reply({ embeds: [embed] });
     }
 
     const lockedData = client.db.channelHides.get(channel.id);
-
-    if (lockedData["hidden"] == true) {
-      const alreadyLockedEmbed = client.embeds.error(command, `This channel has already been hidden.`);
-      return message.lineReply(alreadyLockedEmbed);
+    if (lockedData.hidden) {
+      const embed = client.embeds.error(command, `This channel has already been hidden.`);
+      return message.reply({ embeds: [embed] });
     }
 
     const pendingEmbed = client.embeds.pending(command, `Hiding the channel...`);
-    const editMsg = await message.lineReply(pendingEmbed)
+    const editMsg = await message.reply({ embeds: [pendingEmbed] });
     var failed = false;
 
     try {
+      channel.permissionOverwrites.edit(message.guild.roles.everyone, {
+        VIEW_CHANNEL: false
+      }, `Hid the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
+
+      channel.permissionOverwrites.edit(message.member, {
+        VIEW_CHANNEL: true
+      }, `Hid the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
+
       if (settings.adminRole) {
-        channel.updateOverwrite(message.guild.roles.everyone, {
-          VIEW_CHANNEL: false
-        }, `Hid the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
-
-        channel.updateOverwrite(message.member, {
-          VIEW_CHANNEL: true
-        }, `Hid the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
-
-        channel.updateOverwrite(settings.adminRole, {
-          VIEW_CHANNEL: true
-        }, `Hid the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
-      } else {
-        channel.updateOverwrite(message.guild.roles.everyone, {
-          VIEW_CHANNEL: false
-        }, `Hid the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
-
-        channel.updateOverwrite(message.member, {
+        channel.permissionOverwrites.edit(settings.adminRole, {
           VIEW_CHANNEL: true
         }, `Hid the "${channel.name}" channel. Responsible User: ${message.author.tag}`);
       }
     } catch (error) {
       failed = true;
-      const errorEmbed = await client.embeds.errorInfo(command, message, error);
+      const embed = await client.embeds.errorInfo(command, message, error);
+      editMsg.edit({ embeds: [embed] });
 
-      editMsg.edit(errorEmbed);
     } finally {
-      if (failed == false) {
+      if (!failed) {
         client.db.channelHides.set(channel.id, true, "hidden");
         client.db.channelHides.set(channel.id, message.author.id, "locker");
         client.db.channelHides.set(channel.id, channel.id, "channel");
         client.db.channelHides.set(channel.id, Date.now(), "lockedAt");
-        var compEmbed = null;
 
-        if (reason == client.util.reason || reason == "") compEmbed = client.embeds.success(command, `Hid \`${channel.name}\` from other members.`);
-        else compEmbed = client.embeds.fieldSuccess(command, `Hid \`${channel.name}\` from other members.`, [{ name: "Reason", value: reason, inline: true }])
-
-        editMsg.edit(compEmbed)
+        if (reason !== client.util.reason && reason) fields[0] = {
+          name: "Reason", value: reason, inline: true
+        };
+        
+        const embed = client.embeds.success(command, `Hid <#${channel.id}> from other members.`, fields);
+        editMsg.edit({ embeds: [embed] });
       }
     }
   } catch (error) {

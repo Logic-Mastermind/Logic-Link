@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 const ms = require("ms");
 
@@ -20,8 +19,8 @@ module.exports = async (client, message) => {
     var prefix = guildPrefix;
 
     if (blacklistInfo.blacklisted) {
-      const embed = client.embeds.error(command, `You are currently blacklisted from using Logic Link.\n\n**Reason**\n${blacklistInfo.reason}`);
-      return message.lineReply(embed);
+      const embed = client.embeds.error(command, `You are currently blacklisted from using Logic Link.`, [{ name: "Reason", value: blacklistInfo.blacklisted, inline: false }]);
+      return message.reply({ embeds: [embed] });
     }
 
     if (userInfo.inPrompt) return;
@@ -38,8 +37,8 @@ module.exports = async (client, message) => {
     if (!message.content.startsWith(prefix) && !mentioned) return;
     if (mentioned) {
       if (!allArgs[1]) {
-        const embed = client.embeds.blue("Server Prefix", `This server's prefix is currently set to: \`${guildPrefix}\`.\nRun \`${guildPrefix}help\` for more information.`);
-        return message.lineReply(embed);
+        const embed = client.embeds.green("Greetings", `Hello, I'm Logic Link, an advanced utility/moderation bot with extremely cool commands and features.\n\n**Server Prefix**\nThis server's prefix is currently set to: \`${guildPrefix}\`.\nRun \`${guildPrefix}help\` for more information.`);
+        return message.reply({ embeds: [embed] });
       }
     }
     
@@ -58,7 +57,6 @@ module.exports = async (client, message) => {
     const devMode = client.db.devSettings.get(client.util.devId, "devMode");
     const logId = await client.logger.log(`${message.author.tag} ran the ${command.commandName} command.`, message.author);
     
-    const hasPermission = (arr1, arr2) => arr1.some((e) => arr2.includes(e))
     const permissionWhitelist = ["delete", "lock", "hide", "unhide", "unlock"];
     const checkBotPerms = ["addrole", "addroles", "hide", "hoist", "lock", "removerole", "removeroles", "unhide", "unhoist", "unlock", "ban", "kick", "purge", "slowmode"];
 
@@ -72,7 +70,7 @@ module.exports = async (client, message) => {
           if (!command.permissions.includes("ALL")) {
             await client.logger.updateLog(`User lacked permissions.`, logId);
             const embed = client.embeds.permission(command);
-            return message.lineReply(embed);
+            return message.reply({ embeds: [embed] });
           }
         }
       } else if (command.required == "support") {
@@ -83,18 +81,18 @@ module.exports = async (client, message) => {
         if (message.guild.id !== client.util.supportServer) {
           await client.logger.updateLog(`User not in support server.`, logId);
           const embed = client.embeds.red(command, `This command is only available in the Logic Link's support server.\nUse the \`${guildPrefix}invite\` command to join it.`);
-          return message.lineReply(embed);
+          return message.reply({ embeds: [embed] });
 
         } else {
           await client.logger.updateLog(`User lacked permissions.`, logId);
           const embed = client.embeds.permission(command);
-          return message.lineReply(embed);
+          return message.reply({ embeds: [embed] });
         }
       } else if (command.required == "ticket") {
         if (command.permissions.includes("ALL")) return null;
       }
 
-      var hasPerms = await hasPermission(message.member.permissions.toArray(), command.permissions);
+      var hasPerms = await client.functions.hasPermission(message.member, command, message.guild);
       var hasAdminRole = message.member.roles.cache.has(settings.adminRole);
       var hasModRole = message.member.roles.cache.has(settings.modRole);
 
@@ -106,23 +104,23 @@ module.exports = async (client, message) => {
           
           await client.logger.updateLog(`User lacked permissions.`, logId);
           const embed = client.embeds.permission(command);
-          return message.lineReply(embed);
+          return message.reply({ embeds: [embed] });
 
         } else if (command.required == "admin") {
           await client.logger.updateLog(`User lacked permissions.`, logId);
           const embed = client.embeds.permission(command);
-          return message.lineReply(embed);
+          return message.reply({ embeds: [embed] });
 
         } else if (command.required == "ticket") {
           await client.logger.updateLog(`User lacked permissions.`, logId);
           const embed = client.embeds.permission(command);
-          return message.lineReply(embed);
+          return message.reply({ embeds: [embed] });
         }
       }
     }
 
     const filtered = await filterPermissions();
-    if (filtered) return
+    if (filtered) return;
 
     if (message.author.id !== client.util.devId) {
       const locked = client.db.devlock.get(command.commandName, "locked");
@@ -133,15 +131,15 @@ module.exports = async (client, message) => {
       if (locked == true && lockedGuild) {
         if (message.guild.id == lockedGuild.id) {
           await client.logger.updateLog(`Command was locked in the guild.`, logId);
-          const lockedEmbed = client.embeds.new(`Developer Lock`, `The \`${command.commandName}\` command has been locked until further notice.${lockedReason ? `\n\n**Developer Note**\n${lockedReason}` : `\nNo further information was provied.`}`, `BLUE`, client.util.footer1, client.util.footer2, true)
+          const embed = client.embeds.blue(`Developer Lock`, `The \`${command.commandName}\` command has been locked until further notice.${lockedReason ? `\n\n**Developer Note**\n${lockedReason}` : `\nNo further information was provied.`}`);
 
-          return message.lineReply(lockedEmbed)
+          return message.reply({ embeds: [embed] });
         }
       } else if (locked == true && (!lockedGuild)) {
         await client.logger.updateLog(`Command was locked.`, logId);
-        const lockedEmbed = client.embeds.new(`Developer Lock`, `The \`${command.commandName}\` command has been locked until further notice.${lockedReason ? `\n\n**Developer Note**\n${lockedReason}` : `\nNo further information was provided.`}`, `BLUE`, client.util.footer1, client.util.footer2, true)
+        const embed = client.embeds.blue(`Developer Lock`, `The \`${command.commandName}\` command has been locked until further notice.${lockedReason ? `\n\n**Developer Note**\n${lockedReason}` : `\nNo further information was provided.`}`);
 
-        return message.lineReply(lockedEmbed)
+        return message.reply({ embeds: [embed] });
       }
 
       if (userCooldown) {
@@ -152,9 +150,9 @@ module.exports = async (client, message) => {
 
           if (now < expiration) {
             await client.logger.updateLog(`User was on cooldown for that command.`, logId);
-            const cooldownEmbed = client.embeds.error(command, `You are on cooldown for the \`${command.commandName}\` command.\nYou currently need to wait \`${ms(timeLeft, { long: true })}\` before running this command again.`);
+            const embed = client.embeds.error(command, `You are on cooldown for the \`${command.commandName}\` command.\nYou currently need to wait \`${ms(timeLeft, { long: true })}\` before running this command again.`);
 
-            return message.lineReply(cooldownEmbed)
+            return message.reply({ embeds: [embed] });
           }
         }
       }
@@ -167,28 +165,33 @@ module.exports = async (client, message) => {
 
         await client.logger.updateLog(`User did not pass enough arguments.`, logId);
         const embed = await client.embeds.noArgs(command, message.guild);
-        return message.lineReply(embed);
+        return message.reply({ embeds: [embed] });
       }
     }
 
     if (checkBotPerms.includes(command.commandName)) {
-      if (!clientMember.hasPermission(command.permissions)) {
+      if (!clientMember.permissions.has(command.permissions)) {
         await client.logger.updateLog(`Bot lacked permissions.`, logId);
         const embed = client.embeds.botPermission(command);
-        return message.lineReply(embed);
+        return message.reply({ embeds: [embed] });
       }
+    }
+
+    var hasSupportRole = false;
+    for await (const [key, val] of tsettings.panels.all.entries()) {
+      hasSupportRole = await val.supportRoles.some(r => message.member.roles.cache.has(r));
     }
 
     const extra = {
       commandName: commandName,
       allArgs: allArgs,
       mentioned: mentioned,
-      logId: logId
+      logId: logId,
+      hasSupport: hasSupportRole
     }
 
     await client.logger.updateLog(`All checks were passed.`, logId);
     await client.db.cooldown.set(message.author.id, now, command.commandName);
-
     cmd.run(client, message, args, command, settings, tsettings, extra);
   } catch (error) {
     client.functions.sendError(error, true, message, command);

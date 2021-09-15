@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 const Paste = require("pastebin-api").default;
 const YouTube = require("ytdl-core-discord");

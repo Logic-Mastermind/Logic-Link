@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
@@ -30,7 +29,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
     const embed = client.embeds.blue(title, description, true);
     await message.channel.send(embed);
-    message.delete({ timeout: 5000 });
+    message.delete({ timeout: 3000 });
 
   } catch (error) {
     client.functions.sendErrorMsg(error, true, message, command, extra.logId);

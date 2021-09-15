@@ -61,8 +61,7 @@ module.exports = class Embeds {
   }
 
   botPermissionCustom(command, msg) {
-    var permissions = command.clientPerms;
-    if (!permissions) permissions = command;
+    var permissions = command.clientPerms || [command];
 
     const embed = new Discord.MessageEmbed()
     .setTitle(`Insufficient Permissions`)
@@ -115,55 +114,60 @@ module.exports = class Embeds {
 
     return embed
   }
-  success(command, description) {
-    const embed = new Discord.MessageEmbed()
-    .setTitle(command.name || command)
-    .setColor(`GREEN`)
-    .setDescription(`${check} ${description}`)
-    .setFooter(footer1, footer2)
-    .setTimestamp();
+  
+  success(command, description, fields) {
+    const embed = new Discord.MessageEmbed();
+    embed.setTitle(command.name || command);
+    embed.setColor(`GREEN`);
+    embed.setDescription(`${check} ${description}`);
+    embed.setFooter(footer1, footer2);
+    if (fields) if (fields[0]) embed.addFields(fields);
+    embed.setTimestamp();
 
     return embed
   }
 
-  error(command, description) {
-    const embed = new Discord.MessageEmbed()
-    .setTitle(command.name || command)
-    .setColor(`RED`)
-    .setDescription(`${this.client.util.error} ${description}`)
-    .setFooter(footer1, footer2)
-    .setTimestamp();
+  error(command, description, fields) {
+    const embed = new Discord.MessageEmbed();
+    embed.setTitle(command.name || command);
+    embed.setColor(`RED`);
+    embed.setDescription(`${this.client.util.error} ${description}`);
+    embed.setFooter(footer1, footer2);
+    if (fields) if (fields[0]) embed.addFields(fields);
+    embed.setTimestamp();
+
+    return embed;
+  }
+
+  red(command, description, fields) {
+    const embed = new Discord.MessageEmbed();
+    embed.setTitle(command.name || command);
+    embed.setColor(`RED`);
+    embed.setDescription(`${description}`);
+    embed.setFooter(footer1, footer2);
+    if (fields) if (fields[0]) embed.addFields(fields);
+    embed.setTimestamp();
 
     return embed
   }
 
-  red(command, description) {
-    const embed = new Discord.MessageEmbed()
-    .setTitle(command.name || command)
-    .setColor(`RED`)
-    .setDescription(`${description}`)
-    .setFooter(footer1, footer2)
-    .setTimestamp();
+  green(command, description, fields) {
+    const embed = new Discord.MessageEmbed();
+    embed.setTitle(command.name || command);
+    embed.setColor(`GREEN`);
+    embed.setDescription(`${description}`);
+    embed.setFooter(footer1, footer2);
+    if (fields) if (fields[0]) embed.addFields(fields);
+    embed.setTimestamp();
 
-    return embed
-  }
-
-  green(command, description) {
-    const embed = new Discord.MessageEmbed()
-    .setTitle(command.name || command)
-    .setColor(`GREEN`)
-    .setDescription(`${description}`)
-    .setFooter(footer1, footer2)
-    .setTimestamp();
-
-    return embed
+    return embed;
   }
 
   async errorInfo(command, message, error) {
     const errorId = await this.client.functions.getRandomString(10);
-    await this.client.functions.setErrorData(error, errorId);
+    error ? await this.client.functions.setErrorData(error, errorId) : console.log("Recieved Invalid Error");
     
-    const whClient = new Discord.WebhookClient(`874010484234399745`, `-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa`);
+    const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa" });
 
     const catcher = {
       title: `Bot Error`,
@@ -222,17 +226,6 @@ module.exports = class Embeds {
     .setColor(`GREEN`)
     .setDescription(`${description}`)
     .setImage(image)
-    .setFooter(footer1, footer2)
-    .setTimestamp();
-
-    return embed
-  }
-
-  confirmation(command, description) {
-    const embed = new Discord.MessageEmbed()
-    .setTitle(command.name)
-    .setColor(`ORANGE`)
-    .setDescription(`${description}`)
     .setFooter(footer1, footer2)
     .setTimestamp();
 
@@ -361,7 +354,7 @@ module.exports = class Embeds {
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    return embed
+    return embed;
   }
 
   noRole(command, arg) {
@@ -372,7 +365,18 @@ module.exports = class Embeds {
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    return embed
+    return embed;
+  }
+
+  noGuild(command, arg) {
+    const embed = new Discord.MessageEmbed()
+    embed.setTitle(command.name);
+    embed.setColor(`RED`);
+    embed.setDescription(`${error} I could not record any guilds from your message.\n\n**Detailed Info**\n\`${arg}\` is not a guild.`);
+    embed.setFooter(footer1, footer2);
+    embed.setTimestamp();
+
+    return embed;
   }
 
   noChannel(command, arg) {
@@ -383,7 +387,7 @@ module.exports = class Embeds {
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    return embed
+    return embed;
   }
 
   noCommand(command, arg) {
@@ -394,7 +398,7 @@ module.exports = class Embeds {
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    return embed
+    return embed;
   }
 
   noMembersOrRoles(command, arg1, arg2) {
@@ -405,7 +409,7 @@ module.exports = class Embeds {
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    return embed
+    return embed;
   }
 
   noRolesOrChannels(command, arg) {
@@ -416,7 +420,7 @@ module.exports = class Embeds {
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    return embed
+    return embed;
   }
 
   notValid(command, arg, type, other) {
@@ -427,7 +431,7 @@ module.exports = class Embeds {
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    return embed
+    return embed;
   }
 
   detailed(command, content, ...descriptions) {
@@ -438,7 +442,7 @@ module.exports = class Embeds {
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    return embed
+    return embed;
   }
 
   moderated(type, guild, reason, duration) {
@@ -474,14 +478,14 @@ module.exports = class Embeds {
 
     const embed = new Discord.MessageEmbed();
     embed.setTitle(title);
-    embed.setColor("ORANGE");
+    embed.setColor("#f9a61a");
     embed.setDescription(`${warn} ${content}`);
     embed.setFooter(footer1, footer2);
     embed.addField("Reason", reason, false);
     if (duration) embed.addField("Duration", ms(duration, { long: true }));
     embed.setTimestamp();
 
-    return embed
+    return embed;
   }
 
   helpCategory(category, emoji, prefix, tckSup, tckAdm, noPanel) {
@@ -490,9 +494,9 @@ module.exports = class Embeds {
     
     if (category == "Ticket") {
       cmdArray = [
-        { name: `${this.client.util.members} Basic Commands`, value: `${code}\n${this.client.command.total.ticket.basic.join("\n")}${code}`, inline: true },
-        { name: `${tckSup}Support Commands`, value: `${code}\n${this.client.command.total.ticket.support.join("\n")}${code}`, inline: true },
-        { name: `${tckAdm}Administrator Commands`, value: `${code}\n${this.client.command.total.ticket.admin.join("\n")}${code}`, inline: true }
+        { name: `${this.client.util.members} Basic Commands`, value: `${code}\n${this.client.category.get(category).Basic.join("\n")}${code}`, inline: true },
+        { name: `${tckSup}Support Commands`, value: `${code}\n${this.client.category.get(category).Support.join("\n")}${code}`, inline: true },
+        { name: `${tckAdm}Administrator Commands`, value: `${code}\n${this.client.category.get(category).Administrator.join("\n")}${code}`, inline: true }
       ]
     } else {
       cmdArray = [

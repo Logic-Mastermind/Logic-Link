@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
@@ -12,7 +11,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const responses = {};
 
   try {
-    
+    const cmd = client.commands.get("ban");
+    cmd.run(client, message, args, command, settings, tsettings, extra);
   } catch (error) {
     client.functions.sendErrorMsg(error, true, message, command, extra.logId);
   }

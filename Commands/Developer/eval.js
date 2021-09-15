@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 const Paste = require("pastebin-api").default;
 const YouTube = require("ytdl-core-discord");
@@ -23,37 +22,29 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     const author = message.author;
     const member = message.member;
 
-    async function clean(text) {
-      if (typeof text === "string") {
-        const newText = text.replace(/`/g, "`" + String.fromCharCode(8203));
-        newText.replace(/@/g, "@" + String.fromCharCode(8203));
-        return newText
-      } else {
-        return text;
-      }
-    }
-
     try {
-      var execCode
-      var evaled = null
+      var execCode;
+      var evaled = null;
+      var silent = false;
 
-      if (secArg == "silent" || secArg == "s") {
+      if (secArg == "silent") {
         execCode = args.slice(1).join(" ");
+        silent = true;
         
         if (execCode) {
           evaled = await eval(`${execCode}`);
         } else {
           const embed = await client.embeds.noArgs(command.option.silent, message.guild);
-          return message.lineReply(embed);
+          return message.reply({ embeds: [embed] });
         }
-      } else if (secArg == "async" || secArg == "a") {
+      } else if (secArg == "async") {
         execCode = args.slice(1).join(" ");
 
         if (execCode) {
-          evaled = await eval(`(async function() {return ${execCode}})()`);
+          evaled = await eval(`(async function() {${execCode}})()`);
         } else {
           const embed = await client.embeds.noArgs(command.option.async, message.guild);
-          return message.lineReply(embed)
+          return message.reply({ embeds: [embed] })
         }
       } else {
         execCode = args.join(" ");
@@ -61,11 +52,14 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       }
 
       if (typeof evaled !== "string") evaled = require("util").inspect(evaled);
-      if (secArg !== "silent" && secArg !== "s") message.lineReply(evaled, { code: "xl", split: true })
+      if (!silent) message.reply({ content: `${code}xl\n${evaled}${code}`, split: true });
     } catch (error) {
-      const embed = client.embeds.red(command, `An error has occured whilst trying to execute that evaluation.\n\n**Code Executed**\n${code}javascript\n${execCode}${code}\n**Error**\n${code}${error.stack}${code}`);
+      const embed = client.embeds.error(command, `An error has occured whilst trying to execute that evaluation.\n\u200b`, [
+        { name: "Code Executed", value: `${code}js\n${execCode}${code}\u200b`, inline: false },
+        { name: "Error Stack", value: `${code}${error.stack}${code}`, inline: false }
+      ]);
 
-      message.lineReply(embed);
+      message.reply({ embeds: [embed] });
     }
   } catch (error) {
     client.functions.sendErrorMsg(error, true, message, command, extra.logId);

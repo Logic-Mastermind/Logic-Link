@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
@@ -18,7 +17,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     const successEmbed = client.embeds.success(command, `Shutdown Logic Link.`);
     await editMsg.edit(successEmbed)
 
-    setTimeout(function() { client.destroy() }, 500);
+    setTimeout(async () => { await client.destroy() }, 800);
   } catch (error) {
     client.functions.sendErrorMsg(error, true, message, command, extra.logId);
   }

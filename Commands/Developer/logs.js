@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
@@ -25,7 +24,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         const embed = client.embeds.success(command, `Cleared the bot logs successfully.`);
         return message.lineReply(embed);
 
-      } else if (secArg == "perst" || secArg == "persist" || secArg == "persistent") {
+      } else if (secArg == "all") {
         logs = await client.db.logs.fetchEverything();
         persist = true;
 

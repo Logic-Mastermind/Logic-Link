@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
@@ -12,47 +11,44 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const responses = {};
 
   try {
-    if (secArg == "cooldown") {
+    if (secArg == "cooldown" || secArg == "cd") {
       if (!thirdArg) {
         const noArgsEmbed = await client.embeds.noArgs(command.option.cooldown, message.guild);
         return message.lineReply(noArgsEmbed);
       }
 
       var user = message.mentions.users.first();
-      var mentionedCommand = client.functions.findCommand(fourthArg, client);
-      if (!user) user = await client.functions.findUser(thirdArg, client);
+      var cmd = await client.functions.findCommand(fourthArg);
+      if (!user) user = await client.functions.findUser(thirdArg);
 
       if (user) {
-        const userID = user.id;
+        if (cmd) {
+          await client.db.cooldown.delete(user.id, cmd.commandName);
 
-        if (mentionedCommand) {
-          await client.db.cooldown.delete(user.id, mentionedCommand.commandName);
-
-          const embed = client.embeds.success(command.option.cooldown, `Cleared <@${userID}>'s cooldown for the \`${mentionedCommand.commandName}\` command.`);
+          const embed = client.embeds.success(command.option.cooldown, `Cleared <@${user.id}>'s cooldown for the \`${cmd.commandName}\` command.`);
           message.lineReply(embed);
         } else {
           if (fourthArg) {
-            const embed = client.embeds.error(command.option.cooldown, `\`${fourthArg}\` is not a valid command.`);
+            const embed = client.embeds.noCommand(command.option.cooldown, fourthArg);
             return message.lineReply(embed);
           }
 
           await client.db.cooldown.delete(user.id);
-
-          const embed = client.embeds.success(command.option.cooldown, `Cleared <@${userID}>'s cooldown.`);
+          const embed = client.embeds.success(command.option.cooldown, `Cleared <@${user.id}>'s cooldown.`);
           message.lineReply(embed);
         }
       } else {
-        const embed = client.embeds.error(command.option.cooldown, `No users were recorded from your message.`);
+        const embed = client.embeds.noUser(command.option.cooldown, thirdArg);
         message.lineReply(embed);
       }
-    } else if (secArg == "settings" || secArg == "setting") {
+    } else if (secArg == "settings" || secArg == "set") {
       if (!thirdArg) {
         const noArgsEmbed = await client.embeds.noArgs(command.option.settings, message.guild);
         return message.lineReply(noArgsEmbed);
       }
 
       var setting = client.util.settingsAliases[fourthArg];
-      var guild = await client.guilds.cache.get(thirdArg);
+      var guild = await client.functions.findGuild(thirdArg);
 
       if (guild) {
         await client.db.settings.delete(guild.id, setting || null);
@@ -60,7 +56,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         message.lineReply(embed);
 
       } else {
-        const embed = client.embeds.notValid(command, thirdArg, `guild`);
+        const embed = client.embeds.noGuild(command, thirdArg);
         message.lineReply(embed);
       }
     }

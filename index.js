@@ -17,17 +17,16 @@ const clear = require("clear-module");
 const os = require("os");
 
 const client = new Discord.Client({
-  fetchAllMembers: false, 
+  intents: util.intents,
+  restGlobalRateLimit: 50,
   presence: {
     status: "online",
-    activity: {
+    afk: false,
+    activities: [{
       name: `>help`,
       type: "LISTENING"
-    }
-  },
-  ws: {
-    intents: new Discord.Intents(32767).toArray()
-  },
+    }]
+  }
 });
 
 client.command = commands;
@@ -53,19 +52,18 @@ client.readySince = null;
 client.readySinceMS = null;
 client.server = require('./server')();
 
-require("discord-buttons")(client);
-require("discord-reply");
-
 const cmds = {
   Administrator: [],
   Developer: [],
   General: [],
   Moderator: [],
   Support: [],
-  Ticket: []
+  Ticket: { Basic: [], Support: [], Administrator: [] }
 };
 
 for (const category of client.command.categories) {
+  if (category == "Ticket") continue;
+
   FS.readdir(`./Commands/${category}/`, (error, files) => {
     if (error) return console.error(error);
     files.forEach((file) => {
@@ -77,10 +75,26 @@ for (const category of client.command.categories) {
       client.commands.set(name, cmd);
       cmds[category].push(name);
     });
-
     client.category.set(category, cmds[category]);
   })
 }
+
+for (const category of client.command.ticketCategories) {
+  FS.readdir(`./Commands/Ticket/${category}/`, (error, files) => {
+    if (error) return console.error(error);
+    files.forEach((file) => {
+      if (!file.endsWith(".js")) return;
+      let cmd = require(`./Commands/Ticket/${category}/${file}`);
+      let name = file.split(".")[0];
+      
+      client.functions.log(`Loading ${name}.`);
+      client.commands.set(name, cmd);
+      cmds["Ticket"][category].push(name);
+    });
+    if (category == "Support") client.category.set("Ticket", cmds["Ticket"]);
+  })
+}
+
 
 FS.readdir("./Events/", (error, files) => {
   if (error) return console.error(error);

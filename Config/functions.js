@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 const Chalk = require("chalk");
 const ms = require("ms");
@@ -11,7 +10,7 @@ module.exports = class Functions {
   }
 
   async sendErrorMsg(error, send, message, command, logId) {
-    const whClient = new Discord.WebhookClient(`874010484234399745`, `-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa`);
+    const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa" });
 
     const errorId = await this.getRandomString(10);
     await this.setErrorData(error, errorId)
@@ -56,13 +55,12 @@ module.exports = class Functions {
     stackEmbed.setTimestamp();
 
     if (logId) this.client.logger.updateLog(`An unexpected error occured.`, logId);
-
     whClient.send({
       username: "Logic Link",
       avatarURL: this.client.user.displayAvatarURL(),
       embeds: [errorEmbed, stackEmbed]
     })
-    .catch((error) => console.log(error))
+    .catch((error) => console.log(error));
 
     if (send) {
       if (send == true) {
@@ -73,13 +71,13 @@ module.exports = class Functions {
         .setDescription(`A fatal error has occured that prevented this command from working correctly.\nIf this issue persists, please contact the bot developer or support server.\n\n**Error ID**\n${code}${errorId}${code}`)
         .setTimestamp();
 
-        message.channel.send(sendEmbed).catch((error) => console.log(error))
+        message.channel.send({ embeds: [sendEmbed] }).catch((error) => console.log(error));
       }
     }
   }
 
   async sendError(error) {
-    const whClient = new Discord.WebhookClient(`874010484234399745`, `-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa`);
+    const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa"});
 
     const catcher = {
       title: `Bot Error`,
@@ -115,7 +113,7 @@ module.exports = class Functions {
       avatarURL: this.client.user.displayAvatarURL(),
       embeds: [errorEmbed, stackEmbed]
     })
-    .catch((error) => console.log(error))
+    .catch((error) => console.log(error));
   }
 
   async getNoArgs(command, guild) {
@@ -131,306 +129,217 @@ module.exports = class Functions {
   }
   
   async findRole(filter, guild, safe) {
+    const filterL = filter.toLowerCase();
+    const guildR = guild.roles.cache;
+    if (!guildR) return null;
+
     var role = null;
     var found = false;
 
-    if (!isNaN(filter)) {
-      role = guild.roles.cache.get(filter);
+    if (!role) role = guildR.get(filter);
+    if (!role) role = guildR.find(x => x.name.toLowerCase() == filterL);
 
-      if (!role) role = guild.roles.cache.find(r => r.name.toLowerCase() === filter.toLowerCase());
+    for await (const [id, role] of guildR.entries()) {
+      var nameL = role.name.toLowerCase();
+      var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
-      if (!safe) {
-        if (!role) role = guild.roles.cache.filter(r => r.name.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-          if (found == false) {
-            found = key
-          }
-        })
-      } else {
-        if (!role) role = guild.roles.cache.filter(r => r.name.toLowerCase().startsWith(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-          if (found == false) {
-            found = key
-          }
-        })
-      }
-    } else {
-      role = guild.roles.cache.find(r => r.name.toLowerCase() === filter.toLowerCase());
-
-      if (!safe) {
-        if (!role) role = guild.roles.cache.filter(r => r.name.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-          if (found == false) {
-            found = key
-          }
-        })
-      } else {
-        if (!role) role = guild.roles.cache.filter(r => r.name.toLowerCase().startsWith(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-          if (found == false) {
-            found = key
-          }
-        })
+      if (safeFilter && filter.length >= 3) {
+        found = id;
+        break;
       }
     }
 
-    if (found !== false) role = guild.roles.cache.get(found);
-    return role
+    if (found) role = guildR.get(found);
+    if (!role) role = null;
+    return role;
   }
 
   async findChannel(filter, guild, safe) {
+    const filterL = filter.toLowerCase();
+    const guildC = guild.channels.cache;
+    if (!guildC) return null;
+
     var channel = null;
     var found = false;
 
-    if (!isNaN(filter)) {
-      channel = guild.channels.cache.get(filter);
+    if (!channel) channel = guildC.get(filter);
+    if (!channel) channel = guildC.find(x => x.name.toLowerCase() == filterL);
 
-      if (!channel) channel = guild.channels.cache.find(c => c.name.toLowerCase() === filter.toLowerCase());
+    for await (const [id, channel] of guildC.entries()) {
+      var nameL = channel.name.toLowerCase();
+      var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
-      if (!safe) {
-        if (!channel) channel = guild.channels.cache.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-          if (found == false) {
-            found = key
-          }
-        })
-      } else {
-        if (!channel) channel = guild.channels.cache.filter(c => c.name.toLowerCase().startsWith(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-          if (found == false) {
-            found = key
-          }
-        })
-      }
-    } else {
-      channel = guild.channels.cache.find(c => c.name.toLowerCase() === filter.toLowerCase());
-
-      if (!safe) {
-        if (!channel) channel = guild.channels.cache.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-          if (found == false) {
-            found = key
-          }
-        })
-      } else {
-        if (!channel) channel = guild.channels.cache.filter(c => c.name.toLowerCase().startsWith(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-          if (found == false) {
-            found = key
-          }
-        })
+      if (safeFilter && filter.length >= 3) {
+        found = id;
+        break;
       }
     }
 
-    if (found !== false) channel = guild.channels.cache.get(found);
-    return channel
+    if (found) channel = guildC.get(found);
+    if (!channel) channel = null;
+    return channel;
   }
 
   async findCategory(filter, guild, safe) {
+    const filterL = filter.toLowerCase();
+    const guildC = guild.channels.cache;
+    if (!guildC) return null;
+
     var channel = null;
     var found = false;
 
-    if (!isNaN(filter)) {
-      channel = guild.channels.cache.get(filter);
+    if (!channel) channel = guildC.get(filter);
+    if (!channel) channel = guildC.find(x => x.name.toLowerCase() == filterL);
 
-      if (!channel) channel = guild.channels.cache.find(c => c.name.toLowerCase() === filter.toLowerCase());
+    for await (const [id, channel] of guildC.entries()) {
+      var nameL = channel.name.toLowerCase();
+      var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
-      if (!safe) {
-        if (!channel) channel = guild.channels.cache.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-          if (found == false) {
-            found = key
-          }
-        })
-      } else {
-        if (!channel) channel = guild.channels.cache.filter(c => c.name.toLowerCase().startsWith(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-          if (found == false) {
-            found = key
-          }
-        })
-      }
-    } else {
-      channel = guild.channels.cache.find(c => c.name.toLowerCase() === filter.toLowerCase());
-
-      if (!safe) {
-        if (!channel) channel = guild.channels.cache.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-          if (found == false) {
-            found = key
-          }
-        })
-      } else {
-        if (!channel) channel = guild.channels.cache.filter(c => c.name.toLowerCase().startsWith(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-          if (found == false) {
-            found = key
-          }
-        })
+      if (safeFilter && filter.length >= 3) {
+        found = id;
+        break;
       }
     }
 
-    if (found !== false) channel = guild.channels.cache.get(found);
-    if (channel) {
-      if (channel.type !== "category") channel = null;
-    }
-    return channel
+    if (found) channel = guildC.get(found);
+    if (channel.type !== "category") channel = null;
+    if (!channel) channel = null;
+    return channel;
   }
 
   async findMember(filter, guild, safe) {
+    const filterL = filter.toLowerCase();
+    const guildM = guild.members.cache;
+    if (!guildM) return null;
+
     var member = null;
     var found = false;
 
-    if (!isNaN(filter)) {
-      member = guild.members.cache.get(filter);
+    if (!member) member = guildM.get(filter);
+    if (!member) member = guildM.find(x => x.displayName.toLowerCase() == filterL);
+    if (!member) member = guildM.find(x => x.user.tag.toLowerCase() == filterL);
 
-      if (!member) member = guild.members.cache.find(m => m.user.username.toLowerCase() === filter.toLowerCase() || m.displayName.toLowerCase() == filter.toLowerCase());
+    for await (const [id, member] of guildM.entries()) {
+      var nameL = member.displayName.toLowerCase();
+      var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
-      if (!safe) {
-        if (!member) member = guild.members.cache.filter(m => m.user.username.toLowerCase().includes(filter.toLowerCase()) || m.displayName.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-          if (found == false) {
-            found = key
-          }
-        })
-      } else {
-        if (!member) member = guild.members.cache.filter(m => m.user.username.toLowerCase().startsWith(filter.toLowerCase()) || m.displayName.toLowerCase().startsWith(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-          if (found == false) {
-            found = key
-          }
-        })
-      }
-    } else if (filter.includes("#")) {
-      member = guild.members.cache.find(m => m.user.tag.toLowerCase() == filter.toLowerCase());
-
-      if (!member) member = guild.members.cache.find(m => m.user.username.toLowerCase() === filter.toLowerCase() || m.displayName.toLowerCase() == filter.toLowerCase());
-
-      if (!safe) {
-        if (!member) member = guild.members.cache.filter(m => m.user.username.toLowerCase().includes(filter.toLowerCase()) || m.displayName.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-          if (found == false) {
-            found = key
-          }
-        })
-      } else {
-        if (!member) member = guild.members.cache.filter(m => m.user.username.toLowerCase().startsWith(filter.toLowerCase()) || m.displayName.toLowerCase().startsWith(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-          if (found == false) {
-            found = key
-          }
-        })
-      }
-    } else {
-      if (!member) member = guild.members.cache.find(m => m.user.username.toLowerCase() === filter.toLowerCase() || m.displayName.toLowerCase() == filter.toLowerCase());
-
-      if (!safe) {
-        if (!member) member = guild.members.cache.filter(m => m.user.username.toLowerCase().includes(filter.toLowerCase()) || m.displayName.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-          if (found == false) {
-            found = key
-          }
-        })
-      } else {
-        if (!member) member = guild.members.cache.filter(m => m.user.username.toLowerCase().startsWith(filter.toLowerCase()) || m.displayName.toLowerCase().startsWith(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-          if (found == false) {
-            found = key
-          }
-        })
+      if (safeFilter && filter.length >= 3) {
+        found = id;
+        break;
       }
     }
 
-    if (found !== false) member = guild.members.cache.get(found);
-    return member
+    if (found) member = guildM.get(found);
+    if (!member) member = null;
+    return member;
   }
 
-  async findMemberRoles(filter, member) {
+  async findMemberRoles(filter, member, safe) {
+    const filterL = filter.toLowerCase();
+    const memberR = member.roles.cache;
+    if (!memberR) return null;
+
     var role = null;
     var found = false;
 
-    if (!isNaN(filter)) {
-      role = member.roles.cache.get(filter);
+    if (!role) role = memberR.get(filter);
+    if (!role) role = memberR.find(x => x.name.toLowerCase() == filterL);
 
-      if (!role) role = member.roles.cache.find(r => r.name.toLowerCase() === filter.toLowerCase());
+    for await (const [id, role] of memberR.entries()) {
+      var nameL = role.name.toLowerCase();
+      var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
-      if (!role) role = member.roles.cache.filter(r => r.name.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-        if (found == false) {
-          found = key
-        }
-      })
-    } else {
-      role = member.roles.cache.find(r => r.name.toLowerCase() === filter.toLowerCase());
-
-      if (!role) role = member.roles.cache.filter(r => r.name.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-        if (found == false) {
-          found = key
-        }
-      })
+      if (safeFilter && filter.length >= 3) {
+        found = id;
+        break;
+      }
     }
 
-    if (found !== false) role = member.roles.cache.get(found);
-    return role
+    if (found) role = memberR.get(found);
+    if (!role) role = null;
+    return role;
   }
 
   async findUser(filter, safe) {
+    const filterL = filter.toLowerCase();
+    const clientU = this.client.users.cache;
+    if (!clientU) return null;
+
     var user = null;
     var found = false;
 
-    if (!isNaN(filter)) {
-      user = this.client.users.fetch(filter);
+    if (!user && !isNaN(filterL)) user = clientU.get(filter) || await this.client.users.fetch(filter);
+    if (!user) user = clientU.find(x => x.username.toLowerCase() == filterL);
+    if (!user) user = clientU.find(x => x.tag.toLowerCase() == filterL);
 
-      if (!user) user = this.client.users.cache.find(u => u.username.toLowerCase() === filter.toLowerCase());
+    for await (const [id, user] of clientU.entries()) {
+      if (safe) break;
+      var nameL = user.username.toLowerCase();
+      var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
-      if (!user) user = this.client.users.cache.filter(u => u.username.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-        if (found == false) {
-          found = key
-        }
-      })
-    } else if (filter.includes("#")) {
-      user = this.client.users.fetch(u => u.tag.toLowerCase() == filter.toLowerCase());
-
-      if (!user) user = this.client.users.cache.find(u => u.username.toLowerCase() === filter.toLowerCase());
-
-      if (!user) user = this.client.users.cache.filter(u => u.username.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-        if (found == false) {
-          found = key
-        }
-      })
-    } else {
-      if (!user) user = this.client.users.cache.find(u => u.username.toLowerCase() === filter.toLowerCase());
-
-      if (!user) user = this.client.users.cache.filter(u => u.username.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-        if (found == false) {
-          found = key
-        }
-      })
+      if (safeFilter && filter.length >= 3) {
+        found = id;
+        break;
+      }
     }
 
-    if ((found !== false) && !safe) user = this.client.users.cache.get(found);
+    if (found) user = clientU.get(found);
+    if (!user) user = null;
     return user;
   }
 
-  async findBan(filter, guild) {
-    var user = null;
+  async findGuild(filter, safe) {
+    const filterL = filter.toLowerCase();
+    const clientG = this.client.guilds.cache;
+    if (!clientG) return null;
+
+    var guild = null;
     var found = false;
-    var bans = await guild.fetchBans()
 
-    if (!isNaN(filter)) {
-      user = bans.get(filter);
+    if (!guild) guild = clientG.get(filter);
+    if (!guild) guild = clientG.find(x => x.name.toLowerCase() == filterL);
 
-      if (!user) user = bans.find(u => u.user.username.toLowerCase() === filter.toLowerCase());
+    for await (const [id, guild] of clientG.entries()) {
+      var nameL = guild.name.toLowerCase();
+      var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
-      if (!user) user = bans.filter(u => u.user.username.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-        if (found == false) {
-          found = key
-        }
-      })
-    } else if (filter.includes("#")) {
-      user = bans.find(u => u.tag.toLowerCase() == filter.toLowerCase());
-
-      if (!user) user = bans.find(u => u.user.username.toLowerCase() === filter.toLowerCase());
-
-      if (!user) user = bans.filter(u => u.user.username.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-        if (found == false) {
-          found = key
-        }
-      })
-    } else {
-      if (!user) user = bans.find(u => u.user.username.toLowerCase() === filter.toLowerCase());
-
-      if (!user) user = bans.filter(u => u.user.username.toLowerCase().includes(filter.toLowerCase()) && filter.length >= 3).forEach((value, key, map) => {
-        if (found == false) {
-          found = key
-        }
-      })
+      if (safeFilter && filter.length >= 3) {
+        found = id;
+        break;
+      }
     }
 
-    if (found !== false) user = await this.client.users.fetch(found);
-    else if (user) user = user.user
-    return user
+    if (found) guild = clientG.get(found);
+    if (!guild) guild = null;
+    return guild;
+  }
+
+  async findBan(filter, guild, safe) {
+    const filterL = filter.toLowerCase();
+    const guildB = await guild.fetchBans();
+    const clientU = this.client.users.cache;
+    if (!guildB) return null;
+
+    var ban = null;
+    var found = false;
+
+    if (!ban) ban = guildB.get(filter);
+    if (!ban) ban = guildB.find(x => x.user.username.toLowerCase() == filterL);
+    if (!ban) ban = guildB.find(x => x.user.tag.toLowerCase() == filterL);
+
+    for await (const [id, ban] of guildB.entries()) {
+      var nameL = ban.user.username.toLowerCase();
+      var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
+
+      if (safeFilter && filter.length >= 3) {
+        found = id;
+        break;
+      }
+    }
+
+    if (found) ban = clientU.get(found) || await this.client.users.fetch(found);
+    if (!ban) ban = null;
+    return ban;
   }
 
   async getTime(unsorted) {
@@ -509,6 +418,7 @@ module.exports = class Functions {
     for (var i = 0; i < length; i++) {
       result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
     }
+
     return result;
   }
 
@@ -600,6 +510,7 @@ module.exports = class Functions {
 
     for (const [name, info] of Object.entries(client.command.ticket)) {
       if (command) break;
+      
       if (filter == info.commandName || info.aliases.includes(filter)) {
         command = info;
         break;
@@ -682,6 +593,11 @@ module.exports = class Functions {
     return newArray
   }
 
+  getCmdPath(cmd) {
+    if (cmd.category !== "Ticket") return `/home/runner/Logic-Link/Commands/${cmd.category}/${cmd.commandName}.js`
+    return `/home/runner/Logic-Link/Commands/Ticket/${cmd.subCategory}/${cmd.commandName}.js`
+  }
+
   async log(content, option) {
     if (option) {
       if (this.client.util.chalkOptions.includes(option)) {
@@ -692,6 +608,13 @@ module.exports = class Functions {
     } else {
       console.log(content)
     }
+  }
+
+  async hasPermission(member, command, guild) {
+    const perms = await command.permissions.some(p => member.permissions.has(p));
+    const isOwner = guild.ownerId == member.id;
+
+    return perms || isOwner;
   }
 
   async upperFirstAll(array) {
@@ -757,10 +680,11 @@ module.exports = class Functions {
 
   async getBadges(user) {
     const flags = await user.flags;
+    const noBadges = ["No Badges"];
     const replaced = [];
 
-    if (!flags) return ["No Badges"];
-    if (flags.bitfield == 0) return ["No Badges"];
+    if (!flags) return noBadges;
+    if (flags.bitfield == 0) return noBadges;
 
     for await (const flag of flags.toArray()) {
       if (flag == "DISCORD_EMPLOYEE") replaced.push(this.client.util.discordStaff);
@@ -772,10 +696,12 @@ module.exports = class Functions {
       if (flag == "HOUSE_BRAVERY") replaced.push(this.client.util.bravery);
       if (flag == "HOUSE_BALANCE") replaced.push(this.client.util.balance);
       if (flag == "EARLY_SUPPORTER") replaced.push(this.client.util.earlySupporter);
-      if (flag == "CERTIFIED_DISCORD_MODERATOR") replaced.push(this.client.util.certifiedMod);
-      if (flag == "EARLY_VERIFIED_DEVELOPER" || flag == "VERIFIED_DEVELOPER") replaced.push(this.client.util.hypesquad);
+      if (flag == "DISCORD_CERTIFIED_MODERATOR") replaced.push(this.client.util.certifiedMod);
+      if (flag == "VERIFIED_BOT") replaced.push(this.client.util.verified);
+      if (flag == "EARLY_VERIFIED_DEVELOPER") replaced.push(this.client.util.hypesquad);
     }
 
+    if (!replaced[0]) return noBadges;
     return replaced;
   }
 
@@ -823,7 +749,97 @@ module.exports = class Functions {
     return compact[0] ? compact : "No Permission Overwrites";
   }
 
-  async emojiId(emoji) {
+  isAdmin(target, guild, settings) {
+    const hasPerm = target.permissions.has("ADMINISTRATOR");
+    const hasRole = target.roles.cache.has(settings.adminRole);
+    const isOwner = guild.ownerId == target.id;
+
+    const client = this.client;
+    const devMode = client.db.devSettings.get(client.util.devId, "devMode") ? target.id == client.util.devId : false;
+
+    return hasPerm || hasRole || isOwner || devMode;
+  }
+
+  isMod(target, guild, settings) {
+    const hasPerm = target.permissions.has("ADMINISTRATOR");
+    const hasMod = target.roles.cache.has(settings.modRole);
+    const hasAdmin = target.roles.cache.has(settings.adminRole);
+    const isOwner = guild.ownerId == target.id;
+
+    const client = this.client;
+    const devMode = client.db.devSettings.get(client.util.devId, "devMode") ? target.id == client.util.devId : false;
+
+    return hasPerm || hasMod || hasAdmin || isOwner || devMode;
+  }
+
+  hasPerm(command, target, guild, settings, supRole) {
+    const perm = command.required || command;
+    const perms = command.permissions || command;
+    const isDev = target.id == this.client.util.devId;
+    const supportRole = target.roles.cache.has(this.client.supportRole);
+
+    const client = this.client;
+    const devMode = client.db.devSettings.get(client.util.devId, "devMode") ? target.id == client.util.devId : false;
+
+    const isAdmin = this.isAdmin(target, guild, settings);
+    const isMod = this.isMod(target, guild, settings);
+    var hasPerm = false;
+
+    if (perm == "admin") {
+      if (isAdmin || target.permissions.has(perms)) hasPerm = true;
+
+    } else if (perm == "mod") {
+      if (isMod || target.permissions.has(perms)) hasPerm = true;
+
+    } else if (perm == "dev") {
+      if (isDev) hasPerm = true;
+
+    } else if (perm == "ticket") {
+      if (command.subCategory == "Administrator") {
+        if (isAdmin || target.permissions.has(perms)) hasPerm = true;
+
+      } else if (command.subCategory == "Support") {
+        if (isAdmin || supRole) hasPerm = true;
+      }
+    } else if (perm == "support") {
+      if (supportRole) hasPerm = true;
+      
+    } else if (perm == "none") {
+      hasPerm = true;
+
+    } else {
+      if (supRole == "admin") {
+        if (isAdmin || target.permissions.has(perms)) hasPerm = true;
+
+      } else if (supRole == "mod") {
+        if (isMod || target.permissions.has(perms)) hasPerm = true;
+
+      } else {
+        if (target.permissions.has(perms)) hasPerm = true;
+      }
+    }
+
+    return hasPerm || devMode;
+  }
+
+  hierarchy(initiator, target, guild) {
+    const initRole = initiator.roles ? initiator.roles.highest : initiator;
+    const targRole = target.roles ? target.roles.highest : target;
+    const ownerId = guild.ownerId;
+
+    const isLower = initRole.position <= targRole.position;
+    const isOwner = (target.id == ownerId) && (initiator.id !== this.client.user.id);
+    var lower = false;
+
+    if (isLower && !isOwner) lower = true;
+    return lower;
+  }
+
+  validPerms(test, array) {
+    return test.every(x => array.includes(x));
+  }
+
+  emojiId(emoji) {
     return emoji.split(":")[2].split(">")[0];
   }
 

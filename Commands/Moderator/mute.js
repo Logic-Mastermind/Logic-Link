@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
@@ -162,12 +161,13 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
           const successEmbed = client.embeds.success(command, `Muted <@${member.id}> from the server for ${timeObj.timeView[0]} ${timeObj.unit}${timeObj.timeView[0] > 1 ? `s` : ``}.\n\n**Reason**\n${reason}`);
           editMsg.edit(successEmbed);
 
-          client.db.mutes.set(`${member.id}-${message.guild.id}`, message.author.id, "muter");
-          client.db.mutes.set(`${member.id}-${message.guild.id}`, member.id, "muted");
-          client.db.mutes.set(`${member.id}-${message.guild.id}`, Date.now(), "mutedTimestamp");
-          client.db.mutes.set(`${member.id}-${message.guild.id}`, timeObj.duration, "duration");
-          client.db.mutes.set(`${member.id}-${message.guild.id}`, Date.now() + timeObj.duration, "end");
-          client.db.mutes.set(`${member.id}-${message.guild.id}`, message.guild.id, "guildId");
+          client.db.timeouts.set(`${member.id}-${message.guild.id}[mute]`, message.author.id, "muter");
+          client.db.timeouts.set(`${member.id}-${message.guild.id}[mute]`, "mute", "type");
+          client.db.timeouts.set(`${member.id}-${message.guild.id}[mute]`, member.id, "muted");
+          client.db.timeouts.set(`${member.id}-${message.guild.id}[mute]`, Date.now(), "mutedTimestamp");
+          client.db.timeouts.set(`${member.id}-${message.guild.id}[mute]`, timeObj.duration, "duration");
+          client.db.timeouts.set(`${member.id}-${message.guild.id}[mute]`, Date.now() + timeObj.duration, "end");
+          client.db.mtimeoutsutes.set(`${member.id}-${message.guild.id}[mute]`, message.guild.id, "guildId");
 
           if (timeObj.duration > 2147483647) return
 
@@ -176,7 +176,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               if (clientMember.hasPermission("MANAGE_ROLES")) {
                 if (clientMember.roles.highest.position > mutedRole.position) {
                   member.roles.remove(mutedRole).catch(() => {});
-                  client.db.mutes.delete(`${member.id}-${message.guild.id}`);
+                  client.db.timeouts.delete(`${member.id}-${message.guild.id}[mute]`);
                 }
               }
             }

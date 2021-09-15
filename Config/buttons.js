@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 
 module.exports = class MessageButtons {
   constructor(client) {

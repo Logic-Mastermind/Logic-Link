@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
@@ -11,13 +10,10 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const code = `\`\`\``;
 
   const responses = {
-    selfWarning: `You are attempting to kick yourself from the server.\n\n**Detailed Info**\n`,
-    botKick: `You are attempting to kick me from the server.\n\n**Detailed Info**\n`,
-    serverOwner: `You are attempting to kick the server owner.\n\n**Detailed Info**\n`,
-    hierarchy: `This member has a higher or equal role position as your top role.\n\n**Detailed Info**\n`,
-    botHierarchy: `This member has a higher or equal role position as my top role.\n\n**Detailed Info**\n`,
+    selfWarning: `You are attempting to kick yourself from the server.`,
+    botKick: `You are attempting to kick me from the server.`,
+    serverOwner: `You are attempting to kick the server owner.`,
     noUser: `No members were recorded from your message.`,
-    pending: `Kicking the member from the server...`
   }
 
   try {
@@ -26,62 +22,55 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     if (secArg.toLowerCase() == "me") member = message.member;
     
     var reason = args.slice(1).join(" ");
-    if (!reason) reason = "No reason was provided.";
+    if (!reason) reason = client.util.reason;
 
     if (member) {
-      if (!clientMember.hasPermission(command.clientPerms)) {
-        const errorEmbed = client.embeds.botPermission(command)
-        return message.lineReply(errorEmbed)
-      }
-
       if (member.id === client.user.id) {
-        const errorEmbed = client.embeds.error(command, `${responses.botKick}Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`)
-        return message.lineReply(errorEmbed)
+        const errorEmbed = client.embeds.detailed(command, responses.botKick, `Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`);
+        return message.lineReply(errorEmbed);
 
       } else if (member.id == message.author.id) {
-        const errorEmbed = client.embeds.error(command, `${responses.selfWarning}Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`);
-        return message.lineReply(errorEmbed)
+        const errorEmbed = client.embeds.detailed(command, responses.selfWarning, `Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`);
+        return message.lineReply(errorEmbed);
+        
+      } else if (member.id == message.guild.owner.id) {
+        const errorEmbed = client.embeds.error(command, responses.serverOwner, `Server Owner - <@${member.guild.owner.id}>\nTargetted Member - <@${member.id}>`);
+        return message.lineReply(errorEmbed);
       }
 
-      if (member.id == message.guild.owner.id) {
-        const errorEmbed = client.embeds.error(command, `${responses.serverOwner}Server Owner - <@${member.guild.owner.id}>\nTargetted Member - <@${member.id}>`);
-        return message.lineReply(errorEmbed)
-      }
-
-      if ((message.author.id !== message.guild.owner.id) && member.roles.highest) {
-        if (message.member.roles.highest.position <= member.roles.highest.position) {
-          const embed = client.embeds.error(command, `${responses.hierarchy}Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nInitiator - <@${message.author.id}>: Top Role Position \`${message.member.roles.highest.position}\`.`);
-          return message.lineReply(embed);
-        }
+      if (client.functions.hierarchy(message.member, member, message.guild)) {
+        const embed = client.embeds.detailed(command, client.util.hierarchyM, `Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.`, `Initiator - <@${message.author.id}>: Top Role Position \`${message.member.roles.highest.position}\`.`);
+        return message.lineReply(embed);
       }
       
-      if (member.roles.highest) {
-        if (clientMember.roles.highest.position <= member.roles.highest.position) {
-          const clientTopRole = clientMember.roles.highest;
-          const embed = client.embeds.error(command, `${responses.botHierarchy}Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nClient Member - <@${clientMember.id}>: Top Role Position \`${clientTopRole.position}\`.`);
-          return message.lineReply(embed);
-        }
+      if (client.functions.hierarchy(clientMember, member, message.guild)) {
+        const clientTopRole = clientMember.roles.highest;
+        const embed = client.embeds.detailed(command, client.util.botHierarchyM, `Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nClient Member - <@${clientMember.id}>: Top Role Position \`${clientTopRole.position}\`.`);
+        return message.lineReply(embed);
       }
 
-      const pendingEmbed = client.embeds.pending(command, responses.pending);
+      const pendingEmbed = client.embeds.pending(command, "Kicking the member...");
       const editMsg = await message.lineReply(pendingEmbed);
 
-      const kickedEmbed = client.embeds.orange(`User Kicked`, `You have been kicked from \`${member.guild.name}\`${member.guild.name.endsWith(".") ? `` : `.`}\n\n**Reason**\n${reason}`);
-
+      const kickedEmbed = client.embeds.moderated("kick", message.guild, reason);
       if (!member.user.bot) member.user.send(kickedEmbed);
-      setTimeout(kickMember, 500)
+      setTimeout(kickMember, 500);
 
       function kickMember() {
         member
         .kick(`${member.user.tag} was kicked. Responsible User: ${message.author.tag}`)
         .then(() => {
-          const successEmbed = client.embeds.success(command, `Kicked <@${member.id}> from the server.\n\n**Reason**\n${reason}`)
+          const successEmbed = client.embeds.success(command, `Kicked <@${member.id}> from the server.`, [{
+            name: "Reason",
+            value: reason,
+            inline: false
+          }])
 
           editMsg.edit(successEmbed)
         })
         .catch(async (error) => {
           const errorEmbed = await client.embeds.errorInfo(command, message, error);
-          editMsg.edit(errorEmbed)
+          editMsg.edit(errorEmbed);
         })
       }
     } else {

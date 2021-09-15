@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const YouTube = require("ytdl-core-discord");
 const YTSearch = require("yt-search");
 const Fetch = require("node-fetch");
@@ -74,6 +73,9 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         }
 
         var filter = args.slice(1).join(" ");
+        var groups = [...filter.matchAll(client.util.ytVidRegex)];
+
+        console.log(groups)
         var connection = clientMember.voice.connection;
 
         if (!connection) {
@@ -90,7 +92,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
         if (connection && filter) {
           const results = await YTSearch(filter);
-          const filtered = results.all.filter(e => e.type == "video");
+          const filtered = await results.all.filter(e => e.type == "video");
           const video = filtered[0];
 
           if (!video) {

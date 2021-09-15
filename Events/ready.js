@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 
 module.exports = async (client) => {
@@ -9,43 +8,30 @@ module.exports = async (client) => {
   client.readySince = Math.floor(Date.now() / 1000);
   client.readySinceMS = Date.now();
 
-  client.db.mutes.forEach(async (v, k, m) => {
-    if (v.end) {
-      const guild = await client.guilds.cache.get(v.guildId);
-      const member = await guild.members.cache.get(v.muted);
+  for (const [key, val] of client.db.timeouts.fetchEverything().entries()) {
+    if (val.type == "mute") {
+      const guild = await client.guilds.cache.get(val.guildId);
+      const member = await guild.members.cache.get(val.muted);
 
       const mutedRoleId = await client.db.settings.get(guild.id, "mutedRole");
-      const clientMember = guild.me;
       const mutedRole = await guild.roles.cache.get(mutedRoleId);
-      const timeLeft = v.end - Date.now();
+      const timeLeft = val.end - Date.now();
+      const clientMember = guild.me;
 
-      if (timeLeft <= 2147483647) {
-        if (v.end > Date.now()) {
-          if (mutedRole) {
-            if (member.roles.cache.has(mutedRoleId)) {
-              if (clientMember.hasPermission("MANAGE_ROLES")) {
-                if (clientMember.roles.highest.position > mutedRole.position) {
-                  setTimeout(function() {
-                    member.roles.remove(mutedRole).catch(() => {});
-                    client.db.mutes.delete(`${member.id}-${guild.id}`);
-                  }, timeLeft)
-                }
-              }
-            }
-          }
-        } else {
-          if (mutedRole) {
-            if (member.roles.cache.has(mutedRoleId)) {
-              if (clientMember.hasPermission("MANAGE_ROLES")) {
-                if (clientMember.roles.highest.position > mutedRole.position) {
-                  member.roles.remove(mutedRole).catch(() => {});
-                  client.db.mutes.delete(`${member.id}-${guild.id}`);
-                }
-              }
-            }
-          }
-        }
-      }
+      if (timeLeft > client.util.timeoutLimit) continue;
+      if (!mutedRole) continue;
+
+      if (!member.roles.cache.has(mutedRoleId)) continue;
+      if (!clientMember.hasPermission("MANAGE_ROLES")) continue;
+      if (mutedRole.position >= clientMember.roles.highest.position) continue;
+
+      const remove = () => {
+        member.roles.remove(mutedRole);
+        client.db.mutes.delete(key);
+      };
+
+      if (v.end >= Date.now()) setTimeout(remove, timeLeft);
+      else remove();
     }
-  })
+  }
 }

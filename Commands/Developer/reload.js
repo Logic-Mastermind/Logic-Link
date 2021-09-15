@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const Buttons = require("discord-buttons");
 const Fetch = require("node-fetch");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
@@ -15,7 +14,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     var cmd = await client.functions.findCommand(secArg);
 
     if (cmd) {
-      const path = `../${cmd.category}/${cmd.commandName}.js`;
+      const path = client.functions.getCmdPath(cmd);
       const pendEmbed = client.embeds.pending(command, `Reloading the command...`);
       const editMsg = await message.lineReply(pendEmbed);
 
