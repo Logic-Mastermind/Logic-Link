@@ -103,7 +103,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     const msg = await message.channel.send({ embeds: [pages[0]], components: [actionRow] });
     pages = await pages.slice(1);
 
-    client.functions.paginate(msg, pages);
     if (pages[0]) client.functions.paginate(msg, pages);
   } catch (error) {
     client.functions.sendErrorMsg(error, message, command, extra.logId);
