@@ -8,9 +8,9 @@ module.exports = async (client, guild) => {
 
   try {
     const channel = await client.channels.cache.get(client.util.entryChannel);
-    const embed = client.embeds.fieldError(`Guild Left`, `Left a guild.\n\u200b`, [{ name: `Guild Information`, value: `**Name:** \`${guild.name}\`\n**ID:** \`${guild.id}\`\n**Owner:** <@${guild.owner.id}>` }]);
+    const embed = client.embeds.error(`Guild Left`, `Left a guild.\n\u200b`, [{ name: `Guild Information`, value: `**Name:** \`${guild.name}\`\n**ID:** \`${guild.id}\`\n**Owner:** <@${guild.ownerId}>` }]);
 
-    channel.send(embed);
+    channel.send({ embeds: [embed] });
   } catch (error) {
     client.functions.sendError(error);
   }

@@ -14,6 +14,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     const cmd = client.commands.get("help");
     cmd.run(client, message, args[0] ? args : ["ticket"], command, settings, tsettings, extra);
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

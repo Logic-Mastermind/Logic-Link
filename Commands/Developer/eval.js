@@ -3,6 +3,8 @@ const Fetch = require("node-fetch");
 const Paste = require("pastebin-api").default;
 const YouTube = require("ytdl-core-discord");
 const Chalk = require("chalk");
+const Mongoose = require("mongoose");
+const Enmap = require("enmap");
 const FS = require("fs");
 const ms = require("ms");
 
@@ -21,6 +23,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     const category = message.channel.parent;
     const author = message.author;
     const member = message.member;
+    const pasteClient = new Paste(client.config.pasteBinAPI);
+    const dbKey = `${member.id}-${guild.id}`;
 
     try {
       var execCode;
@@ -37,6 +41,10 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
           const embed = await client.embeds.noArgs(command.option.silent, message.guild);
           return message.reply({ embeds: [embed] });
         }
+      } else if (secArg.includes("await")) {
+        execCode = args.join(" ");
+        evaled = await eval(`(async function() { return ${execCode}})()`);
+
       } else if (secArg == "async") {
         execCode = args.slice(1).join(" ");
 
@@ -52,7 +60,20 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       }
 
       if (typeof evaled !== "string") evaled = require("util").inspect(evaled);
-      if (!silent) message.reply({ content: `${code}xl\n${evaled}${code}`, split: true });
+      if (!silent) {
+        const msgs = await Discord.splitMessage(evaled);
+        var inc = 0;
+
+        for (const msg of msgs) {
+          ++inc
+          if (inc >= 5) {
+            await client.functions.sleep(5000);
+            inc = 0;
+          }
+
+          message.reply({ content: `${code}xl\n${msg}${code}` });
+        }
+      }
     } catch (error) {
       const embed = client.embeds.error(command, `An error has occured whilst trying to execute that evaluation.\n\u200b`, [
         { name: "Code Executed", value: `${code}js\n${execCode}${code}\u200b`, inline: false },
@@ -62,6 +83,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       message.reply({ embeds: [embed] });
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

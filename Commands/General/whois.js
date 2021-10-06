@@ -16,24 +16,26 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     if (!secArg && !member) member = message.member;
 
     if (member) {
+      const roles = await Array.from(await member.roles.cache.filter(r => r.id !== member.guild.roles.everyone.id).keys());
       const info = {
-        roles: await Array.from(await member.roles.cache.filter(r => r.id !== member.guild.roles.everyone.id).keys()),
-        createdAt: await Math.floor(Date.parse(member.user.createdAt) / 1000),
-        joinedAt: await Math.floor(Date.parse(member.joinedAt) / 1000),
-        permissions: await client.functions.getPermissions(member),
-        badges: await client.functions.getBadges(member.user),
+        roles: roles[0] ? `<@&${roles.join(">, <@&")}>` : `No Roles Found`,
+        createdAt: `<t:${Math.floor(Date.parse(member.user.createdAt) / 1000)}:D>`,
+        joinedAt: `<t:${Math.floor(Date.parse(member.joinedAt) / 1000)}:D>`,
+        permissions: (await client.functions.getPermissions(member)).join(", "),
+        badges: (await client.functions.getBadges(member.user)).join(" "),
         profile: await member.user.displayAvatarURL({ dynamic: false, size: 512 }),
-        user: member.user,
-        owner: member.id == message.guild.owner.id
+        mention: `<@${member.user.id}>`,
+        roleCount: roles.length,
+        owner: member.id == message.guild.ownerId
       }
       
       const embed = client.embeds.itemInfo(command, "user", info);
-      message.lineReply(embed);
+      message.reply({ embeds: [embed]});
     } else {
       const embed = client.embeds.noMember(command, args.join(" "));
-      message.lineReply(embed);
+      message.reply({ embeds: [embed] });
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

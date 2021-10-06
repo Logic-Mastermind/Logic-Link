@@ -15,9 +15,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const responses = {};
 
   try {
-    const member = await client.functions.findMember(secArg, message.guild);
-    console.log(await member.user.flags)
+    const emb = client.embeds.blue("Server Verification", `Welcome to the Logic Link support server.\nTo gain access to the rest of channnels, please click the button below.\n\nOnce you have completed verification, you can take a look at the server rules, get support, or talk with the community.`);
+    const button = client.buttons.green("Verify", "Support_Server:Verify");
+    const row = client.buttons.actionRow([button]);
+    message.channel.send({ embeds: [emb], components: [row] });
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

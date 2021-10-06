@@ -14,7 +14,7 @@ module.exports = async (client, member) => {
     if (channel) {
       if (!channel.permissionsFor(clientMember).has("SEND_MESSAGES")) return;
       const embed = client.embeds.red(`Goodbye`, `<@${member.id}> has left the server.`);
-      channel.send(embed);
+      channel.send({ embeds: [embed] });
     }
   } catch (error) {
     client.functions.sendError(error);

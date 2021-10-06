@@ -15,7 +15,7 @@ module.exports = class Embeds {
     this.client = client;
   }
 
-  new(title, description, color, footer1, footer2, timestamp, image, thumbnail, fields) {
+  new(title = "", description = "", color = "BLUE", footer1 = footer1, footer2 = footer2, timestamp = true, image = null, thumbnail = null, fields = []) {
     const embed = new Discord.MessageEmbed();
     if (title) embed.setTitle(title);
     if (description) embed.setDescription(description);
@@ -25,305 +25,218 @@ module.exports = class Embeds {
     if (thumbnail) embed.setThumbnail(thumbnail);
     if (image) embed.setImage(image);
     if (fields) embed.addFields(fields);
-    return embed
+    return embed;
   }
 
-  permission(command) {
-    var permissions = command.permissions;
-    if (!permissions) permissions = command;
-
-    const description = `You do not have the required permissions to execute the \`${command.commandName}\` command.\nTo execute this command, you will need to be granted the permission${permissions.length == 1 ? `` : `s`} below.\n\n**Command Permissions**\n${code}${permissions.join(" | ")}${code}`;
-
-    const embed = new Discord.MessageEmbed()
-    .setTitle(`Insufficient Permissions`)
-    .setDescription(`${description}`)
-    .setColor(`RED`)
-    .setFooter(footer1, footer2)
-    .setTimestamp();
-
-    return embed
-  }
-
-  botPermission(command) {
-    var permissions = command.clientPerms;
-    if (!permissions) permissions = command;
-
-    const description = `I do not have the required permissions to carry out this process.\nConsider granting me the permission${permissions.length == 1 ? `` : `s`} below to run this command properly.\n\n**Command Permissions**\n${code}${permissions.join(" | ")}${code}`;
-
-    const embed = new Discord.MessageEmbed()
-    .setTitle(`Insufficient Permissions`)
-    .setDescription(`${description}`)
-    .setColor(`RED`)
-    .setFooter(footer1, footer2)
-    .setTimestamp();
-
-    return embed
-  }
-
-  botPermissionCustom(command, msg) {
-    var permissions = command.clientPerms || [command];
-
-    const embed = new Discord.MessageEmbed()
-    .setTitle(`Insufficient Permissions`)
-    .setDescription(`${msg}\nConsider granting me the permission below to execute this command properly.\n\n**Permissions**\n${code}${permissions.join(" | ")}${code}`)
-    .setColor(`RED`)
-    .setFooter(footer1, footer2)
-    .setTimestamp();
-
-    return embed
-  }
-
-  async noArgs(command, guild) {
-    const guildPrefix = await this.client.functions.fetchPrefix(guild);
-    const noArgs = {
-      title: `${command.name}`,
-      color: `ORANGE`,
-      description: `${command.description}\n\n**Usage**\n${code}${guildPrefix}${command.usage}${code}\n**Options**\n${command.options[0] ? `\`${guildPrefix}${command.commandName} ${command.options.join(`\n${guildPrefix}${command.commandName} `)}\`` : `No command options found.`}\n\n**Usage Error**\nYou are missing required parameters needed to carry out this command.\nTo get more information, run: \`${guildPrefix}help ${command.commandName}\`.`,
-      footer1: `Logic Link - Imagine A World`,
-      footer2: `https://cdn.discordapp.com/emojis/775848533298905130.png?v=1`
+  permission(command, msg) {
+    var permissions = command;
+    if (typeof command == "object") permissions = command.permissions;
+    
+    if (/[A-Z_]/.test(msg)) {
+      permissions = [msg];
+      msg = null;
     }
 
-    const embed = new Discord.MessageEmbed()
-    .setTitle(noArgs.title)
-    .setColor(noArgs.color)
-    .setDescription(noArgs.description)
-    .setFooter(noArgs.footer1, noArgs.footer2)
-    .setTimestamp();
+    const description = `${msg || `You do not have the required permissions to execute the \`${command.commandName}\` command.`}\nTo execute this command, you will need to be granted the permission${permissions.length == 1 ? `` : `s`} below.`;
 
-    return embed
+    const embed = new Discord.MessageEmbed();
+    embed.setTitle(`Insufficient Permissions`);
+    embed.setDescription(`${description}`);
+    embed.setColor(`RED`);
+    embed.addField("Command Permissions", `${code}${permissions.join(" | ")}${code}`);
+    embed.setFooter(footer1, footer2);
+    embed.setTimestamp();
+
+    return embed;
   }
 
-  noArgsObj(noArgs) {
-    const embed = new Discord.MessageEmbed()
-    .setTitle(noArgs.title)
-    .setColor(noArgs.color)
-    .setDescription(noArgs.description)
-    .setFooter(noArgs.footer1, noArgs.footer2)
-    .setTimestamp();
+  botPermission(command, msg) {
+    var permissions = command;
+    if (typeof command == "object") permissions = command.permissions;
 
-    return embed
+    if (/[A-Z_]/.test(msg)) {
+      permissions = [msg];
+      msg = null;
+    }
+
+    const description = `${msg || `I do not have the required permissions to carry out this process.`}\nConsider granting me the permission${permissions.length == 1 ? `` : `s`} below to run this command properly.`;
+
+    const embed = new Discord.MessageEmbed();
+    embed.setTitle(`Insufficient Permissions`);
+    embed.setDescription(`${description}`);
+    embed.setColor(`RED`);
+    embed.addField("Command Permissions", `${code}${permissions.join(" | ")}${code}`);
+    embed.setFooter(footer1, footer2);
+    embed.setTimestamp();
+
+    return embed;
   }
 
   pending(command, msg) {
-    const embed = new Discord.MessageEmbed()
-    .setTitle(command.name || command)
-    .setColor(`BLUE`)
-    .setDescription(`${this.client.util.clock} ${msg ? msg : `Loading...`} ${this.client.util.pending}`)
-    .setFooter(footer1, footer2)
-    .setTimestamp();
-
-    return embed
-  }
-  
-  success(command, description, fields) {
     const embed = new Discord.MessageEmbed();
-    embed.setTitle(command.name || command);
-    embed.setColor(`GREEN`);
-    embed.setDescription(`${check} ${description}`);
-    embed.setFooter(footer1, footer2);
-    if (fields) if (fields[0]) embed.addFields(fields);
-    embed.setTimestamp();
-
-    return embed
-  }
-
-  error(command, description, fields) {
-    const embed = new Discord.MessageEmbed();
-    embed.setTitle(command.name || command);
-    embed.setColor(`RED`);
-    embed.setDescription(`${this.client.util.error} ${description}`);
-    embed.setFooter(footer1, footer2);
-    if (fields) if (fields[0]) embed.addFields(fields);
-    embed.setTimestamp();
-
-    return embed;
-  }
-
-  red(command, description, fields) {
-    const embed = new Discord.MessageEmbed();
-    embed.setTitle(command.name || command);
-    embed.setColor(`RED`);
-    embed.setDescription(`${description}`);
-    embed.setFooter(footer1, footer2);
-    if (fields) if (fields[0]) embed.addFields(fields);
-    embed.setTimestamp();
-
-    return embed
-  }
-
-  green(command, description, fields) {
-    const embed = new Discord.MessageEmbed();
-    embed.setTitle(command.name || command);
-    embed.setColor(`GREEN`);
-    embed.setDescription(`${description}`);
-    embed.setFooter(footer1, footer2);
-    if (fields) if (fields[0]) embed.addFields(fields);
-    embed.setTimestamp();
-
-    return embed;
-  }
-
-  async errorInfo(command, message, error) {
-    const errorId = await this.client.functions.getRandomString(10);
-    error ? await this.client.functions.setErrorData(error, errorId) : console.log("Recieved Invalid Error");
-    
-    const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa" });
-
-    const catcher = {
-      title: `Bot Error`,
-      color: `RED`,
-      description: `An error has occured whilst running the \`${command.commandName}\` command.\n${error ? `${error.name ? `${error.name.includes("Discord") ? `This error was caused by a Discord API Error which passed through user filtering.` : `This error was caused by a human error from the command file of this command.   \u200b`}` : `This error was caused by a human error from the command file of this command.   \u200b`}` : ``}`,
-      field1: {
-        title: `Error Information`,
-        description: `${error.name ? `**Name:** \`${error.name}\`` : ``}${error.message ? `\n**Message:** \`${error.message}\`` : ``}${error.path ? `\n**Path:** \`${error.path}\`` : ``}${error.code ? `\n**Code:** \`${error.code}\`` : ``}${error.method ? `\n**Method:** \`${error.method}\`` : ``}${error.httpStatus ? `\n**HTTP Status:** \`${error.httpStatus}\`‎` : ``}\n‎`,
-      },
-      field2: {
-        title: `Command Information`,
-        description: `${command.name ? `**Name:** \`${command.name}\`\n` : ``}${message.guild.name ? `**Guild Name:** \`${message.guild.name}\`\n` : ``}${message.author.id ? `**Sender:** <@${message.author.id}>\n` : ``}${message.channel.id ? `**Channel:** <#${message.channel.id}>\n` : ``}`,
-      },
-      field3: {
-        title: `Error Stack`,
-        description: `${code}${error.stack}${code}`,
-      },
-      footer1: `Logic Link - Imagine A World`,
-      footer2: `https://cdn.discordapp.com/emojis/775848533298905130.png?v=1`
-    }
-
-    const errorEmbed = new Discord.MessageEmbed();
-    errorEmbed.setTitle(`${catcher.title}`)
-    errorEmbed.setColor(`${catcher.color}`)
-    if (error) errorEmbed.addField(`${catcher.field1.title}`, `${catcher.field1.description}`)
-    if (command) errorEmbed.addField(`${catcher.field2.title}`, `${catcher.field2.description}`)
-    errorEmbed.setDescription(`${catcher.description}`)
-
-    const stackEmbed = new Discord.MessageEmbed();
-    stackEmbed.setTitle(catcher.field3.title);
-    stackEmbed.setColor(catcher.color)
-    stackEmbed.setDescription(catcher.field3.description);
-    stackEmbed.setFooter(catcher.footer1, catcher.footer2)
-    stackEmbed.setTimestamp();
-
-    whClient.send({
-      username: "Logic Link",
-      avatarURL: this.client.user.displayAvatarURL(),
-      embeds: [errorEmbed, stackEmbed]
-    })
-    .catch((error) => console.log(error))
-
-    const embed = new Discord.MessageEmbed()
-    .setTitle(command.name)
-    .setColor(`RED`)
-    .setDescription(`An error has occured whilst running this command${error.message ? `` : `, that's all we know for now`}.\nIf this issue persists, please contact the bot developer or support server.\n\n**Error ID**\n${code}${errorId}${code}\n**Error Info**\n${error.message ? `${code}${error.message}${code}\n` : ``}`)
-    .setFooter(footer1, footer2)
-    .setTimestamp();
-
-    return embed
-  }
-
-  image(command, description, image) {
-    const embed = new Discord.MessageEmbed()
-    .setTitle(command.name)
-    .setColor(`GREEN`)
-    .setDescription(`${description}`)
-    .setImage(image)
-    .setFooter(footer1, footer2)
-    .setTimestamp();
-
-    return embed
-  }
-
-  blue(command, description, setFooters) {
-    const embed = new Discord.MessageEmbed();
-    if (command) embed.setTitle(command.name || command)
-    embed.setColor(`BLUE`)
-    if (description) embed.setDescription(`${description}`)
-    if (!setFooters) {
-      embed.setFooter(footer1, footer2);
-      embed.setTimestamp();
-    }
-
-    return embed
-  }
-
-  orange(command, description) {
-    const embed = new Discord.MessageEmbed()
-    .setTitle(command.name || command)
-    .setColor(`ORANGE`)
-    .setDescription(`${description}`)
-    .setFooter(footer1, footer2)
-    .setTimestamp();
-
-    return embed
-  }
-
-  field(command, description, fields) {
-    const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name || command);
     embed.setColor(`BLUE`);
-    embed.setDescription(`${description}`);
-    if (fields) embed.addFields(fields);
+    embed.setDescription(`${this.client.util.clock} ${msg ? msg : `Loading...`} ${this.client.util.pending}`);
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    return embed
+    return embed;
   }
-
-  fieldSuccess(command, description, fields) {
-    const embed = new Discord.MessageEmbed()
+  
+  success(command, description, fields = []) {
+    const embed = new Discord.MessageEmbed();
     embed.setTitle(command.name || command);
     embed.setColor(`GREEN`);
     embed.setDescription(`${check} ${description}`);
-    if (fields) embed.addFields(fields);
     embed.setFooter(footer1, footer2);
+    if (fields[0]) embed.addFields(fields);
     embed.setTimestamp();
 
-    return embed
+    return embed;
   }
 
-  fieldGreen(command, description, fields) {
-    const embed = new Discord.MessageEmbed()
+  warn(command, description, fields = []) {
+    const embed = new Discord.MessageEmbed();
     embed.setTitle(command.name || command);
-    embed.setColor(`GREEN`);
-    embed.setDescription(`${description}`);
-    if (fields) embed.addFields(fields);
+    embed.setColor(`#f9a61a`);
+    embed.setDescription(`${warn} ${description}`);
     embed.setFooter(footer1, footer2);
+    if (fields[0]) embed.addFields(fields);
     embed.setTimestamp();
 
-    return embed
+    return embed;
   }
 
-  fieldError(command, description, fields) {
-    const embed = new Discord.MessageEmbed()
+  error(command, description, fields = []) {
+    const embed = new Discord.MessageEmbed();
     embed.setTitle(command.name || command);
     embed.setColor(`RED`);
     embed.setDescription(`${error} ${description}`);
-    if (fields) embed.addFields(fields);
+    embed.setFooter(footer1, footer2);
+    if (fields[0]) embed.addFields(fields);
+    embed.setTimestamp();
+
+    return embed;
+  }
+
+  red(command, description, fields = []) {
+    const embed = new Discord.MessageEmbed();
+    embed.setTitle(command.name || command);
+    embed.setColor(`RED`);
+    embed.setDescription(`${description}`);
+    embed.setFooter(footer1, footer2);
+    if (fields[0]) embed.addFields(fields);
+    embed.setTimestamp();
+
+    return embed;
+  }
+
+  green(command, description, fields = []) {
+    const embed = new Discord.MessageEmbed();
+    embed.setTitle(command.name || command);
+    embed.setColor(`GREEN`);
+    embed.setDescription(`${description}`);
+    embed.setFooter(footer1, footer2);
+    if (fields[0]) embed.addFields(fields);
+    embed.setTimestamp();
+
+    return embed;
+  }
+
+  blue(command, description, fields = []) {
+    const embed = new Discord.MessageEmbed();
+    embed.setTitle(command.name || command);
+    embed.setColor(`BLUE`);
+    embed.setDescription(`${description}`);
+    embed.setFooter(footer1, footer2);
+    if (fields[0]) embed.addFields(fields);
+    embed.setTimestamp();
+
+    return embed;
+  }
+
+  custom(title, description, footer = [], fields = [], stamp) {
+    const embed = new Discord.MessageEmbed();
+    if (title) embed.setTitle(title.name || title);
+    embed.setColor(`BLUE`);
+    if (description) embed.setDescription(description);
+    if (footer[0]) embed.setFooter(footer[0], footer[1]);
+    if (fields[0]) embed.addFields(fields);
+    if (stamp) embed.setTimestamp();
+
+    return embed;
+  }
+
+  orange(command, description, fields = []) {
+    const embed = new Discord.MessageEmbed();
+    embed.setTitle(command.name || command);
+    embed.setColor(`ORANGE`);
+    embed.setDescription(`${description}`);
+    embed.setFooter(footer1, footer2);
+    if (fields[0]) embed.addFields(fields);
+    embed.setTimestamp();
+
+    return embed;
+  }
+
+  image(command, description, image) {
+    const embed = new Discord.MessageEmbed();
+    embed.setTitle(command.name);
+    embed.setColor(`GREEN`);
+    embed.setDescription(`${description}`);
+    if (image) embed.setImage(image);
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    return embed
+    return embed;
   }
 
   settingsNoArgs(command, description, prefix) {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name || command);
     embed.setColor(`BLUE`);
-    embed.setDescription(`${command.description}\n\n**Current Setting**\n${description}\n\n**Usage**\n${code}${prefix}${command.usage}${code}\n**Usage Error**\nYou are missing required parameters needed to carry out this command.\nTo get more information, run: \`${prefix}help ${command.commandName}\`.`);
+    embed.setDescription(`${command.description}\n\u200b`);
+    embed.addField("Current Setting", `${description}\n\u200b`);
+    embed.addField("Usage", `${code}${prefix}${command.usage}${code}\u200b`);
+    embed.addField("Usage Error", `You are missing required parameters needed to carry out this command.\nTo get more information, run: \`${prefix}help ${command.commandName}\`.`);
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    return embed
+    return embed;
+  }
+
+  inactivity(command) {
+    const embed = new Discord.MessageEmbed()
+    embed.setTitle(command.name || command);
+    embed.setColor(`RED`);
+    embed.setDescription(`${error} This prompt has timed out due to inactivity.`);
+    embed.setFooter(footer1, footer2);
+    embed.setTimestamp();
+
+    return embed;
+  }
+
+  notComponent() {
+    const embed = new Discord.MessageEmbed()
+    embed.setTitle("Message Component");
+    embed.setColor(`RED`);
+    embed.setDescription(`${error} This is not your message component.`);
+    embed.setFooter(footer1, footer2);
+    embed.setTimestamp();
+
+    return embed;
   }
 
   helpMenu(command, prefix) {
     const fields = [
-      { name: `Permissions`, value: `${command.permissions[0] == "ALL" ? `${this.client.util.noPerms}` : `${command.required == "dev" ? `Locked to bot developer.` : `\`${command.permissions.join(" | ")}\``}`}`, inline: true },
-      { name: `Bot Permissions`, value: `${command.clientPerms[0] ? `\`${command.permissions.join(" | ")}\`` : `${this.client.util.noPerms}`}`, inline: true },
+      { name: `Permissions`, value: `${command.permissions == "ALL" ? `${this.client.util.noPerms}` : `${command.required == "dev" ? `Locked to bot developer.` : `\`${command.permissions.join(" | ")}\``}`}`, inline: true },
+      { name: `Bot Permissions`, value: `${command.clientPerms ? command.clientPerms[0] ? `\`${command.clientPerms.join(" | ")}\`` : this.client.util.noPerms : this.client.util.noPerms}`, inline: true },
       { name: `\u200b`, value: `\u200b`, inline: true },
-      { name: `Aliases`, value: `${command.aliases[0] ? `\`${command.aliases.join("\n")}\`` : `${this.client.util.noAlias}`}`, inline: true },
-      { name: `Options`, value: `${command.options[0] ? `\`${command.options.join("\n")}\`` : `${this.client.util.noOption}`}`, inline: true },
+      { name: `Aliases`, value: `${command.aliases ? `\`${command.aliases.join("\`\n\`")}\`` : this.client.util.noAlias}`, inline: true },
+      { name: `Options`, value: `${command.options ? `\`${command.options.join("\`\n\`")}\`` : this.client.util.noOption}`, inline: true },
       { name: `\u200b`, value: `\u200b`, inline: true },
     ]
+    
     const embed = new Discord.MessageEmbed()
     embed.setTitle(`Help - ${command.name}`);
     embed.setColor(`BLUE`);
@@ -332,26 +245,36 @@ module.exports = class Embeds {
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    return embed
+    return embed;
   }
 
   noUser(command, arg) {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name || command);
     embed.setColor(`RED`);
-    embed.setDescription(`${error} I could not record any users from your message.\n\n**Detailed Info**\n\`${arg}\` is not a user.`);
+    embed.setDescription(`${error} I could not record any users from your message.`);
     embed.setFooter(footer1, footer2);
+    embed.addFields([{
+      name: "Detailed Info",
+      value: `\`${arg}\` is not a user.`,
+      inline: false
+    }]);
     embed.setTimestamp();
 
-    return embed
+    return embed;
   }
 
   noMember(command, arg) {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name);
     embed.setColor(`RED`);
-    embed.setDescription(`${error} I could not record any server members from your message.\n\n**Detailed Info**\n\`${arg}\` is not a member.`);
+    embed.setDescription(`${error} I could not record any server members from your message.`);
     embed.setFooter(footer1, footer2);
+    embed.addFields([{
+      name: "Detailed Info",
+      value: `\`${arg}\` is not a member.`,
+      inline: false
+    }]);
     embed.setTimestamp();
 
     return embed;
@@ -361,8 +284,13 @@ module.exports = class Embeds {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name);
     embed.setColor(`RED`);
-    embed.setDescription(`${error} I could not record any roles from your message.\n\n**Detailed Info**\n\`${arg}\` is not a role.`);
+    embed.setDescription(`${error} I could not record any roles from your message.`);
     embed.setFooter(footer1, footer2);
+    embed.addFields([{
+      name: "Detailed Info",
+      value: `\`${arg}\` is not a role.`,
+      inline: false
+    }]);
     embed.setTimestamp();
 
     return embed;
@@ -372,8 +300,13 @@ module.exports = class Embeds {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name);
     embed.setColor(`RED`);
-    embed.setDescription(`${error} I could not record any guilds from your message.\n\n**Detailed Info**\n\`${arg}\` is not a guild.`);
+    embed.setDescription(`${error} I could not record any guilds from your message.`);
     embed.setFooter(footer1, footer2);
+    embed.addFields([{
+      name: "Detailed Info",
+      value: `\`${arg}\` is not a guild.`,
+      inline: false
+    }]);
     embed.setTimestamp();
 
     return embed;
@@ -383,8 +316,13 @@ module.exports = class Embeds {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name);
     embed.setColor(`RED`);
-    embed.setDescription(`${error} I could not record any channels from your message.\n\n**Detailed Info**\n\`${arg}\` is not a channel.`);
+    embed.setDescription(`${error} I could not record any channels from your message.`);
     embed.setFooter(footer1, footer2);
+    embed.addFields([{
+      name: "Detailed Info",
+      value: `\`${arg}\` is not a channel.`,
+      inline: false
+    }]);
     embed.setTimestamp();
 
     return embed;
@@ -394,8 +332,13 @@ module.exports = class Embeds {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name);
     embed.setColor(`RED`);
-    embed.setDescription(`${error} I could not record any commands from your message.\n\n**Detailed Info**\n\`${arg}\` is not a command.`);
+    embed.setDescription(`${error} I could not record any commands from your message.`);
     embed.setFooter(footer1, footer2);
+    embed.addFields([{
+      name: "Detailed Info",
+      value: `\`${arg}\` is not a command.`,
+      inline: false
+    }]);
     embed.setTimestamp();
 
     return embed;
@@ -405,19 +348,29 @@ module.exports = class Embeds {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name);
     embed.setColor(`RED`);
-    embed.setDescription(`${error} I could not record any members or roles from your message.\n\n**Detailed Info**\n\`${arg1}\` is not a member.${arg2 ? `\n\`${arg2}\` is not a role.` : ``}`);
+    embed.setDescription(`${error} I could not record any members or roles from your message.`);
     embed.setFooter(footer1, footer2);
+    embed.addFields([{
+      name: "Detailed Info",
+      value: `\`${arg1}\` is not a member.${arg2 ? `\n${arg2} is not a role`: ``}`,
+      inline: false
+    }]);
     embed.setTimestamp();
 
     return embed;
   }
 
-  noRolesOrChannels(command, arg) {
+  noRolesOrChannels(command, arg1) {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name);
     embed.setColor(`RED`);
-    embed.setDescription(`${error} I could not record any roles or channels from your message.\n\n**Detailed Info**\n\`${arg}\` is not a role or channel.`);
+    embed.setDescription(`${error} I could not record any roles or channels from your message.`);
     embed.setFooter(footer1, footer2);
+    embed.addFields([{
+      name: "Detailed Info",
+      value: `\`${arg1}\` is not a role or channel.`,
+      inline: false
+    }]);
     embed.setTimestamp();
 
     return embed;
@@ -427,8 +380,13 @@ module.exports = class Embeds {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name);
     embed.setColor(`RED`);
-    embed.setDescription(`${error} No valid ${other ? other : type}s were recorded from your message.\n\n**Detailed Info**\n\`${arg}\` is not a valid ${type}.`);
+    embed.setDescription(`${error} I could not record any valid ${other || type}'s from your message.`);
     embed.setFooter(footer1, footer2);
+    embed.addFields([{
+      name: "Detailed Info",
+      value: `\`${arg}\` is not a valid ${type}.`,
+      inline: false
+    }]);
     embed.setTimestamp();
 
     return embed;
@@ -438,7 +396,12 @@ module.exports = class Embeds {
     const embed = new Discord.MessageEmbed()
     embed.setTitle(command.name);
     embed.setColor(`RED`);
-    embed.setDescription(`${error} ${content}\n\n**Detailed Info**\n${descriptions.join("\n")}`);
+    embed.setDescription(`${error} ${content}`);
+    embed.addFields([{
+      name: "Detailed Info",
+      value: descriptions.join("\n"),
+      inline: false
+    }]);
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
@@ -452,25 +415,25 @@ module.exports = class Embeds {
     switch (type) {
       case "ban":
       {
-        content = `You have been banned from \`${guild.name}\`.`;
+        content = `You have been banned from \`${guild.name || guild}\`.`;
         title = "User Banned";
         break;
       }
       case "kick":
       {
-        content = `You have been kicked from \`${guild.name}\`.`;
+        content = `You have been kicked from \`${guild.name || guild}\`.`;
         title = "User Kicked";
         break;
       }
       case "mute":
       {
-        content = `You have been muted in \`${guild.name}\`.`;
+        content = `You have been muted in \`${guild.name || guild}\`.`;
         title = "User Muted";
         break;
       }
       case "warn":
       {
-        content = `You have been warned in \`${guild.name}\`.`;
+        content = `You have been warned in \`${guild.name || guild}\`.`;
         title = "User Warned";
         break;
       }
@@ -488,25 +451,26 @@ module.exports = class Embeds {
     return embed;
   }
 
-  helpCategory(category, emoji, prefix, tckSup, tckAdm, noPanel) {
+  helpCategory(category, title, prefix, supView, noPanel) {
+    const cat = this.client.category.get(category);
     const lowerCat = category.toLowerCase();
-    var cmdArray = null;
+    const client = this.client;
+
+    const basic = `${client.util.members} Basic Commands`;
+    const cmdArray = [];
+    var catMsg = category == "General" ? "Basic info / utility commands available to all users." : category == "Moderator" ? "Advanced moderation commands useful for stopping raids and attacks." : category == "Administrator" ? "Easy to use admin / utility commands that can get the job done quickly." : category == "Ticket" ? "Next generation ticket systems and commands great for de-cluttering channels." : category == "Support" ? "Helpful commands for our support team used to diagnose issues." : category == "Developer" ? "Secret development commands used to debug problems and fix bugs." : null;
     
     if (category == "Ticket") {
-      cmdArray = [
-        { name: `${this.client.util.members} Basic Commands`, value: `${code}\n${this.client.category.get(category).Basic.join("\n")}${code}`, inline: true },
-        { name: `${tckSup}Support Commands`, value: `${code}\n${this.client.category.get(category).Support.join("\n")}${code}`, inline: true },
-        { name: `${tckAdm}Administrator Commands`, value: `${code}\n${this.client.category.get(category).Administrator.join("\n")}${code}`, inline: true }
-      ]
+      cmdArray.push({ name: basic, value: `${code}\n${cat.Basic.join("\n")}${code}`, inline: true });
+      cmdArray.push({ name: supView, value: `${code}\n${cat.Support.join("\n")}${code}`, inline: true });
+      cmdArray.push({ name: title, value: `${code}\n${cat.Administrator.join("\n")}${code}`, inline: true });
     } else {
-      cmdArray = [
-        { name: `${emoji}${category} Commands`, value: `${code}\n${this.client.category.get(category).join("\n")}${code}`, inline: true },
-        { name: this.client.util.whitespace, value: `\u200b`, inline: true },
-        { name: this.client.util.whitespace, value: `\u200b`, inline: true }
-      ]
+      cmdArray.push({ name: title, value: `${code}\n${cat.join("\n")}${code}`, inline: true });
+      cmdArray.push({ name: client.util.whitespace, value: `\u200b`, inline: true });
+      cmdArray.push({ name: client.util.whitespace, value: `\u200b`, inline: true });
     }
 
-    const helpEmbed = this.field(`Help - ${category}`, `${this.client.util.welcomeBotInfo}\n\n**Command List**\nBelow shows a list of all ${lowerCat} commands.\nTo get more details about a particular command, run: \`${prefix}help [command]\`.\nIf you would like a detailed guide on the help menu, run \`${prefix}help guide\`.\n\n${code}${category} Commands${code}\u200b${noPanel ? `\n${this.client.util.warn} This server does not have any panels. Run \`${prefix}panels new\` to create one.\n` : ``}`, cmdArray);
+    const helpEmbed = this.blue(`Help - ${category}`, `${catMsg}\n\n**Command List**\nBelow shows a list of all ${lowerCat} commands.\nTo get more details about a particular command, run: \`${prefix}help [command]\`.\nIf you would like a detailed guide on the help menu, run \`${prefix}help guide\`.\n\n${code}${category} Commands${code}\u200b${noPanel ? `\n${client.util.warn} This server does not have any panels. Run \`${prefix}panels new\` to create one.\n` : ``}`, cmdArray);
 
     return helpEmbed;
   }
@@ -519,23 +483,20 @@ module.exports = class Embeds {
     embed.setTimestamp();
 
     if (type == "user") {
-      const roles = info.roles[0] ? `<@&${info.roles.join(">, <@&")}>` : "No Roles";
-      const roleCount = roles !== "No Roles" ? info.roles.length : 0;
-
       embed.addFields([
-        { name: "Created At", value: `<t:${info.createdAt}:D>`, inline: true },
-        { name: "Joined At", value: `<t:${info.joinedAt}:D>`, inline: true },
-        { name: `Roles [${roleCount}]`, value: roles, inline: false },
-        { name: "Permissions", value: info.permissions.join(" "), inline: false },
-        { name: "Badges", value: info.badges.join(" "), inline: false },
+        { name: "Created At", value: info.createdAt, inline: true },
+        { name: "Joined At", value: info.joinedAt, inline: true },
+        { name: `Roles [${info.roleCount}]`, value: info.roles, inline: false },
+        { name: "Permissions", value: info.permissions, inline: false },
+        { name: "Badges", value: info.badges, inline: false },
       ]);
 
       embed.setThumbnail(info.profile);
-      embed.setDescription(`${check} Showing whois information for: <@${info.user.id}>.\n\u200b`);
+      embed.setDescription(`${check} Showing whois information for: ${info.mention}.\n\u200b`);
     } else if (type == "guild") {
       embed.addFields([
-        { name: "Server Owner", value: `<@${info.owner}>`, inline: true },
-        { name: "Created At", value: `<t:${info.createdAt}:D>`, inline: true },
+        { name: "Server Owner", value: info.owner, inline: true },
+        { name: "Created At", value: info.createdAt, inline: true },
         { name: "\u200b", value: "\u200b", inline: true },
         { name: "Roles", value: info.roles, inline: true },
         { name: "Emojis", value: info.emojis, inline: true },
@@ -545,27 +506,26 @@ module.exports = class Embeds {
       ]);
 
       embed.setThumbnail(info.icon);
-      embed.setDescription(`${check} Showing server information for ${info.guild.name}.\n\u200b`);
+      embed.setDescription(`${check} Showing server information for ${info.name}.\n\u200b`);
     } else if (type == "channel") {
-      const nsfw = info.nsfw ? `NSFW.` : `Not NSFW.`;
-
       embed.addFields([
-        { name: "Name", value: `\`${info.name}\``, inline: true },
-        { name: "ID", value: `\`${info.id}\``, inline: true },
+        { name: "Name", value: info.name, inline: true },
+        { name: "ID", value: info.id, inline: true },
         { name: "\u200b", value: "\u200b", inline: true },
         { name: "Type", value: info.type, inline: true },
-        { name: "NSFW", value: nsfw, inline: true },
-        { name: "Category", value: info.category ? `#${info.category.name}` : `No Channel Category.`, inline: true },
-        { name: "Topic", value: info.topic || "No Channel Topic", inline: false },
+        { name: "NSFW", value: info.nsfw, inline: true },
+        { name: "Category", value: info.category, inline: true },
+        { name: "Topic", value: info.topic, inline: false },
         { name: "Permission Overwrites", value: info.overwrites, inline: true },
-        { name: "Raw Position", value: info.position, inline: true }
+        { name: "Raw Position", value: info.position, inline: true },
+        { name: "Pinned", value: info.pinned, inline: true }
       ]);
 
-      embed.setDescription(`${check} Showing channel information for: <#${info.id}>.\n\u200b`);
+      embed.setDescription(`${check} Showing channel information for: ${info.mention}.\n\u200b`);
     } else if (type == "role") {
       embed.addFields([
-        { name: "Name", value: `\`${info.name}\``, inline: true },
-        { name: "ID", value: `\`${info.id}\``, inline: true },
+        { name: "Name", value: info.name, inline: true },
+        { name: "ID", value: info.id, inline: true },
         { name: "\u200b", value: "\u200b", inline: true },
         { name: "Colour", value: info.color, inline: true },
         { name: "Hoist", value: info.hoist, inline: true },
@@ -574,8 +534,100 @@ module.exports = class Embeds {
         { name: "Raw Position", value: info.position, inline: true }
       ]);
 
-      embed.setDescription(`${check} Showing role information for: <@&${info.id}>.\n\u200b`);
+      embed.setDescription(`${check} Showing role information for: ${info.mention}.\n\u200b`);
     }
+
+    return embed;
+  }
+
+  async errorInfo(command, message, error) {
+    const errorId = await this.client.functions.getRandomString(10);
+    error ? await this.client.functions.setErrorData(error, errorId) : console.log("Recieved Invalid Error");
+    
+    const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa" });
+
+    const catcher = {
+      title: `Bot Error`,
+      color: `RED`,
+      description: `An error has occured whilst running the \`${command.commandName}\` command.\n${error ? `${error.name ? `${error.name.includes("Discord") ? `This error was caused by a Discord API Error which passed through user filtering.` : `This error was caused by a human error from the command file of this command.   \u200b`}` : `This error was caused by a human error from the command file of this command.   \u200b`}` : ``}`,
+      fields: [
+        {
+          name: `Error Information`,
+          value: `${error.name ? `**Name:** \`${error.name}\`` : ``}${error.message ? `\n**Message:** \`${error.message}\`` : ``}${error.path ? `\n**Path:** \`${error.path}\`` : ``}${error.code ? `\n**Code:** \`${error.code}\`` : ``}${error.method ? `\n**Method:** \`${error.method}\`` : ``}${error.httpStatus ? `\n**HTTP Status:** \`${error.httpStatus}\`‎` : ``}\n\u200b`,
+          inline: false
+        },
+        {
+          name: `Command Information`,
+          value: `${command ? `**Name:** \`${command.name}\`\n` : ``}${message.guild ? `**Guild Name:** \`${message.guild.name}\`\n` : ``}${message.author ? `**Sender:** <@${message.author.id}>\n` : ``}${message.channel ? `**Channel:** <#${message.channel.id}>\n` : ``}`,
+          inline: false
+        }
+      ]
+    }
+
+    const stack = {
+      title: `Error Stack`,
+      description: `${code}${error.stack}${code}`,
+      color: "RED",
+      timestamp: Date.now(),
+      footer: {
+        text: footer1,
+        iconURL: footer2
+      }
+    }
+
+    const msg = {
+      title: command.name,
+      description: this.client.util.errorMsgDefault,
+      color: "RED",
+      fields: [
+        { name: "Error Identification", value: `${code}${errorId}${code}`, inline: false }
+      ],
+      timestamp: Date.now(),
+      footer: {
+        text: footer1,
+        iconURL: footer2
+      }
+    }
+
+    const embed = new Discord.MessageEmbed(msg);
+    const embed1 = new Discord.MessageEmbed(catcher);
+    const embed2 = new Discord.MessageEmbed(stack);
+
+    whClient.send({
+      username: "Logic Link",
+      avatarURL: this.client.user.displayAvatarURL(),
+      embeds: [embed1, embed2]
+    })
+    .catch((error) => console.log(error));
+    return embed;
+  }
+
+  async noArgs(command = {}, guild) {
+    const prefix = await this.client.functions.fetchPrefix(guild);
+    const noArgs = {
+      title: `${command.name}`,
+      color: `ORANGE`,
+      description: `${command.description}\n\u200b`,
+      fields: [
+        { name: "Usage", value: `${code}${prefix}${command.usage}${code}\u200b`, inline: false },
+        { name: "Options", value: `${command.options[0] ? `\`${prefix}${command.commandName} ${command.options.join(`\`\n\`${prefix}${command.commandName} `)}\`` : this.client.util.noOption}\n\u200b` },
+        { name: "Usage Error", value: `${this.client.util.requiredParams}\nTo get more information, run \`${prefix}help ${command.commandName}\`.` }
+      ]
+    }
+
+    const embed = new Discord.MessageEmbed(noArgs);
+    embed.setTimestamp();
+    embed.setFooter(footer1, footer2);
+    return embed;
+  }
+
+  noArgsObj(noArgs) {
+    const embed = new Discord.MessageEmbed();
+    embed.setTitle(noArgs.title);
+    embed.setColor(noArgs.color);
+    embed.setDescription(noArgs.description);
+    embed.setFooter(noArgs.footer1, noArgs.footer2);
+    embed.setTimestamp();
 
     return embed;
   }

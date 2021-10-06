@@ -25,6 +25,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     const embed1 = client.embeds.success(command, `Logic Link is online.`, fields);
     msg.edit({ embeds: [embed1] });
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

@@ -20,7 +20,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
     if (!role) role = await client.functions.findRole(args.join(" "), message.guild, true);
     if (!channel) channel = await client.functions.findChannel(args.join(" "), message.guild, true);
-    if (firstTime) return await client.prompts.deleteConfirmation(message, command, responses);
+    if (firstTime) return await client.prompts.deleteConfirmation(message, command, responses.conditions);
 
     async function deleteRole() {
       if (!client.functions.hasPerm(command.option.role, message.member, message.guild, settings)) {
@@ -95,6 +95,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       message.reply({ embeds: [embed] });
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

@@ -47,7 +47,7 @@ module.exports = {
       description: "Provides info about your server.",
       permissions: ["ALL"],
       clientPerms: [],
-      cooldown: 2,
+      cooldown: 6,
       minArgs: 0,
       options: [],
       aliases: ["sinfo"],
@@ -61,7 +61,7 @@ module.exports = {
       description: "Provides info about a specific role.",
       permissions: ["ALL"],
       clientPerms: [],
-      cooldown: 2,
+      cooldown: 4,
       minArgs: 1,
       options: [],
       aliases: ["rinfo"],
@@ -75,7 +75,7 @@ module.exports = {
       description: "Provides info about a specific channel.",
       permissions: ["ALL"],
       clientPerms: [],
-      cooldown: 2,
+      cooldown: 5,
       minArgs: 0,
       options: [],
       aliases: ["cinfo"],
@@ -92,7 +92,7 @@ module.exports = {
       cooldown: 1,
       minArgs: 0,
       options: [],
-      aliases: ["inv"],
+      aliases: ["inv", "links"],
       usage: "invite",
       required: "none",
       category: "General",
@@ -140,6 +140,20 @@ module.exports = {
       category: "General",
       commandName: "ping"
     },
+    remind: {
+      name: "Remind",
+      description: "Creates an automatic reminder that direct messages you a task when the time runs out.",
+      permissions: ["ALL"],
+      clientPerms: [],
+      cooldown: 10,
+      minArgs: 1,
+      options: [],
+      aliases: ["remindme"],
+      usage: "remind [duration] <task>",
+      required: "none",
+      category: "General",
+      commandName: "remind"
+    },
     uptime: {
       name: "Up-Time",
       description: "Shows how long the bot has last been online for.",
@@ -180,7 +194,7 @@ module.exports = {
           usage: "voice connect",
           required: "none",
           category: "General",
-          commandName: "voice connect"
+          commandName: "connect"
         },
         disconnect: {
           name: "Voice - Disconnect",
@@ -194,7 +208,7 @@ module.exports = {
           usage: "voice disconnect",
           required: "none",
           category: "General",
-          commandName: "voice disconnect"
+          commandName: "disconnect"
         },
         play: {
           name: "Voice - Play",
@@ -208,7 +222,7 @@ module.exports = {
           usage: "voice play <search query>",
           required: "none",
           category: "General",
-          commandName: "voice play"
+          commandName: "play"
         },
         pause: {
           name: "Voice - Pause",
@@ -222,7 +236,7 @@ module.exports = {
           usage: "voice pause",
           required: "none",
           category: "General",
-          commandName: "voice pause"
+          commandName: "pause"
         }
       }
     },
@@ -285,7 +299,7 @@ module.exports = {
           required: "ticket",
           category: "Ticket",
           subCategory: "Administrator",
-          commandName: "panels new",
+          commandName: "new",
         },
         modify: {
           name: "Ticket Panels - Modify",
@@ -300,7 +314,7 @@ module.exports = {
           required: "ticket",
           category: "Ticket",
           subCategory: "Administrator",
-          commandName: "panels modify",
+          commandName: "modify",
         },
         delete: {
           name: "Ticket Panels - Delete",
@@ -315,7 +329,7 @@ module.exports = {
           required: "ticket",
           category: "Ticket",
           subCategory: "Administrator",
-          commandName: "panels delete",
+          commandName: "delete",
         }
       }
     },
@@ -362,7 +376,7 @@ module.exports = {
           usage: "announce everyone <channel> <announcement>",
           required: "admin",
           category: "Moderator",
-          commandName: "announce everyone"
+          commandName: "everyone"
         },
         here: {
           name: "Announce - Here",
@@ -376,7 +390,7 @@ module.exports = {
           usage: "announce here <channel> <announcement>",
           required: "admin",
           category: "Moderator",
-          commandName: "announce here"
+          commandName: "here"
         },
         role: {
           name: "Announce - Role",
@@ -390,7 +404,7 @@ module.exports = {
           usage: "announce role <role> <channel> <announcement>",
           required: "admin",
           category: "Moderator",
-          commandName: "announce role"
+          commandName: "role"
         }
       }
     },
@@ -407,6 +421,20 @@ module.exports = {
       required: "mod",
       category: "Moderator",
       commandName: "ban",
+    },
+    case: {
+      name: "Cases",
+      description: "Allows users to view and remove moderation cases for that server.",
+      permissions: ["MANAGE_NICKNAMES"],
+      clientPerms: ["MANAGE_NICKNAMES"],
+      cooldown: 4,
+      minArgs: 0,
+      options: [],
+      aliases: ["cases"],
+      usage: "case <id>",
+      required: "mod",
+      category: "Moderator",
+      commandName: "case",
     },
     softban: {
       name: "Softban",
@@ -497,7 +525,7 @@ module.exports = {
       description: "Quickly deletes messages from a channel.",
       permissions: ["MANAGE_MESSAGES"],
       clientPerms: ["MANAGE_MESSAGES"],
-      cooldown: 3,
+      cooldown: 8,
       minArgs: 1,
       options: [],
       aliases: [],
@@ -586,7 +614,7 @@ module.exports = {
       cooldown: 2,
       minArgs: 1,
       options: [],
-      aliases: ["giverole", "ar"],
+      aliases: ["giverole", "ar", "adr"],
       usage: "addrole <user> <role>",
       required: "admin",
       category: "Administrator",
@@ -600,7 +628,7 @@ module.exports = {
       cooldown: 10,
       minArgs: 1,
       options: [],
-      aliases: ["giveroles", "ars"],
+      aliases: ["giveroles", "ars", "adrs"],
       usage: "addroles <user> <roles>",
       required: "admin",
       category: "Administrator",
@@ -631,7 +659,7 @@ module.exports = {
           usage: "create channel <name>",
           required: "admin",
           category: "Administrator",
-          commandName: "create channel"
+          commandName: "channel"
         },
         role: {
           name: "Create - Role",
@@ -644,7 +672,7 @@ module.exports = {
           usage: "create role <name>",
           required: "admin",
           category: "Administrator",
-          commandName: "create role"
+          commandName: "role"
         },
         voice: {
           name: "Create - Voice Channel",
@@ -657,7 +685,7 @@ module.exports = {
           usage: "create voice <name>",
           required: "admin",
           category: "Administrator",
-          commandName: "create voice"
+          commandName: "voice"
         }
       }
     },
@@ -686,7 +714,7 @@ module.exports = {
           usage: "delete <channel>",
           required: "admin",
           category: "Administrator",
-          commandName: "delete channel"
+          commandName: "channel"
         },
         role: {
           name: "Delete - Role",
@@ -699,7 +727,7 @@ module.exports = {
           usage: "delete <role>",
           required: "admin",
           category: "Administrator",
-          commandName: "delete role"
+          commandName: "role"
         }
       }
     },
@@ -708,8 +736,8 @@ module.exports = {
       description: "Prevents all users from being able to see a certain channel.",
       permissions: ["MANAGE_CHANNELS"],
       clientPerms: ["MANAGE_CHANNELS"],
-      cooldown: 3,
-      minArgs: 0,
+      cooldown: 5,
+      minArgs: 1,
       options: [],
       aliases: [],
       usage: "hide [channel] [reason]",
@@ -737,7 +765,7 @@ module.exports = {
       permissions: ["MANAGE_CHANNELS"],
       clientPerms: ["MANAGE_CHANNELS"],
       cooldown: 3,
-      minArgs: 0,
+      minArgs: 1,
       options: [],
       aliases: [],
       usage: "lock [channel] [reason]",
@@ -793,11 +821,11 @@ module.exports = {
           permissions: ["ADMINISTRATOR"],
           clientPerms: [],
           cooldown: 1,
-          aliases: ["settings pre"],
+          aliases: ["pre"],
           usage: "settings prefix <new prefix>",
           required: "admin",
           category: "Administrator",
-          commandName: "settings prefix"
+          commandName: "prefix"
         },
         adminrole: {
           name: "Setting - Administrator Role",
@@ -805,11 +833,11 @@ module.exports = {
           permissions: ["ADMINISTRATOR"],
           clientPerms: [],
           cooldown: 1,
-          aliases: ["settings admin", "settings administratorrole"],
+          aliases: ["adm", "admin", "administrator", "administratorrole"],
           usage: "settings adminrole <role>",
           required: "admin",
           category: "Administrator",
-          commandName: "settings adminrole"
+          commandName: "adminrole"
         },
         modrole: {
           name: "Setting - Moderator Role",
@@ -817,11 +845,11 @@ module.exports = {
           permissions: ["ADMINISTRATOR"],
           clientPerms: [],
           cooldown: 1,
-          aliases: ["settings mod", "settings moderatorrole"],
+          aliases: ["mod", "moderator", "moderatorrole"],
           usage: "settings modrole <role>",
           required: "admin",
           category: "Administrator",
-          commandName: "settings modrole"
+          commandName: "modrole"
         },
         logchannel: {
           name: "Setting - Log Channel",
@@ -829,11 +857,11 @@ module.exports = {
           permissions: ["ADMINISTRATOR"],
           clientPerms: [],
           cooldown: 1,
-          aliases: ["settings log", "settings logchan"],
+          aliases: ["log", "logchan"],
           usage: "settings logchannel <channel>",
           required: "admin",
           category: "Administrator",
-          commandName: "settings logchannel"
+          commandName: "logchannel"
         },
         mutedrole: {
           name: "Setting - Muted Role",
@@ -841,11 +869,11 @@ module.exports = {
           permissions: ["ADMINISTRATOR"],
           clientPerms: [],
           cooldown: 1,
-          aliases: ["settings muted"],
+          aliases: ["muted"],
           usage: "settings mutedrole <role>",
           required: "admin",
           category: "Administrator",
-          commandName: "settings mutedrole"
+          commandName: "mutedrole"
         },
         welcome: {
           name: "Setting - Welcome System",
@@ -853,11 +881,11 @@ module.exports = {
           permissions: ["ADMINISTRATOR"],
           clientPerms: [],
           cooldown: 1,
-          aliases: ["settings welc", "settings welcomesystem"],
+          aliases: ["welc", "welcomesystem"],
           usage: "settings welcome <on | off>",
           required: "admin",
           category: "Administrator",
-          commandName: "settings welcome"
+          commandName: "welcome"
         },
         welcomechannel: {
           name: "Setting - Welcome Channel",
@@ -865,11 +893,11 @@ module.exports = {
           permissions: ["ADMINISTRATOR"],
           clientPerms: [],
           cooldown: 1,
-          aliases: ["settings welcomechan", "settings welcchan"],
+          aliases: ["welcomechan", "welcchan", "wc", "welc"],
           usage: "settings welcomechannel <channel>",
           required: "admin",
           category: "Administrator",
-          commandName: "settings welcomechannel"
+          commandName: "welcomechannel"
         },
         welcomerole: {
           name: "Setting - Welcome Role",
@@ -877,11 +905,11 @@ module.exports = {
           permissions: ["ADMINISTRATOR"],
           clientPerms: [],
           cooldown: 1,
-          aliases: ["settings welcrole"],
+          aliases: ["welcrole", "wr", "welcr"],
           usage: "settings welcomerole <role>",
           required: "admin",
           category: "Administrator",
-          commandName: "settings welcomerole"
+          commandName: "welcomerole"
         },
         welcomemsg: {
           name: "Setting - Welcome Message",
@@ -889,11 +917,23 @@ module.exports = {
           permissions: ["ADMINISTRATOR"],
           clientPerms: [],
           cooldown: 1,
-          aliases: ["settings welcmsg"],
+          aliases: ["welcmsg", "wm", "welcm"],
           usage: "settings welcomemsg <msg>",
           required: "admin",
           category: "Administrator",
-          commandName: "settings welcomemsg"
+          commandName: "welcomemsg"
+        },
+        reset: {
+          name: "Settings - Reset",
+          description: "Resets server settings for that guild.",
+          permissions: ["ADMINISTRATOR"],
+          clientPerms: [],
+          cooldown: 1,
+          aliases: ["rst"],
+          usage: "settings reset",
+          required: "admin",
+          category: "Administrator",
+          commandName: "reset"
         },
       }
     },
@@ -916,8 +956,8 @@ module.exports = {
       description: "Allows users to be able to see a certain channel again.",
       permissions: ["MANAGE_CHANNELS"],
       clientPerms: ["MANAGE_CHANNELS"],
-      cooldown: 3,
-      minArgs: 0,
+      cooldown: 5,
+      minArgs: 1,
       options: [],
       aliases: [],
       usage: "unhide [channel] [reason]",
@@ -931,7 +971,7 @@ module.exports = {
       permissions: ["MANAGE_CHANNELS"],
       clientPerms: ["MANAGE_CHANNELS"],
       cooldown: 5,
-      minArgs: 0,
+      minArgs: 1,
       options: [],
       aliases: ["un-lock"],
       usage: "unlock [channel] [reason]",
@@ -1041,7 +1081,7 @@ module.exports = {
           usage: "devlock view",
           required: "dev",
           category: "Developer",
-          commandName: "devlock view",
+          commandName: "view",
         }
       }
     },
@@ -1099,7 +1139,7 @@ module.exports = {
           usage: "eval silent <code>",
           required: "dev",
           category: "Developer",
-          commandName: "eval silent",
+          commandName: "silent",
         },
         async: {
           name: "Eval - Async",
@@ -1113,7 +1153,7 @@ module.exports = {
           usage: "eval async <code>",
           required: "dev",
           category: "Developer",
-          commandName: "eval async",
+          commandName: "async",
         }
       }
     },
@@ -1171,7 +1211,7 @@ module.exports = {
           usage: "reset cooldown <user> [command]",
           required: "dev",
           category: "Developer",
-          commandName: "reset cooldown",
+          commandName: "cooldown",
         },
         settings: {
           name: "Reset - Settings",
@@ -1185,7 +1225,7 @@ module.exports = {
           usage: "reset settings <guild> [setting]",
           required: "dev",
           category: "Developer",
-          commandName: "reset settings",
+          commandName: "settings",
         }
       }
     },
@@ -1296,6 +1336,7 @@ module.exports = {
     "takeroles": "removeroles",
     "upt": "uptime",
     "commands": "help",
+    "links": "invite",
     "cmds": "help",
     "cmd": "help",
     "warning": "warnings",
@@ -1330,7 +1371,11 @@ module.exports = {
     "dvl": "devlock",
     "ar": "addrole",
     "ars": "addroles",
+    "adr": "addrole",
+    "adrs": "addroles",
     "rr": "removerole",
-    "rrs": "removeroles"
+    "rrs": "removeroles",
+    "setings": "settings",
+    "cases": "case"
   }
 }

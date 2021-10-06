@@ -28,7 +28,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         return message.reply({ embeds: [embed] });
       }
 
-      if (client.functions.hierarchy(member, role, message.guild)) {
+      if (client.functions.hierarchy(message.member, role, message.guild)) {
         client.logger.updateLog(`Role position was higher than or equal to user.`, extra.logId);
         const topRole = message.member.roles.highest;
 
@@ -79,6 +79,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       }
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

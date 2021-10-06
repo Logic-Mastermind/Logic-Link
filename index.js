@@ -1,6 +1,7 @@
-const Discord = require('discord.js');
+const Discord = require("discord.js");
 const Enmap = require("enmap");
-const _ = require("lodash");
+const Chalk = require("chalk");
+const Lod = require("lodash");
 const FS = require("fs");
 
 const buttons = require("./Config/buttons.js");
@@ -13,8 +14,13 @@ const database = require("./Config/database.js");
 const logger = require("./Config/logger.js");
 const util = require("./Config/util.js");
 const schemas = require("./Config/schemas.js");
+const discordFn = require("./Config/discordFn.js");
 const clear = require("clear-module");
 const os = require("os");
+
+for (const [key, opt] of Object.entries(discordFn)) {
+  Discord[key] = opt;
+}
 
 const client = new Discord.Client({
   intents: util.intents,
@@ -35,7 +41,7 @@ client.db = database;
 client.util = util;
 client.clearMod = clear;
 client.os = os;
-client._ = _;
+client._ = Lod;
 
 client.buttons = new buttons(client);
 client.embeds = new embeds(client);
@@ -43,6 +49,7 @@ client.functions = new functions(client);
 client.logger = new logger(client);
 client.prompts = new prompts(client);
 client.schemas = new schemas(client);
+client.server = require('./server')();
 
 client.commands = new Enmap();
 client.category = new Enmap();
@@ -50,7 +57,6 @@ client.category = new Enmap();
 client.ready = false;
 client.readySince = null;
 client.readySinceMS = null;
-client.server = require('./server')();
 
 const cmds = {
   Administrator: [],
@@ -62,7 +68,24 @@ const cmds = {
 };
 
 for (const category of client.command.categories) {
-  if (category == "Ticket") continue;
+  if (category == "Ticket") {
+    for (const category of client.command.ticketCategories) {
+      FS.readdir(`./Commands/Ticket/${category}/`, (error, files) => {
+        if (error) return console.error(error);
+        files.forEach((file) => {
+          if (!file.endsWith(".js")) return;
+          let cmd = require(`./Commands/Ticket/${category}/${file}`);
+          let name = file.split(".")[0];
+          
+          client.functions.log(`CMD: ${Chalk["bold"](name)}`);
+          client.commands.set(name, cmd);
+          cmds["Ticket"][category].push(name);
+        });
+        client.category.set("Ticket", cmds["Ticket"]);
+      })
+    }
+    continue;
+  }
 
   FS.readdir(`./Commands/${category}/`, (error, files) => {
     if (error) return console.error(error);
@@ -71,27 +94,11 @@ for (const category of client.command.categories) {
       let cmd = require(`./Commands/${category}/${file}`);
       let name = file.split(".")[0];
       
-      client.functions.log(`Loading ${name}.`);
+      client.functions.log(`CMD: ${Chalk["bold"](name)}`);
       client.commands.set(name, cmd);
       cmds[category].push(name);
     });
     client.category.set(category, cmds[category]);
-  })
-}
-
-for (const category of client.command.ticketCategories) {
-  FS.readdir(`./Commands/Ticket/${category}/`, (error, files) => {
-    if (error) return console.error(error);
-    files.forEach((file) => {
-      if (!file.endsWith(".js")) return;
-      let cmd = require(`./Commands/Ticket/${category}/${file}`);
-      let name = file.split(".")[0];
-      
-      client.functions.log(`Loading ${name}.`);
-      client.commands.set(name, cmd);
-      cmds["Ticket"][category].push(name);
-    });
-    if (category == "Support") client.category.set("Ticket", cmds["Ticket"]);
   })
 }
 
@@ -107,19 +114,13 @@ FS.readdir("./Events/", (error, files) => {
 });
 
 process.on("unhandledRejection", async (error) => {
-  if (client.ready) {
-    client.functions.sendError(error);
-  } else {
-    console.log(error)
-  }
-})
+  if (client.ready) client.functions.sendError(error);
+  else console.log(error);
+});
 
 process.on("unhandledException", async (error) => {
-  if (client.ready) {
-    client.functions.sendError(error);
-  } else {
-    console.log(error)
-  }
-})
+  if (client.ready) client.functions.sendError(error);
+  else console.log(error);
+});
 
 client.login(config.token);

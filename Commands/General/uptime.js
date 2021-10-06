@@ -16,10 +16,10 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       { name: `Exact`, value: `<t:${client.readySince}:d>`, inline: true }
     ];
 
-    const uptimeEmbed = client.embeds.success(command, `Logic Link has been online since <t:${client.readySince}:t>.`, fields);
-    message.lineReply(uptimeEmbed);
+    const embed = client.embeds.success(command, `Logic Link has been online since <t:${client.readySince}:t>.`, fields);
+    message.reply({ embeds: [embed] });
     
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

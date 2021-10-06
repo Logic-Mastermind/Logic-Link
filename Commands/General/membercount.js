@@ -11,14 +11,16 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const responses = {};
   
   try {
-    const memberCountUsers = message.guild.members.cache.filter((member) => !member.user.bot).size;
-    const memberCountBots = message.guild.members.cache.filter((member) => member.user.bot).size;
-    const memberCountTotal = message.guild.members.cache.size;
+    const fetched = await message.guild.members.fetch();
+    const users = await fetched.filter(m => !m.user.bot).size;
+    const bots = await fetched.filter(m => m.user.bot).size;
+    const fields = [
+      { name: "Information", value: `${client.util.members} Users: \`${users}\` Server Member${users == 1 ? `` : `s`}.\n🤖 Bots: \`${bots}\` Server Bot${bots == 1 ? `` : `s`}.` }
+    ]
 
-    const memberCountEmbed = client.embeds.blue(command, `${message.guild.name} has ${memberCountBots == 0 ? `${memberCountUsers} members` : `a combined total of \`${memberCountTotal}\` users and bots.\nOf this number \`${memberCountUsers}\` ${memberCountUsers == 1 ? `is a user` : `are users`} and \`${memberCountBots}\` ${memberCountBots == 1 ? `is a bot` : `are bots`}`}.`)
-
-    message.lineReply(memberCountEmbed)
+    const embed = client.embeds.blue(command, `${message.guild.name} has \`${fetched.size}\` members.`, fields);
+    message.reply({ embeds: [embed] });
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

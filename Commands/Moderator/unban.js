@@ -12,39 +12,55 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
   try {
     var user = message.mentions.users.first();
-    var reason = "No reason was provided.";
+    var reason = client.util.reason;
+    var mentioned = true;
 
-    if (!user) user = await client.functions.findBan(secArg, message.guild);
+    if (!user) {
+      user = await client.functions.findBan(secArg, message.guild);
+      mentioned = false;
+    }
+
     if (thirdArg) reason = args.slice(1).join(" ");
-
-
     if (user) {
-      if (!clientMember.hasPermission(command.clientPerms)) {
-        const embed = client.embeds.botPermission(command);
-        return message.lineReply(embed);
+      if (mentioned) {
+        const bans = await message.guild.bans.fetch();
+        
+        if (!bans.get(user.id)) {
+          const embed = client.embeds.error(command, `This user is not banned from this server.`);
+          return message.reply({ embeds: [embed] });
+        }
       }
 
-      const guildBans = await message.guild.fetchBans();
-      if (guildBans.get(user.id)) {
-        message.guild.members.unban(user, reason)
-        .then(() => {
-          const embed = client.embeds.success(command, `Un-banned <@${user.id}> from the server.\n\n**Reason**\n${reason}`);
+      message.guild.members.unban(user, reason)
+      .then(() => {
+        const fields = [];
+        if (reason !== client.util.reason) fields[0] = {
+          name: "Reason",
+          value: reason,
+          inline: false
+        }
 
-          message.lineReply(embed);
-        })
-        .catch(async (error) => {
-          const embed = await client.embeds.error(command, message, error);
-          message.lineReply(embed);
-        })
-      } else {
-        const embed = client.embeds.error(command, `This user is not banned.`);
-        message.lineReply(embed);
-      }
+        const caseData = {
+          type: "UNBAN",
+          user: member.id,
+          moderator: message.author.id,
+          reason: warning,
+          timestamp: Math.round(Date.now() / 1000)
+        }
+
+        client.functions.createCase(caseData, settings, message.guild);
+        const embed = client.embeds.success(command, `Un-banned <@${user.id}> from the server.`, fields);
+        message.reply({ embeds: [embed] });
+      })
+      .catch(async (error) => {
+        const embed = await client.embeds.error(command, message, error);
+        message.reply({ embeds: [embed] });
+      });
     } else {
-      const embed = client.embeds.noMember(command, secArg);
-      message.lineReply(embed);
+      const embed = client.embeds.noUser(command, secArg);
+      message.reply({ embeds: [embed] });
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

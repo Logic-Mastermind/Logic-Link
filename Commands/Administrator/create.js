@@ -126,6 +126,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       }
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

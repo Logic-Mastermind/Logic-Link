@@ -27,19 +27,19 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         if (cmdInfo.reason !== client.util.reason) fields[0] = { name: "Reason", value: cmdInfo.reason };
 
         const embed = client.embeds.error(command, `This command has already been locked.`, fields);
-        return message.lineReply(embed);
+        return message.reply({ embeds: [embed] });
       }
 
       if (thirdArg == "off") {
         if (!cmdInfo.locked) {
           const embed = client.embeds.error(command, `This command is not locked.`);
-          return message.lineReply(embed);
+          return message.reply({ embeds: [embed] });
         }
 
         client.db.devlock.delete(cmd.commandName);
 
         const embed = client.embeds.success(command, `Removed the command lock for \`${cmd.commandName}\`.`);
-        return message.lineReply(embed);
+        return message.reply({ embeds: [embed] });
       }
 
       client.db.devlock.set(cmd.commandName, true, "locked");
@@ -52,7 +52,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       if (guild) fields[1] = { name: "Guild", value: guild.name, inline: false };
 
       const embed = client.embeds.success(command, `Locked the \`${cmd.commandName}\` command.`, fields);
-      message.lineReply(embed);
+      message.reply({ embeds: [embed] });
     } else {
       if (secArg == "view") {
         const fetched = await client.db.devlock.fetchEverything();
@@ -63,30 +63,30 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
           const guild = client.guilds.cache.get(val.guild);
           cmds.push({
             name: `${val.name}`,
-            value: `Reason: \`${val.reason}\`\nDate: <t:${val.date}:R>\nGuild: ${guild ? guild.name : `None`}.`,
+            value: `Reason: ${val.reason}\nDate: <t:${val.date}:R>\nGuild: ${guild ? guild.name : `None`}.`,
             inline: false
           });
         }
 
         if (!cmds[0]) {
           const embed = client.embeds.error(command, `No commands are currently locked.`);
-          return message.lineReply(embed);
+          return message.reply({ embeds: [embed] });
         }
 
         const embed = client.embeds.green(command, `\`${cmds.length}\` command${cmds.length == 1 ? ` is` : `s are`} currently locked.`, cmds);
-        return message.lineReply(embed);
+        return message.reply({ embeds: [embed] });
 
       } else if (secArg == "clear") {
         client.db.devlock.clear();
 
         const embed = client.embeds.success(command, `Removed all developer command locks.`);
-        return message.lineReply(embed);
+        return message.reply({ embeds: [embed] });
       }
 
       const embed = client.embeds.noCommand(command, secArg);
-      message.lineReply(embed);
+      message.reply({ embeds: [embed] });
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

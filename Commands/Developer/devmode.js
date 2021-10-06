@@ -15,29 +15,29 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     if (secArg == "on") {
       if (devMode == true) {
         const embed = client.embeds.error(command, `Developer mode has already been turned on.`);
-        return message.lineReply(embed)
+        return message.reply({ embeds: [embed] });
       }
 
       client.db.devSettings.set(client.util.devId, true, "devMode");
       const embed = client.embeds.success(command, `Turned on developer mode.`);
 
-      message.lineReply(embed)
+      message.reply({ embeds: [embed] });
     } else if (secArg == "off") {
       if (devMode == false) {
         const embed = client.embeds.error(command,`Developer mode has already been turned off.`);
-        return message.lineReply(embed)
+        return message.reply({ embeds: [embed] });
       }
 
       client.db.devSettings.set(client.util.devId, false, "devMode");
       const embed = client.embeds.success(command, `Turned off developer mode.`);
 
-      message.lineReply(embed)
+      message.reply({ embeds: [embed] });
     } else if (secArg == "check") {
-      const embed = client.embeds.blue(command, `Developer mode is currently ${devMode ? `enabled` : `disabled`}.`)
+      const embed = client.embeds.blue(command, `Developer mode is currently ${devMode ? `enabled` : `disabled`}.`);
 
-      message.lineReply(embed)
+      message.reply({ embeds: [embed] });
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

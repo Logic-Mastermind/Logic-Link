@@ -11,33 +11,33 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const responses = {};
 
   try {
-    const roleCount = message.guild.roles.cache.size - 1;
-    const emojiCount = message.guild.emojis.cache.size;
-    const memCount = message.guild.members.cache.size;
+    const roles = (await message.guild.roles.fetch()).size - 1;
+    const emojis = (await message.guild.emojis.fetch()).size;
+    const channels = await message.guild.channels.fetch();
+    const members = message.guild.memberCount;
 
-    const text = message.guild.channels.cache.filter(c => c.type == "text").size;
-    const voice = message.guild.channels.cache.filter(c => c.type == "voice").size;
-    const news = message.guild.channels.cache.filter(c => c.type == "news").size;
+    const text = channels.filter(c => c.type == "GUILD_TEXT").size;
+    const voice = channels.filter(c => c.type == "GUILD_VOICE").size;
+    const news = channels.filter(c => c.type == "GUILD_NEWS").size;
     
     const boostLvl = message.guild.premiumTier;
     const boosters = message.guild.premiumSubscriptionCount;
 
     const info = {
-      owner: message.guild.owner.id,
-      createdAt: Math.round(message.guild.joinedTimestamp / 1000),
-      guild: message.guild,
-      roles: `${client.util.moderator} ${roleCount} Role${roleCount == 1 ? `` : `s`}.`,
-      emojis: `${client.util.sticker} ${emojiCount} Emoji${emojiCount == 1 ? `` : `s`}.`,
-      members: `${client.util.members} ${memCount} Member${memCount == 1 ? `` : `s`}.`,
+      owner: `<@${message.guild.ownerId}>`,
+      createdAt: `<t:${Math.round(message.guild.joinedTimestamp / 1000)}:D>`,
+      roles: `${client.util.moderator} ${roles} Role${roles == 1 ? `` : `s`}.`,
+      emojis: `${client.util.sticker} ${emojis} Emoji${emojis == 1 ? `` : `s`}.`,
+      members: `${client.util.members} ${members} Member${members == 1 ? `` : `s`}.`,
       channels: `${client.util.channel} ${text} Text Channel${text == 1 ? `` : `s`}.\n${client.util.voice} ${voice} Voice Channel${voice == 1 ? `` : `s`}.\n${client.util.news} ${news} News Channel${news == 1 ? `` : `s`}.`,
       boosts: `${client.util.boost2} Server Boost Level: \`${boostLvl}\`.\n${client.util.boost} Server Boosters: \`${boosters}\``,
-      icon: message.guild.iconURL()
+      icon: message.guild.iconURL(),
+      name: message.guild.name
     }
     
     const embed = client.embeds.itemInfo(command, "guild", info);
-    message.lineReply(embed);
+    message.reply({ embeds: [embed] });
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
-    client.logger.updateLog(`An unexpected error occured.`, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

@@ -16,27 +16,30 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     if (!secArg && !channel) channel = message.channel;
 
     if (channel) {
-      const emoji = `${channel.type == "text" ? client.util.channel : channel.type == "voice" ? client.util.voice : channel.type == "news" ? client.util.news : channel.type == "category" ? client.util.category : null}`;
+      const emoji = `${channel.id == message.guild.rulesChannelId ? `${client.util.rules} Rules` : channel.type == "GUILD_TEXT" ? `${client.util.channel} Text` : channel.type == "GUILD_VOICE" ? `${client.util.voice} Voice` : channel.type == "GUILD_NEWS" ? `${client.util.news} News` : channel.type == "GUILD_CATEGORY" ? `${client.util.category} Category` : channel.type == "GUILD_STORE" ? `${client.util.store} Store` : channel.type == "GUILD_STAGE_VOICE" ? `${client.util.stage} Stage` : channel.type == "GUILD_NEWS_THREAD" || channel.type == "GUILD_PUBLIC_THREAD" ? `${client.util.thread} Thread` : channel.type == "GUILD_PRIVATE_THREAD" ? `${client.util.threadPrivate} Thread` : null}`;
+      const messages = (await channel.messages.fetchPinned()).size;
 
       const info = {
-        type: `${emoji} ${await client.functions.upperFirst(channel.type)} Channel`,
-        name: channel.name,
-        overwrites: await client.functions.getPermOverwrites(channel),
+        type: `${emoji} Channel`,
+        name: `\`${channel.name}\``,
+        overwrites: (await client.functions.getPermOverwrites(channel)).join("\n"),
         topic: channel.topic || "No Channel Topic",
-        nsfw: channel.nsfw,
-        category: message.guild.channels.cache.get(channel.parentID),
-        guild: message.guild,
-        position: channel.rawPosition,
-        id: channel.id
+        nsfw: channel.nsfw ? `NSFW.` : `Not NSFW.`,
+        category: channel.parent ? `#${channel.parent.name}` : `No Channel Category.`,
+        guild: channel.guild,
+        position: `\`${channel.rawPosition || channel.guild.channels.cache.get(channel.parentId).rawPosition || 0}\``,
+        id: `\`${channel.id}\``,
+        mention: `<#${channel.id}>`,
+        pinned: `\`${messages}\` Pinned Message${messages == 1 ? `` : `s`}`
       }
       
       const embed = client.embeds.itemInfo(command, "channel", info);
-      message.lineReply(embed);
+      message.reply({ embeds: [embed] });
     } else {
       const embed = client.embeds.noChannel(command, args.join(" "));
-      message.lineReply(embed);
+      message.reply({ embeds: [embed] });
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

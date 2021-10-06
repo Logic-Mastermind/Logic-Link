@@ -13,8 +13,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   try {
     if (secArg == "cooldown" || secArg == "cd") {
       if (!thirdArg) {
-        const noArgsEmbed = await client.embeds.noArgs(command.option.cooldown, message.guild);
-        return message.lineReply(noArgsEmbed);
+        const embed = await client.embeds.noArgs(command.option.cooldown, message.guild);
+        return message.reply({ embeds: [embed] });
       }
 
       var user = message.mentions.users.first();
@@ -26,25 +26,25 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
           await client.db.cooldown.delete(user.id, cmd.commandName);
 
           const embed = client.embeds.success(command.option.cooldown, `Cleared <@${user.id}>'s cooldown for the \`${cmd.commandName}\` command.`);
-          message.lineReply(embed);
+          message.reply({ embeds: [embed] });
         } else {
           if (fourthArg) {
             const embed = client.embeds.noCommand(command.option.cooldown, fourthArg);
-            return message.lineReply(embed);
+            return message.reply({ embeds: [embed] });
           }
 
           await client.db.cooldown.delete(user.id);
           const embed = client.embeds.success(command.option.cooldown, `Cleared <@${user.id}>'s cooldown.`);
-          message.lineReply(embed);
+          message.reply({ embeds: [embed] });
         }
       } else {
         const embed = client.embeds.noUser(command.option.cooldown, thirdArg);
-        message.lineReply(embed);
+        message.reply({ embeds: [embed] });
       }
     } else if (secArg == "settings" || secArg == "set") {
       if (!thirdArg) {
-        const noArgsEmbed = await client.embeds.noArgs(command.option.settings, message.guild);
-        return message.lineReply(noArgsEmbed);
+        const embed = await client.embeds.noArgs(command.option.settings, message.guild);
+        return message.reply({ embeds: [embed] });
       }
 
       var setting = client.util.settingsAliases[fourthArg];
@@ -53,14 +53,14 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       if (guild) {
         await client.db.settings.delete(guild.id, setting || null);
         const embed = client.embeds.success(command, `${setting ? `Reset the \`${setting}\` setting` : `Reset settings `} in the \`${guild.name}\` guild.`);
-        message.lineReply(embed);
+        message.reply({ embeds: [embed] });
 
       } else {
         const embed = client.embeds.noGuild(command, thirdArg);
-        message.lineReply(embed);
+        message.reply({ embeds: [embed] });
       }
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

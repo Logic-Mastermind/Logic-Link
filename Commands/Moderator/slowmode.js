@@ -1,5 +1,6 @@
 const Discord = require("discord.js");
 const Fetch = require("node-fetch");
+const ms = require("ms");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
   const clientMember = message.guild.me;
@@ -10,70 +11,60 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const code = `\`\`\``;
 
   const responses = {
-    tooMuch: `This slowmode is over the limit of 6 hours.\n\n**Detailed Info**\n`,
-    already: `This channel's slowmode has already been set to that integer.\n\n**Detailed Info**\n`
+    tooMuch: `This duration is over the limit of 6 hours.`,
+    notNum: `The duration number must be a numerical value.`,
+    already: `This channel's slowmode has already been set to that value.`
   }
 
   try {
-    var slowmode = secArg;
-    var channel = message.channel;
-    var slowmodeTime = null;
-    var passed = "default";
+    var reset = false;
+    var arg = thirdArg;
 
-    if (thirdArg) {
-      channel = message.mentions.channels.first();
-      if (!channel) channel = await client.functions.findChannel(secArg, message.guild);
-      slowmode = thirdArg;
-      passed = "mention"
+    var channel = message.mentions.channels.first();
+    var time = await client.functions.getTime(args.slice(1).join(" "));
+
+    if (!channel) channel = await client.functions.findChannel(secArg, message.guild);
+    if (!channel && !thirdArg) {
+      arg = secArg;
+      channel = message.channel;
+      time = await client.functions.getTime(secArg);
     }
 
-    if (slowmode == "off" || slowmode == "reset") slowmode = "0";
-    slowmode = await client.functions.getTime(slowmode);
-
-    if (slowmode.passed && slowmode.timeView && channel) {
-      slowmodeTime = Math.round(slowmode.duration / 1000);
-
-      if (slowmodeTime > 21600) {
-        const embed = client.embeds.error(command, `${responses.tooMuch}${slowmode.timeView[0]} ${slowmode.unit}${slowmode.timeView == 1 ? `` : `s`} (${slowmodeTime} seconds) is over the limit of \`21600\`.`);
-        return message.lineReply(embed);
+    if (channel) {
+      var seconds = Math.round(time.duration / 1000);
+      if (arg == "off" || arg == "reset") {
+        reset = true;
+        seconds = 0;
       }
 
-      if (channel.rateLimitPerUser == slowmodeTime) {
-        const embed = client.embeds.error(command, `${responses.already}Channel Slowmode - \`${channel.rateLimitPerUser}\`.\nRequested Slowmode - \`${slowmodeTime}\`.`);
-        return message.lineReply(embed);
+      if (!time.passed && !reset) {
+        const embed = client.embeds.error(command, `I could record any time durations from your message.`);
+        return message.reply({ embeds: [embed] });
       }
 
-      channel.setRateLimitPerUser(slowmodeTime, `Changed #${channel.name}'s slowmode. Responsible User: ${message.author.tag}`)
-      .then(() => {
-        const embed = client.embeds.success(command, `${slowmodeTime == 0 ? `Turned off` : `Set`} ${channel.id == message.channel.id ? `this channel's` : `<#${channel.id}>'s`} slowmode${slowmodeTime == 0 ? `.` : ` to \`${slowmode.timeView[0]}\` ${slowmode.unit}${slowmode.timeView[0] == 1 ? `` : `s`}.`}`);
-        message.lineReply(embed);
-      })
+      if (seconds > 21600) {
+        const embed = client.embeds.detailed(command, responses.tooMuch, `\`${time.display}\` is over 21600 seconds.`);
+        return message.reply({ embeds: [embed] });
+      }
+
+      if (channel.rateLimitPerUser == seconds) {
+        const embed = client.embeds.error(command, responses.already);
+        return message.reply({ embeds: [embed] });
+      }
+
+      await channel.setRateLimitPerUser(seconds)
       .catch(async (error) => {
         const embed = await client.embeds.errorInfo(command, message, error);
-        message.lineReply(embed);
-      })
+        return message.reply({ embeds: [embed] });
+      });
+
+      const embed = client.embeds.success(command, `${reset ? `Reset <#${channel.id}>'s slowmode.` : `Set <#${channel.id}>'s slowmode to \`${time.display}\`.`}`);
+      message.reply({ embeds: [embed] });
     } else {
-      if (!channel && slowmode.timeView) {
-        const embed = client.embeds.error(command, `${client.util.channel}\`${secArg}\` is not a channel.`);
-        message.lineReply(embed);
-
-      } else if (!slowmode.passed && channel && passed == "mention") {
-        const noArgsEmbed = await client.embeds.noArgs(command, message.guild);
-        message.lineReply(noArgsEmbed);
-
-      } else if ((slowmode.passed && !slowmode.timeView && passed == "default") || (!slowmode.passed && passed == "default")) {
-        const embed = client.embeds.error(command, `\`${secArg}\` is not a valid time unit.`);
-        message.lineReply(embed);
-
-      } else if ((slowmode.passed && !slowmode.timeView && passed == "mention") || (!slowmode.passed && passed == "mention")) {
-        const embed = client.embeds.error(command, `\`${thirdArg}\` is not a valid time unit.`);
-        message.lineReply(embed);
-
-      } else {
-
-      }
+      const embed = client.embeds.noChannel(command, secArg);
+      message.reply({ embeds: [embed] });
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

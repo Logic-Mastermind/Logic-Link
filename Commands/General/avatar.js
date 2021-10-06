@@ -19,12 +19,12 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       const avatar = await member.user.displayAvatarURL({ dynamic: true, size: 1024 })
       const embed = client.embeds.image(command, `\`${member.displayName}\`'s Avatar`, avatar);
 
-      message.lineReply(embed);
+      message.reply({ embeds: [embed] });
     } else {
       const embed = client.embeds.noMember(command, args.join(" "));
-      message.lineReply(embed);
+      message.reply({ embeds: [embed] });
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

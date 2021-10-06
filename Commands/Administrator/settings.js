@@ -29,7 +29,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         )
       }
 
-      const embed = client.embeds.field(command, `${client.util.welcomeBotInfo}\n\n**Server Settings**\nBelow is a list of configurations for this server.\nTo modify any of these settings, run: \`${guildPrefix}settings [option] [new setting]\`.\nTo reset your server settings, run: \`${guildPrefix}settings reset\`.\n\n${code}Settings${code}\u200b`, settingsArray);
+      const embed = client.embeds.blue(command, `${client.util.welcomeBotInfo}\n\n**Server Settings**\nBelow is a list of configurations for this server.\nTo modify any of these settings, run: \`${guildPrefix}settings [option] [new setting]\`.\nTo reset your server settings, run: \`${guildPrefix}settings reset\`.\n\n${code}Settings${code}\u200b`, settingsArray);
 
       message.reply({ embeds: [embed] })
     } else {
@@ -234,7 +234,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
                 return message.reply({ embeds: [embed] })
               }
 
-              const editMsg = await message.reply(pendingEmbed);
+              const editMsg = await message.reply({ embeds: [pendingEmbed] });
               await client.db.settings.delete(message.guild.id, "mutedRole");
               const successEmbed = client.embeds.success(command.option.mutedrole, `Removed the server muted role.`);
 
@@ -281,7 +281,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             const pendingEmbed = client.embeds.pending(command.option.welcome, `Configuring the welcome system...`);
 
             if (thirdArg.toLowerCase().includes("on") || thirdArg.toLowerCase().includes("off")) {
-              const editMsg = await message.reply(pendingEmbed);
+              const editMsg = await message.reply({ embeds: [pendingEmbed] });
 
               if (thirdArg.toLowerCase().includes("on")) {
                 if (settings.welcomeSystem) {
@@ -479,7 +479,14 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         case "rst":
         case "reset":
         {
-          
+          const embed = client.embeds.warn(command.option.reset, `Are you sure that you would like to reset server settings?`);
+          const confirm = client.buttons.confirm("Settings_Reset:Confirm");
+          const cancel = client.buttons.cancel("Settings_Reset:Cancel");
+          const row = client.buttons.actionRow([confirm, cancel]);
+
+          const msg = await message.reply({ embeds: [embed], components: [row] });
+          client.prompts.resetSettings(msg, command, message);
+
           break;
         }
         default:
@@ -490,6 +497,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       }
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

@@ -22,15 +22,15 @@ module.exports = async (client) => {
       if (!mutedRole) continue;
 
       if (!member.roles.cache.has(mutedRoleId)) continue;
-      if (!clientMember.hasPermission("MANAGE_ROLES")) continue;
+      if (!clientMember.permissions.has("MANAGE_ROLES")) continue;
       if (mutedRole.position >= clientMember.roles.highest.position) continue;
 
       const remove = () => {
         member.roles.remove(mutedRole);
-        client.db.mutes.delete(key);
+        client.db.timeouts.delete(key);
       };
 
-      if (v.end >= Date.now()) setTimeout(remove, timeLeft);
+      if (val.end >= Date.now()) setTimeout(remove, timeLeft);
       else remove();
     }
   }

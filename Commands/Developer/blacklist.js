@@ -16,11 +16,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
       if (blacklists.length == 0) {
         const embed = client.embeds.error(command.option.view, "No users are currently blacklisted.");
-        return message.lineReply(embed);
+        return message.reply({ embeds: [embed] });
       }
 
       const embed = client.embeds.blue(command.option.view, `A total of \`${blacklists.length}\` user${blacklists.length == 1 ? ` is` : `s are`} currently blacklisted.\n\n**Users**\n<@${blacklists.join(">\n<@")}>`);
-      return message.lineReply(embed);
+      return message.reply({ embeds: [embed] });
     }
 
     var user = message.mentions.users.first();
@@ -34,20 +34,20 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
       if (blacklistInfo.blacklisted) {
         const embed = client.embeds.error(command, `This user has already been blacklisted.`);
-        return message.lineReply(embed);
+        return message.reply({ embeds: [embed] });
       }
 
       await client.db.blacklists.set(user.id, true, "blacklisted");
       await client.db.blacklists.set(user.id, reason, "reason");
       
       const embed = client.embeds.success(command, `Blacklisted <@${user.id}> from Logic Link.`, [{ name: "Reason", value: reason, inline: true }]);
-      message.lineReply(embed);
+      message.reply({ embeds: [embed] });
       
     } else {
       const embed = client.embeds.noUser(command, secArg);
-      message.lineReply(embed);
+      message.reply({ embeds: [embed] });
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

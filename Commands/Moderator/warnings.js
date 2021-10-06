@@ -13,15 +13,24 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   try {
     var member = message.mentions.members.first();
     if (!member) member = await client.functions.findMember(secArg, message.guild);
-    if (secArg == "me") member = message.member
+    if (secArg.toLowerCase() == "me") member = message.member;
 
     if (member) {
-      const warnings = client.db.userInfo.get(`${member.id}-${member.guild.id}`, "warnings");
-      const divided = await client.functions.divideChunk(warnings, 5);
+      var warnings = client.db.userInfo.get(`${member.id}-${member.guild.id}`, "warnings");
+      warnings = new Discord.Collection(warnings);
 
-      if (warnings.length == 0) {
+      const fields = [];
+      if (warnings.size < 1) {
         const embed = client.embeds.error(command, `This member has no warnings.`);
-        return message.lineReply(embed)
+        return message.reply({ embeds: [embed] });
+      }
+
+      for await (const [key, val] of warnings.entries()) {
+        fields.push({
+          name: `Case \`${key}\``,
+          value: `${client.util.moderator} Moderator: <@${val.moderator}>\n${client.util.message} Warning: ${val.reason}\n${client.util.clock} Timestamp: <t:${val.timestamp}:R>`,
+          inline: false
+        });
       }
 
       if (thirdArg) {
@@ -29,33 +38,23 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
           case "c":
           case "clear":
           {
-            await client.db.userInfo.set(`${member.id}-${member.guild.id}`, [], "warnings");
-            const embed = client.embeds.success(command, `Cleared <@${member.id}>'s warnings.`);
-            message.lineReply(embed);
-            break;
-          }
-          case "r":
-          case "remove":
-          {
-            break;
-          }
-          default:
-          {
-            const embed = client.embeds.error(command, `\`${thirdArg}\` is not a valid command option.`);
-            message.lineReply(embed);
+            const userWarns = client.db.userInfo.get(`${member.id}-${message.guild.id}`).warnings;
+            const filteredCases = await settings.cases.filter((v) => v.user !== member.id);
+
+            client.db.userInfo.set(`${member.id}-${member.guild.id}`, new Discord.Collection(), "warnings");
+            client.db.settings.set(message.guild.id, filteredCases, "cases");
+
+            const embed = client.embeds.success(command, `Cleared ${userWarns.size} warning${userWarns.size == 1 ? `` : `s`} from <@${member.id}>.`);
+            message.reply({ embeds: [embed] });
+            return;
           }
         }
-        
-        return;
       }
 
-      // const buttonLeft = client.buttons.emoji("Button_Left", "874038583621714020", "grey");
-      // const buttonRight = client.buttons.emoji("Button_Right", "874038537169801216", "grey");
+      const buttonLeft = client.buttons.emoji("User_Warnings:Left", client.util.arrowLeft, "SECONDARY");
+      const buttonRight = client.buttons.emoji("User_Warnings:Right", client.util.arrowRight, "SECONDARY");
 
-      const buttonLeft = client.buttons.grey("<", "buttonLeft");
-      const buttonRight = client.buttons.grey(">", "buttonRight");
-
-      if (warnings.length <= 5) {
+      if (warnings.size <= 5) {
         buttonLeft.setDisabled();
         buttonRight.setDisabled();
       } else {
@@ -64,34 +63,30 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
       var pages = [];
       var paginationMsg = null;
+      var chunks = await client.functions.divideChunk(fields, 5);
 
-      for (const [key, val] of Object.entries(divided)) {
-        const pageContents = [];
-        divided[key].forEach((v, k, a) => {
-          const mod = `${client.util.moderator} Moderator: <@${v.initiator}>`
-          const msg = `${client.util.message} Warning: ${v.message}`
-          const date = `${client.util.clock} Date: <t:${Math.round(v.date / 1000)}:R>`
-
-          pageContents.unshift(`${mod}\n${date}\n${msg}`);
-        });
-
-        const embed = client.embeds.blue(command, `This member has  a total of \`${warnings.length}\` warnings.\n\n**Member Warnings**\n${pageContents.join("\n\n")}`);
-
+      for await (const [key, div] of Object.entries(chunks)) {
+        var desc = "";
         if (key == 0) {
-          paginationMsg = await message.channel.send({ embed: embed, buttons: [buttonLeft, buttonRight]});
-        } else {
-          pages.push(embed);
+          desc = `Viewing all warnings for <@${member.id}>.\nA total of ${warnings.size} warning${warnings.size == 1 ? ` is` : `s are`} shown.`;
         }
+
+        const embed = client.embeds.blue(command, desc, div);
+        pages.push(embed);
       }
 
+      const row = client.buttons.actionRow([buttonLeft, buttonRight]);
+      paginationMsg = await message.channel.send({ embeds: [pages[0]], components: [row] });
+      pages.shift();
+
       if (pages.length >= 1) {
-        client.functions.paginate(paginationMsg, pages)
+        client.functions.paginate(paginationMsg, pages);
       }
     } else {
       const embed = client.embeds.noMember(command, secArg);
-      message.lineReply(embed);
+      message.reply({ embeds: [embed] });
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

@@ -10,12 +10,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const code = `\`\`\``;
 
   const responses = {
-    hierarchy: `This member has a higher or equal role position as your top role.\n\n**Detailed Info**\n`,
-    botHierarchy: `This member has a higher or equal role position as my top role.\n\n**Detailed Info**\n`,
-    serverOwner: `You are attempting to change the nickname of the server owner.\n\n**Detailed Info**\n`,
-    noUser: `No members were recorded from your message.\n\n**Detailed Info**\n`,
-    pending: `Changing the member's nickname...`,
-    alreadyNicked: `That member's nickname has already been set to that.\n\n**Detailed Info**\n`
+    serverOwner: `You are attempting to change the nickname of the server owner.`,
+    alreadyNicked: `The member's nickname has already been set to this value.`
   }
 
   try {
@@ -28,63 +24,60 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     if (member) {
       if (!thirdArg) {
         const embed = client.embeds.noArgsObj(noArgs);
-        return message.lineReply(embed);
+        return message.reply({ embeds: [embed] });
       }
 
-      if (!clientMember.hasPermission("MANAGE_NICKNAMES")) {
-        const errorEmbed = client.embeds.botPermission(command);
-        return message.lineReply(errorEmbed)
+      if (member.id == message.guild.ownerId) {
+        const embed = client.embeds.detailed(command, responses.serverOwner, `Server Owner - <@${member.guild.ownerId}>\nTargetted Member - <@${member.id}>`);
+        return message.reply({ embeds: [embed] });
       }
 
-      if ((message.author.id !== message.guild.owner.id) && member.roles.highest) {
-        if (message.member.roles.highest.position <= member.roles.highest.position) {
-          const embed = client.embeds.error(command, `${responses.hierarchy}Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nInitiator - <@${message.author.id}>: Top Role Position \`${message.member.roles.highest.position}\`.`);
-          return message.lineReply(embed);
-        }
+      if (client.functions.hierarchy(message.member, member, message.guild)) {
+        const embed = client.embeds.detailed(command, client.util.hierarchyM, `Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.`, `Initiator - <@${message.author.id}>: Top Role Position \`${message.member.roles.highest.position}\`.`);
+        return message.reply({ embeds: [embed] });
       }
-
-      if (member.roles.highest && (clientMember.id !== member.id)) {
-        if (clientMember.roles.highest.position <= member.roles.highest.position) {
-          const clientTopRole = clientMember.roles.highest;
-          const embed = client.embeds.error(command, `${responses.botHierarchy}Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nClient Member - <@${clientMember.id}>: Top Role Position \`${clientTopRole.position}\`.`);
-          return message.lineReply(embed)
-        }
-      }
-
-      if (member.id == message.guild.owner.id) {
-        const errorEmbed = client.embeds.error(command, `${responses.serverOwner}Server Owner - <@${member.guild.owner.id}>\nTargetted Member - <@${member.id}>`);
-        return message.lineReply(errorEmbed)
+      
+      if (client.functions.hierarchy(clientMember, member, message.guild)) {
+        const embed = client.embeds.detailed(command, client.util.botHierarchyM, `Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nClient Member - <@${clientMember.id}>: Top Role Position \`${clientMember.roles.highest.position}\`.`);
+        return message.reply({ embeds: [embed] });
       }
 
       if (member.displayName == nick) {
-        const embed = client.embeds.error(command, `${responses.alreadyNicked}Member Nickname - \`${member.displayName}>\`.\nRequested Nickname - \`${nick}\`.`);
-
-        return message.lineReply(embed)
+        const embed = client.embeds.detailed(command, responses.alreadyNicked, `Member Nickname - \`${member.displayName}\`.\nRequested Nickname - \`${nick}\`.`);
+        return message.reply({ embeds: [embed] });
       }
 
       if (nick.length > 32) {
         const embed = client.embeds.error(command, `This nickname is over the limit of 32 characters.`);
-        return message.lineReply(embed);
+        return message.reply({ embeds: [embed] });
       }
 
-      const pendingEmbed = client.embeds.pending(command, responses.pending);
-      const editMsg = await message.lineReply(pendingEmbed);
-      if (thirdArg.toLowerCase() == "reset") nick = member.user.username
+      const pendingEmbed = client.embeds.pending(command, "Changing member nickname...");
+      const editMsg = await message.reply({ embeds: [pendingEmbed] });
+
+      const oldNick = member.displayName;
+      if (thirdArg.toLowerCase() == "reset") nick = member.user.username;
 
       member.setNickname(nick, `${member.username}'s nickname was changed to ${nick}. Responsible User: ${message.author.tag}`)
       .then(() => {
-        const successEmbed = client.embeds.success(command, `${nick == member.user.username ? `Reset <@${member.id}>'s nickname.` : `Changed <@${member.id}>'s nickname to \`${nick}\`.`}`)
-        editMsg.edit(successEmbed)
+        const successEmbed = client.embeds.success(command, `${nick == member.user.username ? `Reset <@${member.id}>'s nickname.` : `Changed \`${oldNick}\`'s nickname to <@${member.id}>.`}`);
+        editMsg.edit({ embeds: [successEmbed] });
       })
       .catch(async (error) => {
-        const errorEmbed = await client.embeds.errorInfo(command, message, error)
-        editMsg.edit(errorEmbed)
-      })
+        const errorEmbed = await client.embeds.errorInfo(command, message, error);
+        editMsg.edit({ embeds: [errorEmbed] });
+      });
     } else {
-      const errorEmbed = client.embeds.noMember(command, `secArg`)
-      message.lineReply(errorEmbed)
+      if (!thirdArg) {
+        const embed = await client.embeds.noArgs(command, message.guild);
+        message.reply({ embeds: [embed] });
+
+      } else {
+        const embed = client.embeds.noMember(command, secArg);
+        message.reply({ embeds: [embed] });
+      }
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

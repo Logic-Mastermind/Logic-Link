@@ -1,5 +1,6 @@
 const Discord = require("discord.js");
 const Fetch = require("node-fetch");
+const Chalk = require("chalk");
 const FS = require("fs");
 
 module.exports = class Schemas {
@@ -14,6 +15,21 @@ module.exports = class Schemas {
       await client.clearMod.all();
       client.functions.log("\n----------\n");
 
+      const commands = require("/home/runner/Logic-Link/Config/commands.js");
+      const config = require("/home/runner/Logic-Link/Config/config.js");
+      const database = require("/home/runner/Logic-Link/Config/database.js");
+      const util = require("/home/runner/Logic-Link/Config/util.js");
+      const discordFn = require("/home/runner/Logic-Link/Config/discordFn.js");
+
+      for (const [key, opt] of Object.entries(discordFn)) {
+        Discord[key] = opt;
+      }
+
+      client.command = commands;
+      client.config = config;
+      client.db = database;
+      client.util = util;
+
       const cmds = {
         Administrator: [],
         Developer: [],
@@ -24,7 +40,24 @@ module.exports = class Schemas {
       };
 
       for (const category of client.command.categories) {
-        if (category == "Ticket") continue;
+        if (category == "Ticket") {
+          for (const category of client.command.ticketCategories) {
+            FS.readdir(`/home/runner/Logic-Link/Commands/Ticket/${category}/`, (error, files) => {
+              if (error) return console.error(error);
+              files.forEach((file) => {
+                if (!file.endsWith(".js")) return;
+                let cmd = require(`/home/runner/Logic-Link/Commands/Ticket/${category}/${file}`);
+                let name = file.split(".")[0];
+                
+                client.functions.log(`CMD: ${Chalk["bold"](name)}`);
+                client.commands.set(name, cmd);
+                cmds["Ticket"][category].push(name);
+              });
+              client.category.set("Ticket", cmds["Ticket"]);
+            })
+          }
+          continue;
+        }
 
         FS.readdir(`/home/runner/Logic-Link/Commands/${category}/`, (error, files) => {
           if (error) return console.error(error);
@@ -33,7 +66,7 @@ module.exports = class Schemas {
             let cmd = require(`/home/runner/Logic-Link/Commands/${category}/${file}`);
             let name = file.split(".")[0];
             
-            client.functions.log(`Loading ${name}.`);
+            client.functions.log(`CMD: ${Chalk["bold"](name)}`);
             client.commands.set(name, cmd);
             cmds[category].push(name);
           });
@@ -41,21 +74,6 @@ module.exports = class Schemas {
         })
       }
 
-      for (const category of client.command.ticketCategories) {
-        FS.readdir(`/home/runner/Logic-Link/Commands/Ticket/${category}/`, (error, files) => {
-          if (error) return console.error(error);
-          files.forEach((file) => {
-            if (!file.endsWith(".js")) return;
-            let cmd = require(`/home/runner/Logic-Link/Commands/Ticket/${category}/${file}`);
-            let name = file.split(".")[0];
-            
-            client.functions.log(`Loading ${name}.`);
-            client.commands.set(name, cmd);
-            cmds["Ticket"][category].push(name);
-          });
-          if (category == "Support") client.category.set("Ticket", cmds["Ticket"]);
-        })
-      }
 
       FS.readdir("/home/runner/Logic-Link/Events/", (error, files) => {
         if (error) return console.error(error);
@@ -69,22 +87,10 @@ module.exports = class Schemas {
         });
       });
 
-      const commands = require("/home/runner/Logic-Link/Config/commands.js");
-      const config = require("/home/runner/Logic-Link/Config/config.js");
-      const database = require("/home/runner/Logic-Link/Config/database.js");
-      const util = require("/home/runner/Logic-Link/Config/util.js");
-
-      client.command = commands;
-      client.config = config;
-      client.db = database;
-      client.util = util;
-
-      await client.login(client.config.token);
-      client.functions.log(`\n[${client.user.tag}]\nTotal Channels: ${client.channels.cache.size}\nTotal Servers: ${client.guilds.cache.size}\nTotal Users: ${client.users.cache.size}`);
-      
+      await client.login(config.token);
       return true;
     } catch (error) {
-      return error
+      return error;
     }
   }
 }

@@ -16,23 +16,23 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
     if (role) {
       const info = {
-        name: role.name,
-        permissions: await client.functions.getPermissions(role),
+        name: `\`${role.name}\``,
+        permissions: (await client.functions.getPermissions(role)).join(", "),
         color: `${role.color.toString(16) == 0 ? `Default Colour` : `#${role.color.toString(16)}`}`,
         hoist: role.hoist ? `Role Hoisted` : `Role Not Hoisted`,
         mentionable: role.mentionable ? `Role Mentionable` : `Role Not Mentionable`,
-        guild: message.guild,
-        position: role.rawPosition,
-        id: role.id
+        position: `\`${role.rawPosition}\``,
+        id: `\`${role.id}\``,
+        mention: `<@&${role.id}>`
       }
       
       const embed = client.embeds.itemInfo(command, "role", info);
-      message.lineReply(embed);
+      message.reply({ embeds: [embed] });
     } else {
       const embed = client.embeds.noRole(command, args.join(" "));
-      message.lineReply(embed);
+      message.reply({ embeds: [embed] });
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

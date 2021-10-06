@@ -6,116 +6,111 @@ module.exports = class Prompts {
     this.client = client;
   }
 
-  async deleteConfirmation(message, command, responses) {
+  async deleteConfirmation(message, command, cond) {
     const client = this.client;
-    const conditionsEmbed = client.embeds.orange(command, responses.conditions);
+    const embed = client.embeds.orange(command, cond);
     const filter = () => true;
     var clicked = false;
 
-    const acceptButton = client.buttons.accept("Delete_Conditions_Accept");
-    const declineButton = client.buttons.decline("Delete_Conditions_Decline");
+    const accept = client.buttons.accept("Delete_Conditions:Accept");
+    const decline = client.buttons.decline("Delete_Conditions:Decline");
+    const row = client.buttons.actionRow([accept, decline]);
 
-    const msg = await message.channel.send(conditionsEmbed, { buttons: [acceptButton, declineButton] });
-    const collector = msg.createButtonCollector(filter, { idle: 60000 });
+    const acceptEmbed = client.embeds.success(command,`Accepted the command conditions.`);
+    const declineEmbed = client.embeds.warn(command, `Declined the command conditions.`);
 
-    collector.on("collect", async (button) => {
-      const btnClicker = await button.clicker.user;
-      const acceptEmbed = client.embeds.success(command,`Accepted the command conditions.`);
-      const declineEmbed = client.embeds.error(command, `Declined the command conditions.`);
+    const msg = await message.reply({ embeds: [embed], components: [row] });
+    const collector = msg.createMessageComponentCollector({ filter, idle: 90 * 1000 });
 
-      if (btnClicker.id == message.author.id) {
-        clicked = true
-        if (button.id == "Delete_Conditions_Accept") {
-          client.db.first.set(btnClicker.id, false, "deleteCmd");
-          msg.edit(acceptEmbed, null);
-          button.reply.defer();
+    collector.on("collect", async (int) => {
+      if (int.member.id !== message.author.id) {
+        const embed = client.embeds.notComponent();
+        return int.reply({ embeds: [embed], ephemeral: true });
+      }
 
-        } else if (button.id == "Delete_Conditions_Decline") {
-          msg.edit(declineEmbed, null);
-          button.reply.defer();
-        }
+      if (int.customId == "Delete_Conditions:Accept") {
+        client.db.first.set(int.member.id, false, "deleteCmd");
+        int.update({ embeds: [acceptEmbed], components: [] });
+
       } else {
-        if (button.id == "Delete_Conditions_Accept") {
-          client.db.first.set(btnClicker.id, false, "deleteCmd")
-          button.reply.send(``, { embed: acceptEmbed, ephemeral: true });
-
-        } else if (button.id == "Delete_Conditions_Decline") {
-          button.reply.send(``, { embed: declineEmbed, ephemeral: true });
-        }
+        int.update({ embeds: [declineEmbed], components: [] });
       }
-    })
 
-    collector.on("end", async (collected) => {
-      if (!clicked) {
-        const errorEmbed = client.embeds.error(command, `This prompt has ended due to inactivity.`);
-        msg.edit(errorEmbed, null);
-      }
-    })
+      clicked = true;
+    });
+
+    collector.on("end", async () => {
+      if (clicked) return;
+
+      const embed = client.embeds.inactivity(command);
+      msg.edit({ embeds: [embed], components: [] });
+    });
   }
 
-  async helpMenu(msg, message, modPermissions, adminPermissions, ticketPermissions, supportPermissions, guildPrefix, noPanel) {
+  async helpMenu(msg, message, obj) {
     const filter = () => true;
-    const collector = msg.createMenuCollector(filter, { idle: 60 * 1000 });
+    const client = this.client;
+
+    const collector = msg.createMessageComponentCollector({ filter, idle: 60 * 1000 });
     const original = msg.embeds[0];
     const select = msg.components[0].components[0];
 
-    collector.on("collect", async (menu) => {
-      if (menu.clicker.id !== message.author.id) return menu.reply.defer();
-      const client = this.client;
-      const backBtn = client.buttons.grey("Back", "Help_Menu:Back");
-      await menu.reply.defer();
+    const backBtn = client.buttons.grey("Back", "Help_Menu:Back");
+    const btnRow = client.buttons.actionRow([backBtn]);
+    const selectRow = client.buttons.actionRow([select]);
 
-      switch (menu.values[0]) {
+    collector.on("collect", async (int) => {
+      if (int.member.id !== message.author.id) {
+        const embed = client.embeds.notComponent();
+        return int.reply({ embeds: [embed], ephemeral: true });
+      }
+
+      if (int.componentType == "BUTTON") {
+        return int.update({ embeds: [original], components: [selectRow] });
+      }
+
+      switch (int.values[0]) {
         case "Help_Menu:General":
         {
-          const helpEmbed = client.embeds.helpCategory("General", `${client.util.members} `, guildPrefix);
-          await msg.edit(helpEmbed, { button: backBtn });
+          const helpEmbed = client.embeds.helpCategory("General", obj.gen, obj.prefix);
+          await int.update({ embeds: [helpEmbed], components: [btnRow] });
           break;
         }
         case "Help_Menu:Moderator":
         {
-          const helpEmbed = client.embeds.helpCategory("Moderator", modPermissions, guildPrefix);
-          await msg.edit(helpEmbed, { button: backBtn });
+          const helpEmbed = client.embeds.helpCategory("Moderator", obj.mod, obj.prefix);
+          await int.update({ embeds: [helpEmbed], components: [btnRow] });
           break;
         }
         case "Help_Menu:Administrator":
         {
-          const helpEmbed = client.embeds.helpCategory("Administrator", adminPermissions, guildPrefix);
-          await msg.edit(helpEmbed, { button: backBtn });
+          const helpEmbed = client.embeds.helpCategory("Administrator", obj.admin, obj.prefix);
+          await int.update({ embeds: [helpEmbed], components: [btnRow] });
           break;
         }
         case "Help_Menu:Ticket":
         {
-          const helpEmbed = client.embeds.helpCategory("Ticket", `${client.util.members} `, guildPrefix, ticketPermissions, adminPermissions, noPanel);
-          await msg.edit(helpEmbed, { button: backBtn });
+          const helpEmbed = client.embeds.helpCategory("Ticket", obj.tck, obj.prefix, obj.sup, obj.noPanel);
+          await int.update({ embeds: [helpEmbed], components: [btnRow] });
           break;
         }
         case "Help_Menu:Support":
         {
-          const helpEmbed = client.embeds.helpCategory("Support", supportPermissions, guildPrefix);
-          await msg.edit(helpEmbed, { button: backBtn });
+          const helpEmbed = client.embeds.helpCategory("Support", obj.support, obj.prefix);
+          await int.update({ embeds: [helpEmbed], components: [btnRow] });
           break;
         }
         case "Help_Menu:Developer":
         {
-          const helpEmbed = client.embeds.helpCategory("Developer", `${client.util.integration} `, guildPrefix);
-          await msg.edit(helpEmbed, { button: backBtn });
+          const helpEmbed = client.embeds.helpCategory("Developer", obj.dev, obj.prefix);
+          await int.update({ embeds: [helpEmbed], components: [btnRow] });
           break;
         }
       }
-
-      const btnCollector = await msg.createButtonCollector(filter, { idle: 60 * 6000 });
-      btnCollector.on("collect", async (btn) => {
-        if (btn.clicker.id !== message.author.id) return;
-        await btn.reply.defer();
-
-        msg.edit(original, select);
-      })
-
-    })
+    });
 
     collector.on("end", async () => {
-      msg.edit(original, null);
+      msg.edit({ embeds: [original], components: [] });
     })
   }
 
@@ -617,7 +612,7 @@ module.exports = class Prompts {
         const btnFilter = () => true;
         var clicked = false;
 
-        const embed = this.client.embeds.fieldGreen(command.option.new, `This prompt has been completed.\nClick on a button below to confirm or cancel the configuration.\n\u200b`, fields);
+        const embed = this.client.embeds.green(command.option.new, `This prompt has been completed.\nClick on a button below to confirm or cancel the configuration.\n\u200b`, fields);
 
         const confirmMsg = await message.channel.send({ embed: embed, buttons: [confirmBtn, cancelBtn] });
         const confirmCollector = confirmMsg.createButtonCollector(btnFilter, { idle: 60 * 1000 });
@@ -726,5 +721,42 @@ module.exports = class Prompts {
         message.delete();
       }
     })
+  }
+
+  async resetSettings(msg, command, message) {
+    const filter = () => true;
+    const collector = msg.createMessageComponentCollector({ filter, idle: 60 * 1000 });
+    const channel = msg.channel;
+    const guildId = msg.guild.id;
+    const client = this.client;
+    const option = command.option.reset;
+    var clicked = false;
+
+    collector.on("collect", async (int) => {
+      if (int.member.id !== message.author.id) {
+        const embed = client.embeds.notComponent();
+        return int.reply({ embeds: [embed], ephemeral: true });
+      }
+
+      if (int.customId == "Settings_Reset:Confirm") {
+        client.db.settings.delete(guildId);
+        const embed = client.embeds.success(option, `Reset this server's settings.`);
+        await int.reply({ embeds: [embed] });
+        msg.delete();
+
+      } else {
+        const embed = client.embeds.success(option, `Cancelled the prompt.`);
+        await int.reply({ embeds: [embed] });
+        msg.delete();
+      }
+
+      clicked = true;
+    });
+
+    collector.on("end", async () => {
+      if (clicked) return;
+      const embed = client.embeds.inactivity(command);
+      channel.send({ embeds: [embed] });
+    });
   }
 }

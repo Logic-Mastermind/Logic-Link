@@ -14,82 +14,97 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     var logs = await client.db.logs;
     var pages = [];
     var allLogs = [];
+
     var persist = false;
-    var devLog = client.db.devSettings.get(client.util.devId, "logsCleared");
+    var devLog = Math.round(client.db.devSettings.get(client.util.devId, "logsCleared") / 1000);
     var canLog = client.db.devSettings.get(client.util.devId, "allowLog");
 
     if (secArg) {
       if (secArg == "clr" || secArg == "clear") {
         await client.logger.clear();
         const embed = client.embeds.success(command, `Cleared the bot logs successfully.`);
-        return message.lineReply(embed);
+        return message.reply({ embeds: [embed] });
 
       } else if (secArg == "all") {
         logs = await client.db.logs.fetchEverything();
         persist = true;
 
+      } else if (secArg == "count") {
+        const embed = client.embeds.success(command, `There is a total of \`${logs.count}\` bot log${logs.count == 1 ? `` : `s`}.`);
+        return message.reply({ embeds: [embed] });
+
       } else if (secArg == "off") {
         if (!canLog) {
-          const embed = client.embeds.error(command, `Logs have already been turned off.`);
-          return message.lineReply(embed);
+          const embed = client.embeds.error(command, `Developer logs have already been turned off.`);
+          return message.reply({ embeds: [embed] });
         }
 
         client.db.devSettings.set(client.util.devId, false, "allowLog");
-        const embed = client.embeds.success(command, `Turned off logs for the bot developer.`);
-        return message.lineReply(embed);
+        const embed = client.embeds.success(command, `Turned off developer logs.`);
+        return message.reply({ embeds: [embed] });
 
       } else if (secArg == "on") {
         if (canLog) {
-          const embed = client.embeds.error(command, `Logs have already been turned on.`);
-          return message.lineReply(embed);
+          const embed = client.embeds.error(command, `Developer logs have already been turned on.`);
+          return message.reply({ embeds: [embed] });
         }
 
         client.db.devSettings.set(client.util.devId, true, "allowLog");
-        const embed = client.embeds.success(command, `Turned on logs for the bot developer.`);
-        return message.lineReply(embed);
+        const embed = client.embeds.success(command, `Turned on developer logs.`);
+        return message.reply({ embeds: [embed] });
 
       } else if (!isNaN(secArg)) {
         var logData = await client.db.logs.get(secArg);
         if (!logData.content) {
           const embed = client.embeds.error(command, `A log with the ID: \`${secArg}\` was not found.`);
-          return message.lineReply(embed);
+          return message.reply({ embeds: [embed] });
         }
 
         const embed = client.embeds.blue(command, `Showing info for the log with ID: \`${secArg}\`.\n\n${client.util.category} Type: \`${logData.type}\`\n${client.util.clock} Date: <t:${Math.round(logData.timestamp / 1000)}:R>\n${client.util.message} Content: ${logData.content}${logData.details ? `\n\n**Log Details**\n${client.util.reply}${logData.details.join(`\n${client.util.reply}`)}` : ``}`);
-        return message.lineReply(embed);
+        return message.reply({ embeds: [embed] });
       }
     }
 
-    if (logs.size <= 1) {
+    if (logs.size < 1) {
       const embed = client.embeds.error(command, `There are no logs to show.`);
-      return message.lineReply(embed);
+      return message.reply({ embeds: [embed] });
     }
 
-    logs.forEach((v, k) => {
-      if (v.type && v.content) {
-        const log = `${(v.type == "Error" || v.type == "Warn") ? `${v.type == "Error" ? `-` : `+`}` : `~`}[${v.type} ${k}]: ${v.content}`;
-        allLogs.unshift(log);
-      }
-    })
+    for await (const [k, v] of logs.entries()) {
+      if (!v.type) continue;
+      if (!v.content) continue;
+
+      const priority = v.type == "Error" ? `-` : v.type == "Warn" ? `+` : `~`;
+      const log = `${priority} [Log] ${k}: ${v.content}`;
+      await allLogs.unshift(log);
+    }
 
     const chunks = await client.functions.divideChunk(allLogs, 15);
-    chunks.forEach((v, k) => {
+    for await (const [k, v] of Object.entries(chunks)) {
+      var desc = "";
+      var logsTotal = allLogs.length;
       var totalLogs = client.db.logs.count;
-      var description = (k == 0 ? `${persist ? `Displaying all logs since last cleared since <t:${Math.round(devLog / 1000)}:T>.` : `Displaying all logs last loaded since <t:${client.readySince}:T>.`}\nA total of \`${allLogs.length}\` log${allLogs.length == 1 ? ` is` : `s are`} shown.${allLogs.length !== totalLogs ? ` (${totalLogs} total log${totalLogs == 1 ? `` : `s`})` : ``}\n\n` : ``);
 
-      const embed = client.embeds.blue(command, `${description}${code}diff\n${v.join("\n")}${code}`);
-      pages.push(embed)
-    })
+      if (k == 0) {
+        desc = `Displaying all logs last ${persist ? `cached since <t:${devLog}:T>` : `cleared since <t:${client.readySince}:T>`}.\nA total of \`${logsTotal}\` log${logsTotal == 1 ? ` is` : `s are`} shown.${logsTotal !== totalLogs ? ` (${totalLogs} total logs)` : ``}\n\n`;
+      }
 
-    const leftBtn = client.buttons.grey("<", "Left_Button").setDisabled();
-    const rightBtn = client.buttons.grey(">", "Right_Button");
+      const embed = client.embeds.blue(command, `${desc}${code}diff\n${v.join("\n")}${code}`);
+      await pages.push(embed);
+    }
+
+    const leftBtn = client.buttons.emoji("Button_Left", client.util.arrowLeft, "SECONDARY");
+    const rightBtn = client.buttons.emoji("Button_Right", client.util.arrowRight, "SECONDARY");
+
     if (allLogs.length <= 15) rightBtn.setDisabled();
+    await leftBtn.setDisabled();
+    const actionRow = client.buttons.actionRow([leftBtn, rightBtn]);
 
-    const msg = await message.channel.send({ embed: pages[0], buttons: [leftBtn, rightBtn] });
+    const msg = await message.channel.send({ embeds: [pages[0]], components: [actionRow] });
     pages = await pages.slice(1);
 
-    if (pages[0]) client.functions.paginate(msg, pages)
+    client.functions.paginate(msg, pages);
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

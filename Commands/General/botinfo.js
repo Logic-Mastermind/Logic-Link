@@ -8,16 +8,26 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const noArgs = await client.functions.getNoArgs(command, message.guild);
   const { secArg, thirdArg, fourthArg, fifthArg } = await client.functions.getArgs(args);
   const code = `\`\`\``;
-
-  const responses = {
-    info: `\n\n**Library**\nDiscord.js V12.5.3\n\n**Developer**\n<@611624247240032256>`
-  }
+  const responses = {};
   
   try {
-    const embed = client.embeds.blue(command, client.util.botInfo + responses.info);
-    message.lineReply(embed);
+    const fields = [
+      {
+        name: "Library",
+        value: `Discord.js V${Discord.version}`,
+        inline: false
+      },
+      {
+        name: "Developer",
+        value: `<@${client.util.devId}>`,
+        inline: false
+      }
+    ];
+
+    const embed = client.embeds.blue(command, `${client.util.botInfo}\n\u200b`, fields);
+    message.reply({ embeds: [embed] });
     
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

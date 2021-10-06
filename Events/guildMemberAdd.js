@@ -9,10 +9,20 @@ module.exports = async (client, member) => {
   const code = `\`\`\``;
 
   try {
+    var guild = member.guild;
     var role = settings.welcomeRoleObj;
     var channel = settings.welcomeChannelObj;
+    var welcomeMsg = settings.welcomeMsg;
 
     if (role) {
+      if (member.guild.id == client.util.supportServer) {
+        var unverifiedRole = guild.roles.cache.get(client.util.supportUnverifyRole);
+        var dividerRole = guild.roles.cache.get(client.util.supportDividerRole);
+        var memberRole = guild.roles.cache.get(client.util.supportMemberRole);
+
+        return member.roles.add([unverifiedRole, dividerRole, memberRole]);
+      }
+
       if (clientMember.roles.highest.position <= role.position) return;
 
       member.roles.add(role)
@@ -21,9 +31,17 @@ module.exports = async (client, member) => {
 
     if (channel) {
       if (!channel.permissionsFor(clientMember).has("SEND_MESSAGES")) return;
-      const embed = client.embeds.green(`Welcome`, `${settings.welcomeMsg ? `${settings.welcomeMsg.replaceAll("[user]", `<@${member.id}>`).replaceAll("[tag]", `${member.user.tag}`).replaceAll("[id]", `${member.id}`).replaceAll("[username]", `${member.user.username}`)}` : `Hello <@${member.id}>.\nWelcome to \`${member.guild.name}\`, enjoy your stay!`}`);
+      if (welcomeMsg) {
+        welcomeMsg = welcomeMsg
+        .replaceAll("[username]", member.user.username)
+        .replaceAll("[user]", `<@${member.id}>`)
+        .replaceAll("[tag]", member.user.tag)
+        .replaceAll("[id]", member.id)
+      }
 
-      channel.send(embed);
+      const defaultMsg = `Hello <@${member.id}>.\nWelcome to \`${member.guild.name}\`, enjoy your stay!`;
+      const embed = client.embeds.green(`Welcome`, `${settings.welcomeMsg ? welcomeMsg : defaultMsg}`);
+      channel.send({ embeds: [embed] });
     }
   } catch (error) {
     client.functions.sendError(error);

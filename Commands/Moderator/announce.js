@@ -17,14 +17,14 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
     if (command.options.includes(secArg)) {
       if (!fourthArg) {
-        const noArgsEmbed = await client.embeds.noArgs(command.option[secArg], message.guild);
-        return message.lineReply(noArgsEmbed);
+        const embed = await client.embeds.noArgs(command.option[secArg], message.guild);
+        return message.reply({ embeds: [embed] });
       }
 
       if (secArg == "role") {
         if (!fifthArg) {
-          const noArgsEmbed = await client.embeds.noArgs(command.option[secArg], message.guild);
-          return message.lineReply(noArgsEmbed);
+          const embed = await client.embeds.noArgs(command.option[secArg], message.guild);
+          return message.reply({ embeds: [embed] });
         }
 
         if (!channel) channel = await client.functions.findChannel(fourthArg, message.guild);
@@ -32,7 +32,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
         if (!role) {
           const embed = client.embeds.noRole(command, thirdArg);
-          return message.lineReply(embed);
+          return message.reply({ embeds: [embed] });
         }
 
         announcement = args.slice(3).join(" ");
@@ -48,31 +48,48 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     }
 
     if (channel) {
+      if (!channel.permissionsFor(message.member).has("SEND_MESSAGES")) {
+        const embed = client.embeds.permission(command, "SEND_MESSAGES");
+        return message.reply({ embeds: [embed] });
+      }
+
       announcement = await client.functions.upperFirst(announcement);
-      const announceEmbed = client.embeds.blue("Announcement", announcement, true);
-      const messageOptions = { embed: announceEmbed };
+      const announceEmbed = client.embeds.custom("Announcement", announcement, [`Announced by ${message.author.tag}`, message.author.displayAvatarURL()]);
+      const messageOptions = { embeds: [announceEmbed] };
 
       if (option) {
         if (option == "everyone" || option == "here") messageOptions.content = `@${option}`;
-        else messageOptions.content = `<@&${option}>`
+        else messageOptions.content = `<@&${option}>`;
+      }
+
+      if (!client.functions.isMod(message.member, message.guild, settings)) {
+        if (!channel.permissionsFor(message.member).has("SEND_MESSAGES")) {
+          const embed = client.embeds.permission("SEND_MESSAGES");
+          return message.reply({ embeds: [embed] });
+        }
+
+        if (!channel.permissionsFor(message.member).has("MENTION_EVERYONE")) {
+          const embed = client.embeds.permission("MENTION_EVERYONE");
+          return message.reply({ embeds: [embed] });
+        }
       }
 
       channel.send(messageOptions)
       .then(() => {
         if (channel.id !== message.channel.id) {
           const embed = client.embeds.success(command, `Sent the announcement to <#${channel.id}>.`);
-          message.lineReply(embed);
+          message.reply({ embeds: [embed] });
         }
       })
       .catch(async (error) => {
         const embed = client.embeds.errorInfo(command, message, error);
-        message.lineReply(embed);
+        message.reply({ embeds: [embed] });
       })
     } else {
       const embed = client.embeds.noChannel(command, option ? thirdArg : secArg)
-      message.lineReply(embed);
+      message.reply({ embeds: [embed] });
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

@@ -37,7 +37,11 @@ module.exports = async (client, message) => {
     if (!message.content.startsWith(prefix) && !mentioned) return;
     if (mentioned) {
       if (!allArgs[1]) {
-        const embed = client.embeds.green("Greetings", `Hello, I'm Logic Link, an advanced utility/moderation bot with extremely cool commands and features.\n\n**Server Prefix**\nThis server's prefix is currently set to: \`${guildPrefix}\`.\nRun \`${guildPrefix}help\` for more information.`);
+        const embed = client.embeds.green("Greetings", `Hello, I'm Logic Link, an advanced utility/moderation bot with extremely cool commands and features.`, [{
+          name: "Server Prefix",
+          value: `This server's prefix is currently set to: \`${guildPrefix}\`.\nRun \`${guildPrefix}help\` for more information.`,
+          inline: false
+        }]);
         return message.reply({ embeds: [embed] });
       }
     }
@@ -58,7 +62,7 @@ module.exports = async (client, message) => {
     const logId = await client.logger.log(`${message.author.tag} ran the ${command.commandName} command.`, message.author);
     
     const permissionWhitelist = ["delete", "lock", "hide", "unhide", "unlock"];
-    const checkBotPerms = ["addrole", "addroles", "hide", "hoist", "lock", "removerole", "removeroles", "unhide", "unhoist", "unlock", "ban", "kick", "purge", "slowmode"];
+    const checkBotPerms = ["addrole", "addroles", "hide", "hoist", "lock", "removerole", "removeroles", "unhide", "unhoist", "unlock", "announce", "ban", "kick", "purge", "slowmode", "nickname", "softban", "tempban", "unban", "unmute"];
 
     async function filterPermissions() {
       if (permissionWhitelist.includes(command.commandName)) return null;
@@ -150,7 +154,11 @@ module.exports = async (client, message) => {
 
           if (now < expiration) {
             await client.logger.updateLog(`User was on cooldown for that command.`, logId);
-            const embed = client.embeds.error(command, `You are on cooldown for the \`${command.commandName}\` command.\nYou currently need to wait \`${ms(timeLeft, { long: true })}\` before running this command again.`);
+            const embed = client.embeds.error(command, `You are on cooldown for the \`${command.commandName}\` command.`, [{
+              name: "Time Left",
+              value: `\`${ms(timeLeft, { long: true })}\``,
+              inline: false
+            }]);
 
             return message.reply({ embeds: [embed] });
           }
@@ -187,6 +195,8 @@ module.exports = async (client, message) => {
       allArgs: allArgs,
       mentioned: mentioned,
       logId: logId,
+      hasBotSupport: message.member.roles.cache.has(client.util.supportRole),
+      isDev: message.author.id == client.util.devId,
       hasSupport: hasSupportRole
     }
 
@@ -194,6 +204,6 @@ module.exports = async (client, message) => {
     await client.db.cooldown.set(message.author.id, now, command.commandName);
     cmd.run(client, message, args, command, settings, tsettings, extra);
   } catch (error) {
-    client.functions.sendError(error, true, message, command);
+    client.functions.sendError(error, message, command);
   }
 }

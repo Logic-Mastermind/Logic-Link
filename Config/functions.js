@@ -2,78 +2,83 @@ const Discord = require("discord.js");
 const Fetch = require("node-fetch");
 const Chalk = require("chalk");
 const ms = require("ms");
+
 const code = "```";
+const footer1 = `Logic Link - Imagine A World`;
+const footer2 = `https://cdn.discordapp.com/emojis/775848533298905130.png?v=1`;
 
 module.exports = class Functions {
   constructor(client) {
     this.client = client;
   }
 
-  async sendErrorMsg(error, send, message, command, logId) {
+  async sendErrorMsg(error, message, command, logId) {
     const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa" });
 
     const errorId = await this.getRandomString(10);
-    await this.setErrorData(error, errorId)
+    await this.setErrorData(error, errorId);
 
     var invite = null;
     if (message && command) {
       invite = await message.channel.createInvite({}, `Creating invite for evaluation because of an error in the ${command.commandName} command.`).catch(() => {});
     }
 
-    var catcher = {
+    const catcher = {
       title: `Bot Error`,
       color: `RED`,
-      description: `An error has occured whilst running the \`${command ? command.commandName : `unknown`}\` command.\n${error.name.includes("Discord") ? `This error was caused by a Discord API Error which passed through user sanitization.` : `This error was caused by a human error from the command file of this command.   \u200b`}`,
-      field1: {
-        title: `Error Information`,
-        description: `${error.name ? `**Name:** \`${error.name}\`` : ``}${error.message ? `\n**Message:** \`${error.message}\`` : ``}${error.path ? `\n**Path:** \`${error.path}\`` : ``}${error.code ? `\n**Code:** \`${error.code}\`` : ``}${error.method ? `\n**Method:** \`${error.method}\`` : ``}${error.httpStatus ? `\n**HTTP Status:** \`${error.httpStatus}\`‎` : ``}\n**Error ID:** \`${errorId}\`\n\u200b`,
-      },
-      field2: {
-        title: `Command Information`,
-        description: `${command.name ? `**Name:** \`${command.name}\`\n` : ``}${message.guild.name ? `**Guild Name:** \`${message.guild.name}\`\n` : ``}${message.author.id ? `**Sender:** <@${message.author.id}>\n` : ``}${message.channel.id ? `**Channel:** <#${message.channel.id}>\n` : ``}${invite ? `**Invite:** ${invite}` : ``}`,
-      },
-      field3: {
-        title: `Error Stack`,
-        description: `${code}${error.stack}${code}`,
-      },
-      footer1: `Logic Link - Imagine A World`,
-      footer2: `https://cdn.discordapp.com/emojis/775848533298905130.png?v=1`
+      description: `An error has occured whilst running the \`${command.commandName}\` command.\n${error ? `${error.name ? `${error.name.includes("Discord") ? `This error originated from an invalidated request to the Discord API which was caused by.` : `This error was caused by a human error from the command file of this command.   \u200b`}` : `This error was caused by a human error from the command file of this command.   \u200b`}` : ``}`,
+      fields: [
+        {
+          name: `Error Information`,
+          value: `${error.name ? `**Name:** \`${error.name}\`` : ``}${error.message ? `\n**Message:** \`${error.message}\`` : ``}${error.path ? `\n**Path:** \`${error.path}\`` : ``}${error.code ? `\n**Code:** \`${error.code}\`` : ``}${error.method ? `\n**Method:** \`${error.method}\`` : ``}${error.httpStatus ? `\n**HTTP Status:** \`${error.httpStatus}\`‎` : ``}\n\u200b`,
+          inline: false
+        },
+        {
+          name: `Command Information`,
+          value: `${command ? `**Name:** \`${command.name}\`\n` : ``}${message.guild ? `**Guild Name:** \`${message.guild.name}\`\n` : ``}${message.author ? `**Sender:** <@${message.author.id}>\n` : ``}${message.channel ? `**Channel:** <#${message.channel.id}>\n` : ``}`,
+          inline: false
+        }
+      ]
     }
 
-    const errorEmbed = new Discord.MessageEmbed();
-    errorEmbed.setTitle(`${catcher.title}`)
-    errorEmbed.setColor(`${catcher.color}`)
-    errorEmbed.addField(`${catcher.field1.title}`, `${catcher.field1.description}`)
-    if (command) errorEmbed.addField(`${catcher.field2.title}`, `${catcher.field2.description}`)
-    errorEmbed.setDescription(`${catcher.description}`)
+    const stack = {
+      title: `Error Stack`,
+      description: `${code}${error.stack}${code}`,
+      color: "RED",
+      timestamp: Date.now(),
+      footer: {
+        text: footer1,
+        iconURL: footer2
+      }
+    }
 
-    const stackEmbed = new Discord.MessageEmbed();
-    stackEmbed.setTitle(catcher.field3.title);
-    stackEmbed.setColor(catcher.color)
-    stackEmbed.setDescription(catcher.field3.description);
-    stackEmbed.setFooter(catcher.footer1, catcher.footer2)
-    stackEmbed.setTimestamp();
+    const msg = {
+      title: command.name,
+      description: this.client.util.errorMsgDefault,
+      color: "RED",
+      fields: [
+        { name: "Error Identification", value: `${code}${errorId}${code}`, inline: false }
+      ],
+      timestamp: Date.now(),
+      footer: {
+        text: footer1,
+        iconURL: footer2
+      }
+    }
+
+    const embed = new Discord.MessageEmbed(msg);
+    const embed1 = new Discord.MessageEmbed(catcher);
+    const embed2 = new Discord.MessageEmbed(stack);
 
     if (logId) this.client.logger.updateLog(`An unexpected error occured.`, logId);
+    message.channel.send({ embeds: [embed] }).catch((error) => console.log(error));
+
     whClient.send({
       username: "Logic Link",
       avatarURL: this.client.user.displayAvatarURL(),
-      embeds: [errorEmbed, stackEmbed]
+      embeds: [embed1, embed2]
     })
     .catch((error) => console.log(error));
-
-    if (send) {
-      if (send == true) {
-        const sendEmbed = new Discord.MessageEmbed()
-        .setTitle(command.name)
-        .setColor(`RED`)
-        .setFooter(catcher.footer1, catcher.footer2)
-        .setDescription(`A fatal error has occured that prevented this command from working correctly.\nIf this issue persists, please contact the bot developer or support server.\n\n**Error ID**\n${code}${errorId}${code}`)
-        .setTimestamp();
-
-        message.channel.send({ embeds: [sendEmbed] }).catch((error) => console.log(error));
-      }
-    }
   }
 
   async sendError(error) {
@@ -82,36 +87,34 @@ module.exports = class Functions {
     const catcher = {
       title: `Bot Error`,
       color: `RED`,
-      description: `An unexpected error has occured.                      \u200b`,
-      field1: {
-        title: `Error Information`,
-        description: `${error.name ? `**Name:** \`${error.name}\`` : ``}${error.message ? `\n**Message:** \`${error.message}\`` : ``}${error.path ? `\n**Path:** \`${error.path}\`` : ``}${error.code ? `\n**Code:** \`${error.code}\`` : ``}${error.method ? `\n**Method:** \`${error.method}\`` : ``}${error.httpStatus ? `\n**HTTP Status:** \`${error.httpStatus}\`‎` : ``}`,
-      },
-      field2: {
-        title: `Error Stack`,
-        description: `${code}${error.stack}${code}`,
-      },
-      footer1: `Logic Link - Imagine A World`,
-      footer2: `https://cdn.discordapp.com/emojis/775848533298905130.png?v=1`
+      description: this.client.util.unexpectedError,
+      fields: [
+        {
+          name: `Error Information`,
+          value: `${error.name ? `**Name:** \`${error.name}\`` : ``}${error.message ? `\n**Message:** \`${error.message}\`` : ``}${error.path ? `\n**Path:** \`${error.path}\`` : ``}${error.code ? `\n**Code:** \`${error.code}\`` : ``}${error.method ? `\n**Method:** \`${error.method}\`` : ``}${error.httpStatus ? `\n**HTTP Status:** \`${error.httpStatus}\`‎` : ``}\n\u200b`,
+          inline: false
+        }
+      ]
     }
 
-    const errorEmbed = new Discord.MessageEmbed();
-    errorEmbed.setTitle(`${catcher.title}`)
-    errorEmbed.setColor(`${catcher.color}`)
-    errorEmbed.addField(`${catcher.field1.title}`, `${catcher.field1.description}`)
-    errorEmbed.setDescription(`${catcher.description}`)
+    const stack = {
+      title: `Error Stack`,
+      description: `${code}${error.stack}${code}`,
+      color: "RED",
+      timestamp: Date.now(),
+      footer: {
+        text: footer1,
+        iconURL: footer2
+      }
+    }
 
-    const stackEmbed = new Discord.MessageEmbed();
-    stackEmbed.setTitle(catcher.field2.title);
-    stackEmbed.setColor(catcher.color)
-    stackEmbed.setDescription(catcher.field2.description);
-    stackEmbed.setFooter(catcher.footer1, catcher.footer2)
-    stackEmbed.setTimestamp();
+    const embed1 = new Discord.MessageEmbed(catcher);
+    const embed2 = new Discord.MessageEmbed(stack);
 
     whClient.send({
       username: "Logic Link",
       avatarURL: this.client.user.displayAvatarURL(),
-      embeds: [errorEmbed, stackEmbed]
+      embeds: [embed1, embed2]
     })
     .catch((error) => console.log(error));
   }
@@ -140,6 +143,7 @@ module.exports = class Functions {
     if (!role) role = guildR.find(x => x.name.toLowerCase() == filterL);
 
     for await (const [id, role] of guildR.entries()) {
+      if (filter.length < 3) break;
       var nameL = role.name.toLowerCase();
       var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
@@ -166,10 +170,11 @@ module.exports = class Functions {
     if (!channel) channel = guildC.find(x => x.name.toLowerCase() == filterL);
 
     for await (const [id, channel] of guildC.entries()) {
+      if (filter.length < 3) break;
       var nameL = channel.name.toLowerCase();
       var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
-      if (safeFilter && filter.length >= 3) {
+      if (safeFilter && channel.isText()) {
         found = id;
         break;
       }
@@ -192,6 +197,7 @@ module.exports = class Functions {
     if (!channel) channel = guildC.find(x => x.name.toLowerCase() == filterL);
 
     for await (const [id, channel] of guildC.entries()) {
+      if (filter.length < 3) break;
       var nameL = channel.name.toLowerCase();
       var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
@@ -220,6 +226,7 @@ module.exports = class Functions {
     if (!member) member = guildM.find(x => x.user.tag.toLowerCase() == filterL);
 
     for await (const [id, member] of guildM.entries()) {
+      if (filter.length < 3) break;
       var nameL = member.displayName.toLowerCase();
       var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
@@ -246,6 +253,7 @@ module.exports = class Functions {
     if (!role) role = memberR.find(x => x.name.toLowerCase() == filterL);
 
     for await (const [id, role] of memberR.entries()) {
+      if (filter.length < 3) break;
       var nameL = role.name.toLowerCase();
       var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
@@ -273,6 +281,7 @@ module.exports = class Functions {
     if (!user) user = clientU.find(x => x.tag.toLowerCase() == filterL);
 
     for await (const [id, user] of clientU.entries()) {
+      if (filter.length < 3) break;
       if (safe) break;
       var nameL = user.username.toLowerCase();
       var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
@@ -300,6 +309,7 @@ module.exports = class Functions {
     if (!guild) guild = clientG.find(x => x.name.toLowerCase() == filterL);
 
     for await (const [id, guild] of clientG.entries()) {
+      if (filter.length < 3) break;
       var nameL = guild.name.toLowerCase();
       var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
@@ -316,7 +326,7 @@ module.exports = class Functions {
 
   async findBan(filter, guild, safe) {
     const filterL = filter.toLowerCase();
-    const guildB = await guild.fetchBans();
+    const guildB = await guild.bans.fetch();
     const clientU = this.client.users.cache;
     if (!guildB) return null;
 
@@ -328,6 +338,7 @@ module.exports = class Functions {
     if (!ban) ban = guildB.find(x => x.user.tag.toLowerCase() == filterL);
 
     for await (const [id, ban] of guildB.entries()) {
+      if (filter.length < 3) break;
       var nameL = ban.user.username.toLowerCase();
       var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
@@ -364,9 +375,9 @@ module.exports = class Functions {
 
     if (endsWithAny(timeUnits.total, unsorted) || (!isNaN(unsorted)) && (!isNaN(unsorted.split("")[0]))) {
       if (hasNum) {
-        passed = true
-        timeFromUnit = unsorted.match(/\d+/g);
-        digit = timeFromUnit[0]
+        passed = true;
+        timeFromUnit = unsorted.match(/[\d.]+/g);
+        digit = timeFromUnit[0];
 
         if (endsWithAny(timeUnits.minutes, unsorted)) {
           duration = timeFromUnit * 60000;
@@ -403,17 +414,20 @@ module.exports = class Functions {
       }
     }
 
+    duration = duration ? await ms(duration, { long: true }) : null;
+    digit = duration ? duration.split(" ")[0] : null;
+    
     return {
       "passed": passed,
       "digit": digit,
-      "duration": duration,
-      "display": duration ? await ms(duration, { long: true }) : null,
+      "duration": duration ? await ms(duration, { long: true }) : null,
+      "display": duration,
       "unit": unit
     }
   }
 
-  async getRandomString(length) {
-    var randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  async getRandomString(length, chars) {
+    var randomChars = chars || "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     var result = '';
     for (var i = 0; i < length; i++) {
       result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
@@ -432,8 +446,9 @@ module.exports = class Functions {
     settingsObj.welcomeChannelObj = await guild.channels.cache.get(settingsObj.welcomeChannel);
     settingsObj.welcomeRoleObj = await guild.roles.cache.get(settingsObj.welcomeRole);
     settingsObj.mutedRoleObj = await guild.roles.cache.get(settingsObj.mutedRole);
+    settingsObj.cases = new Discord.Collection(settings.cases);
 
-    return settingsObj
+    return settingsObj;
   }
 
   async getTicketData(guild) {
@@ -459,7 +474,7 @@ module.exports = class Functions {
   async getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min) + min)
+    return Math.floor(Math.random() * (max - min) + min);
   }
 
   async findCommand(filter) {
@@ -468,7 +483,7 @@ module.exports = class Functions {
     var alias = client.command.aliases[filter];
     if (alias) filter = alias;
     
-    for (const [name, info] of Object.entries(client.command.general)) {
+    for await (const [name, info] of Object.entries(client.command.general)) {
       if (command) break;
       if (filter == info.commandName || info.aliases.includes(filter)) {
         command = info;
@@ -476,7 +491,7 @@ module.exports = class Functions {
       }
     }
 
-    for (const [name, info] of Object.entries(client.command.administrator)) {
+    for await (const [name, info] of Object.entries(client.command.administrator)) {
       if (command) break;
       if (filter == info.commandName || info.aliases.includes(filter)) {
         command = info;
@@ -484,7 +499,7 @@ module.exports = class Functions {
       }
     }
 
-    for (const [name, info] of Object.entries(client.command.moderator)) {
+    for await (const [name, info] of Object.entries(client.command.moderator)) {
       if (command) break;
       if (filter == info.commandName || info.aliases.includes(filter)) {
         command = info;
@@ -492,7 +507,7 @@ module.exports = class Functions {
       }
     }
 
-    for (const [name, info] of Object.entries(client.command.developer)) {
+    for await (const [name, info] of Object.entries(client.command.developer)) {
       if (command) break;
       if (filter == info.commandName || info.aliases.includes(filter)) {
         command = info;
@@ -500,7 +515,7 @@ module.exports = class Functions {
       }
     }
 
-    for (const [name, info] of Object.entries(client.command.support)) {
+    for await (const [name, info] of Object.entries(client.command.support)) {
       if (command) break;
       if (filter == info.commandName || info.aliases.includes(filter)) {
         command = info;
@@ -508,7 +523,7 @@ module.exports = class Functions {
       }
     }
 
-    for (const [name, info] of Object.entries(client.command.ticket)) {
+    for await (const [name, info] of Object.entries(client.command.ticket)) {
       if (command) break;
       
       if (filter == info.commandName || info.aliases.includes(filter)) {
@@ -517,58 +532,70 @@ module.exports = class Functions {
       }
     }
 
-    return command
+    return command;
+  }
+
+  async findOption(command, filter) {
+    var option = null;
+    for await (const [name, info] of Object.entries(command.option)) {
+      if (filter == info.commandName || info.aliases.includes(filter)) {
+        option = info;
+        break;
+      }
+    }
+
+    return option;
   }
 
   async paginate(message = {}, pages, filter = () => true, timeout = 60000) {
-    if (!message.components[0].components[0] && !message.components[0].components[1]) return console.log("Message has 1 one no button components.")
+    if (!message.components[0].components[1]) throw new Error("Message does not have 2 button components");
 
-    const original = await message.embeds[0];
-    const collector = await message.createButtonCollector(filter, { idle: timeout });
+    const original = message.embeds[0];
+    const collector = await message.createMessageComponentCollector({ filter, idle: timeout });
 
-    const button1 = message.components[0].components[0];
-    const button2 = message.components[0].components[1];
+    const row = message.components[0];
+    const button1 = row.components[0];
+    const button2 = row.components[1];
+
     pages.unshift(original);
 
     var total = pages.length;
     var page = 1;
 
-    collector.on("collect", async (button) => {
-      if (!filter(button)) return button.reply.defer();
+    collector.on("collect", async (int) => {
+      if (!filter(int)) {
+        const embed = client.embeds.notComponent();
+        return int.reply({ embeds: [embed], ephemeral: true });
+      }
 
-      switch (button.id) {
-        case button1.custom_id:
+      switch (int.customId) {
+        case button1.customId:
         {
-          page = page <= 1 ? page : page - 1
-          await button.reply.defer()
+          page = page <= 1 ? page : page - 1;
           break;
         }
-        case button2.custom_id:
+        case button2.customId:
         {
-          page = page >= total ? page : page + 1
-          await button.reply.defer()
+          page = page >= total ? page : page + 1;
           break;
         }
       }
 
-      if (page <= 1) {
-        button1.setDisabled();
-      } else {
-        button1.setDisabled(false);
-      }
+      if (page <= 1) button1.setDisabled();
+      else button1.setDisabled(false);
 
-      if (page >= total) {
-        button2.setDisabled();
-      } else {
-        button2.setDisabled(false);
-      }
+      if (page >= total) button2.setDisabled();
+      else button2.setDisabled(false);
 
-      message.edit({ embed: pages[page - 1], buttons: [button1, button2] })
-    })
+      row.spliceComponents(0, 2);
+      row.addComponents(button1, button2);
 
-    collector.on("end", async (collected) => {
-      await message.edit(original, null);
-    })
+      int.update({ embeds: [pages[page - 1]], components: [row] });
+    });
+
+    collector.on("end", async () => {
+      message.edit({ embeds: [original], components: [] });
+    });
   }
 
   async getArgs(args) {
@@ -578,6 +605,23 @@ module.exports = class Functions {
       fourthArg: args[2],
       fifthArg: args[3]
     }
+  }
+
+  createCase(data, settings, guild) {
+    const client = this.client;
+    const caseId = settings.cases.last() ? settings.cases.last().id + 1 : 1;
+    const key = `${data.user}-${guild.id}`;
+    data.id = caseId;
+
+    if (data.type == "WARN") {
+      var warnings = client.db.userInfo.get(key).warnings;
+      
+      warnings.set(caseId, data);
+      client.db.userInfo.set(key, warnings, `warnings`);
+    }
+
+    var cases = settings.cases.set(caseId, data);
+    client.db.settings.set(guild.id, cases, "cases");
   }
 
   async divideChunk(array, chunk) {
@@ -590,7 +634,7 @@ module.exports = class Functions {
       newArray.push(portion);
     }
 
-    return newArray
+    return newArray;
   }
 
   getCmdPath(cmd) {
@@ -611,7 +655,9 @@ module.exports = class Functions {
   }
 
   async hasPermission(member, command, guild) {
-    const perms = await command.permissions.some(p => member.permissions.has(p));
+    const isDev = member.id == this.client.util.devId;
+    const devCmd = command.required == "dev";
+    const perms = devCmd ? isDev : await command.permissions.some(p => member.permissions.has(p));
     const isOwner = guild.ownerId == member.id;
 
     return perms || isOwner;
@@ -644,7 +690,7 @@ module.exports = class Functions {
   }
 
   async next(channel, idObj, embeds, num) {
-    const msg = await channel.send(embeds[num - 1]);
+    const msg = await channel.send({ embeds: [embeds[num - 1]] });
     idObj[num - 1] = msg.id;
     return idObj;
   }
@@ -736,7 +782,8 @@ module.exports = class Functions {
   }
 
   async getPermOverwrites(channel) {
-    const overwrites = channel.permissionOverwrites;
+    if (channel.type.endsWith("THREAD")) channel = channel.guild.channels.cache.get(channel.parentId);
+    const overwrites = channel.permissionOverwrites.cache;
     const everyone = channel.guild.roles.everyone;
     const compact = [];
 
@@ -749,9 +796,9 @@ module.exports = class Functions {
     return compact[0] ? compact : "No Permission Overwrites";
   }
 
-  isAdmin(target, guild, settings) {
+  isAdmin(target, guild, settings, noRole) {
     const hasPerm = target.permissions.has("ADMINISTRATOR");
-    const hasRole = target.roles.cache.has(settings.adminRole);
+    const hasRole = !noRole ? target.roles.cache.has(settings.adminRole) : null;
     const isOwner = guild.ownerId == target.id;
 
     const client = this.client;
@@ -760,10 +807,10 @@ module.exports = class Functions {
     return hasPerm || hasRole || isOwner || devMode;
   }
 
-  isMod(target, guild, settings) {
+  isMod(target, guild, settings, noRole) {
     const hasPerm = target.permissions.has("ADMINISTRATOR");
-    const hasMod = target.roles.cache.has(settings.modRole);
-    const hasAdmin = target.roles.cache.has(settings.adminRole);
+    const hasMod = !noRole ? target.roles.cache.has(settings.modRole) : null;
+    const hasAdmin = !noRole ? target.roles.cache.has(settings.adminRole) : null;
     const isOwner = guild.ownerId == target.id;
 
     const client = this.client;
@@ -828,7 +875,7 @@ module.exports = class Functions {
     const ownerId = guild.ownerId;
 
     const isLower = initRole.position <= targRole.position;
-    const isOwner = (target.id == ownerId) && (initiator.id !== this.client.user.id);
+    const isOwner = (initiator.id == ownerId) && (target.id !== this.client.user.id);
     var lower = false;
 
     if (isLower && !isOwner) lower = true;

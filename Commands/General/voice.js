@@ -2,6 +2,7 @@ const Discord = require("discord.js");
 const YouTube = require("ytdl-core-discord");
 const YTSearch = require("yt-search");
 const Fetch = require("node-fetch");
+const Voice = require("@discordjs/voice");
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
   const clientMember = message.guild.me;
@@ -22,17 +23,17 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       {
         if (!message.member.voice.channel) {
           const embed = client.embeds.error(command.option.connect, `You must be in a voice channel.`);
-          return message.lineReply(embed);
+          return message.reply({ embeds: [embed] });
         }
 
         if (clientMember.voice.channel) {
           const embed = client.embeds.error(command.option.connect, `I am already in a voice channel.`);
-          return message.lineReply(embed);
+          return message.reply({ embeds: [embed] });
         }
 
         const connection = await message.member.voice.channel.join();
-        const successEmbed = client.embeds.success(command.option.connect, `Joined the <#${connection.channel.id}> channel.`);
-        message.lineReply(successEmbed);
+        const embed = client.embeds.success(command.option.connect, `Joined the <#${connection.channel.id}> channel.`);
+        message.reply({ embeds: [embed] });
 
         break;
       }
@@ -45,22 +46,22 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       {
         if (!clientMember.voice.channel) {
           const embed = client.embeds.error(command.option.disconnect, `I am not in a voice channel.`);
-          return message.lineReply(embed);
+          return message.reply({ embeds: [embed] });
         }
 
         if (message.member.voice.channel) {
           if (message.member.voice.channel.id !== clientMember.voice.channel.id) {
             const embed = client.embeds.error(command.option.disconnect, `You must be in the voice channel.`);
-            return message.lineReply(embed);
+            return message.reply({ embeds: [embed] });
           }
         } else {
           const embed = client.embeds.error(command.option.disconnect, `You must be in the voice channel.`);
-          return message.lineReply(embed);
+          return message.reply({ embeds: [embed] });
         }
 
         await message.member.voice.channel.leave();
-        const successEmbed = client.embeds.success(command.option.disconnect, `Left the <#${message.member.voice.channel.id}> channel.`);
-        message.lineReply(successEmbed);
+        const embed = client.embeds.success(command.option.disconnect, `Left the <#${message.member.voice.channel.id}> channel.`);
+        message.reply({ embeds: [embed] });
 
         break;
       }
@@ -69,13 +70,10 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       {
         if (!thirdArg) {
           const embed = await client.embeds.noArgs(command.option.play, message.guild);
-          return message.lineReply(embed);
+          return message.reply({ embeds: [embed] });
         }
 
         var filter = args.slice(1).join(" ");
-        var groups = [...filter.matchAll(client.util.ytVidRegex)];
-
-        console.log(groups)
         var connection = clientMember.voice.connection;
 
         if (!connection) {
@@ -83,12 +81,12 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             connection = await message.member.voice.channel.join();
           } else {
             const embed = client.embeds.error(command.option.play, `You must be in a voice channel.`);
-            return message.lineReply(embed);
+            return message.reply({ embeds: [embed] });
           }
         }
 
         const pendingEmbed = client.embeds.pending(command.option.play, `Fetching youtube videos...`);
-        const editMsg = await message.lineReply(pendingEmbed);
+        const editMsg = await message.reply({ embeds: [pendingEmbed] });
 
         if (connection && filter) {
           const results = await YTSearch(filter);
@@ -97,7 +95,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
           if (!video) {
             const embed = client.embeds.error(command.option.play, `No YouTube videos could be fetched from the query: \`${filter}\`.`);
-            return editMsg.edit(embed)
+            return editMsg.edit({ embeds: [embed] })
           }
 
           try {
@@ -105,12 +103,12 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             await connection.play(videoStream, { type: "opus" })
             await clientMember.voice.setSelfDeaf(true);
 
-            const successEmbed = client.embeds.success(command.option.play, `Playing \`${video.title}\` from [YouTube](${video.url}).`);
-            editMsg.edit(successEmbed);
+            const embed = client.embeds.success(command.option.play, `Playing \`${video.title}\` from [YouTube](${video.url}).`);
+            editMsg.edit({ embeds: [embed] });
 
           } catch (error) {
-            const errorEmbed = client.embeds.errorInfo(command.option.play, message, error);
-            editMsg.edit(errorEmbed);
+            const embed = client.embeds.errorInfo(command.option.play, message, error);
+            editMsg.edit({ embeds: [embed] });
           }
         }
 
@@ -121,30 +119,30 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       {
         if (!message.member.voice.channel) {
           const embed = client.embeds.error(command.option.pause, `You must be in a voice channel.`);
-          return message.lineReply(embed);
+          return message.reply({ embeds: [embed] });
         }
 
         var connection = clientMember.voice.connection;
         if (!connection) {
           const embed = client.embeds.error(command.option.pause, `I am not in a voice channel.`);
-          return message.lineReply(embed);
+          return message.reply({ embeds: [embed] });
         }
 
         var dispatcher = connection.dispatcher;
         if (!dispatcher) {
           const embed = client.embeds.error(command.option.pause, `Nothing is currently being played.`);
-          return message.lineReply(embed);
+          return message.reply({ embeds: [embed] });
         }
 
         try {
           await dispatcher.pause();
 
           const embed = client.embeds.success(command.option.pause, `Paused the currently playing audio.`);
-          message.lineReply(embed);
+          message.reply({ embeds: [embed] });
           
         } catch (error) {
-          const errorEmbed = client.embeds.errorInfo(command.option.pause, message, error);
-          message.lineReply(errorEmbed);
+          const embed = client.embeds.errorInfo(command.option.pause, message, error);
+          message.reply(embed);
         }
 
         break;
@@ -157,6 +155,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       }
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

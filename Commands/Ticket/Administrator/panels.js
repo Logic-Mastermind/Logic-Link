@@ -27,7 +27,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             inline: true
           }
         }
-      })
+      });
 
       if (panelCount == 0) {
         fields[0] = {
@@ -37,8 +37,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         }
       }
 
-      const embed = client.embeds.field(command, `${client.util.welcomeBotInfo}\n\n**Panels**\nBelow shows a list of ticket panels.\nTo view information about a specific panel, run: \`${guildPrefix}panel <id>\`.\nThis server has ${panelCount == 0 ? `no` : `\`${panelCount}\``} panel${panelCount == 1 ? `` : `s`}.\n\n${code}Panels${code}${(panelCount == 0 && (message.member.hasPermission("ADMINISTRATOR") || message.member.roles.cache.has(settings.adminRole))) ? `\n${client.util.warn} This server does not have any panels. Run \`${guildPrefix}panels new\` to create one.` : ``}\u200b`, fields);
-      message.lineReply(embed);
+      const embed = client.embeds.blue(command, `${client.util.welcomeBotInfo}\n\n**Panels**\nBelow shows a list of ticket panels.\nTo view information about a specific panel, run: \`${guildPrefix}panel <id>\`.\nThis server has ${panelCount == 0 ? `no` : `\`${panelCount}\``} panel${panelCount == 1 ? `` : `s`}.\n\n${code}Panels${code}${(panelCount == 0 && (message.member.permissions.has("ADMINISTRATOR") || message.member.roles.cache.has(settings.adminRole))) ? `\n${client.util.warn} This server does not have any panels. Run \`${guildPrefix}panels new\` to create one.` : ``}\u200b`, fields);
+      message.reply({ embeds: [embed] });
 
     } else {
       if (!isNaN(secArg)) {
@@ -54,14 +54,14 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               { name: `Role Configuration`, value: `${client.util.moderator} Support Roles:\n<@&${panelInfo.support.join(">\n<@&")}>\n\n${client.util.moderator} Additional Roles:\n<@&${panelInfo.additional.join(">\n<@&")}>` }
             ];
 
-            const embed = client.embeds.field(command, `Showing info for the panel with the ID: \`${secArg}\`.\nThis panel was created <t:${Math.round(panelInfo.createdAt / 1000)}:R> by <@${panelInfo.createdBy}>.\nTo modify this panel's configuration, run: \`${guildPrefix}panel modify ${panelInfo.id}\`.\n\u200b`, fields);
-            message.lineReply(embed);
+            const embed = client.embeds.blue(command, `Showing info for the panel with the ID: \`${secArg}\`.\nThis panel was created <t:${Math.round(panelInfo.createdAt / 1000)}:R> by <@${panelInfo.createdBy}>.\nTo modify this panel's configuration, run: \`${guildPrefix}panel modify ${panelInfo.id}\`.\n\u200b`, fields);
+            message.reply({ embeds: [embed] });
           } else {
 
           }
         } else {
           const embed = client.embeds.error(command, `\`${secArg}\` is not a valid panel ID.`);
-          message.lineReply(embed);
+          message.reply({ embeds: [embed] });
         }
         return;
       }
@@ -82,11 +82,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
             } else {
               const embed = client.embeds.error(command.option.modify, `\`${thirdArg}\` is not a valid panel ID.`);
-              message.lineReply(embed);
+              message.reply({ embeds: [embed] });
             }
           } else {
             const embed = await client.embeds.noArgs(command.option.modify, message.guild);
-            message.lineReply(embed);
+            message.reply({ embeds: [embed] });
           }
           break;
         }
@@ -97,8 +97,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
           if (thirdArg) {
             if (panelIds.includes(thirdArg)) {
               const panelInfo = tsettings.panels.all.get(thirdArg);
-              const confirmBtn = client.buttons.confirm("Panel_Delete_Confirm");
-              const cancelBtn = client.buttons.cancel("Panel_Delete_Cancel");
+              const confirmBtn = client.buttons.confirm("Panel_Delete:Confirm");
+              const cancelBtn = client.buttons.cancel("Panel_Delete:Cancel");
 
               const embed = client.embeds.blue(command.option.delete, `Are you sure you would like to delete this panel?\nClick on a button below to either confirm or cancel your choice.\n\n**Panel Info**\n${client.util.clock} Created At: <t:${Math.round(panelInfo.createdAt / 1000)}:R>\n${client.util.moderator} Created By: <@${panelInfo.createdBy}>\n${client.util.text} Panel Name: \`${panelInfo.name}\``);
 
@@ -106,11 +106,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               client.prompts.deletePanel(confirmMsg, tsettings, panelInfo, command, message);
             } else {
               const embed = client.embeds.error(command.option.delete, `\`${thirdArg}\` is not a valid panel ID.`);
-              message.lineReply(embed);
+              message.reply({ embeds: [embed] });
             }
           } else {
             const embed = await client.embeds.noArgs(command.option.delete, message.guild);
-            message.lineReply(embed);
+            message.reply({ embeds: [embed] });
           }
           break;
         }
@@ -122,11 +122,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         default:
         {
           const embed = client.embeds.error(command, `\`${secArg}\` is not a valid command option.`);
-          message.lineReply(embed);
+          message.reply({ embeds: [embed] });
         }
       }
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

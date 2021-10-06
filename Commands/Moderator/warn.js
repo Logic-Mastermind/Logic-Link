@@ -12,7 +12,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
   try {
     var member = message.mentions.members.first();
-    var warning = "No reason was provided.";
+    var warning = client.util.reason;
 
     if (!member) member = await client.functions.findMember(secArg, message.guild);
     if (thirdArg) warning = args.slice(1).join(" ");
@@ -21,23 +21,31 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     if (member) {
       if (warning.length > 1000) {
         const embed = client.embeds.error(command, `This warning is over the 1000 character limit.`);
-        return message.lineReply(embed);
+        return message.reply(embed);
       }
 
-      var warnings = await client.db.userInfo.get(`${member.id}-${member.guild.id}`, `warnings`);
+      var caseData = {
+        type: "WARN",
+        user: member.id,
+        moderator: message.author.id,
+        reason: warning,
+        timestamp: Math.round(Date.now() / 1000)
+      }
 
-      await warnings.push({ initiator: message.author.id, message: warning, date: Date.now() });
-      await client.db.userInfo.set(`${member.id}-${member.guild.id}`, warnings, `warnings`);
-      warnings = await client.db.userInfo.get(`${member.id}-${member.guild.id}`, `warnings`);
+      client.functions.createCase(caseData, settings, message.guild);
+      const warnings = client.db.userInfo.get(`${member.id}-${message.guild.id}`).warnings;
+      
+      const warnedEmbed = client.embeds.moderated("warn", message.guild, warning);
+      if (!member.user.bot) member.user.send({ embeds: [warnedEmbed] });
 
-      if (!member.user.bot) member.user.send(client.embeds.moderated("warn", message.guild, warning));
-      const embed = client.embeds.success(command, `Logged a warning for <@${member.id}>${warnings.length == 1 ? `, this is their first warning` : ``}.`);
-      message.lineReply(embed);
+      const embed = client.embeds.success(command, `Logged a warning for <@${member.id}>, they now have ${warnings.size} warning${warnings.size == 1 ? `` : `s`}.`);
+      message.reply({ embeds: [embed] });
+
     } else {
       const embed = client.embeds.noMember(command, secArg);
-      message.lineReply(embed);
+      message.reply({ embeds: [embed] });
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

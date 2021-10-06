@@ -1,75 +1,93 @@
 const Discord = require("discord.js");
 
-module.exports = class MessageButtons {
+module.exports = class Buttons {
   constructor(client) {
     this.client = client;
   }
 
   new(label, style, id, emoji, url, disabled) {
-    const button = new Buttons.MessageButton();
+    const button = new Discord.MessageButton();
     if (label) button.setLabel(label);
     if (style) button.setStyle(style);
-    if (id) button.setID(id);
+    if (id) button.setCustomId(id);
     if (emoji) button.setEmoji(emoji);
     if (url) button.setURL(url);
-    if (disabled == true) button.setDisabled();
+    if (disabled) button.setDisabled();
 
-    return button
+    return button;
   }
 
   accept(id) {
-    const button = new Buttons.MessageButton();
+    const button = new Discord.MessageButton();
     button.setLabel("Accept");
-    button.setStyle("green");
-    button.setID(id);
+    button.setStyle("SUCCESS");
+    button.setCustomId(id);
 
-    return button
+    return button;
   }
 
   decline(id) {
-    const button = new Buttons.MessageButton();
+    const button = new Discord.MessageButton();
     button.setLabel("Decline");
-    button.setStyle("red");
-    button.setID(id);
+    button.setStyle("DANGER");
+    button.setCustomId(id);
     
-    return button
+    return button;
   }
 
   confirm(id) {
-    const button = new Buttons.MessageButton();
+    const button = new Discord.MessageButton();
     button.setLabel("Confirm");
-    button.setStyle("green");
-    button.setID(id);
+    button.setStyle("SUCCESS");
+    button.setCustomId(id);
 
-    return button
+    return button;
   }
 
   cancel(id) {
-    const button = new Buttons.MessageButton();
+    const button = new Discord.MessageButton();
     button.setLabel("Cancel");
-    button.setStyle("red");
-    button.setID(id);
+    button.setStyle("DANGER");
+    button.setCustomId(id);
     
-    return button
+    return button;
   }
 
-  grey(text, id) {
-    const button = new Buttons.MessageButton();
+  grey(text, id, disabled) {
+    const button = new Discord.MessageButton();
     button.setLabel(text);
-    button.setStyle("grey");
-    button.setID(id);
+    button.setStyle("SECONDARY");
+    button.setCustomId(id);
+    if (disabled) button.setDisabled(true);
     
-    return button
+    return button;
+  }
+
+  green(text, id, disabled) {
+    const button = new Discord.MessageButton();
+    button.setLabel(text);
+    button.setStyle("SUCCESS");
+    button.setCustomId(id);
+    if (disabled) button.setDisabled(true);
+    
+    return button;
   }
 
   emoji(id, emoji, style) {
-    const button = new Buttons.MessageButton();
+    const button = new Discord.MessageButton();
     button.setLabel("");
     button.setEmoji(emoji)
     button.setStyle(style);
-    button.setID(id);
+    button.setCustomId(id);
     
-    return button
+    return button;
+  }
+
+  actionRow(components) {
+    const row = new Discord.MessageActionRow();
+    row.addComponents(components);
+
+    return row;
   }
 
   async selectMenu(placeholder, options, id, min, max) {
@@ -77,8 +95,10 @@ module.exports = class MessageButtons {
 
     if (options) {
       for await (const option of options) {
+        if (typeof option !== "object") throw new Error(`Expected object, got ${typeof option}`);
+        
         const { label, value, id, emoji, def } = option;
-        const menuOption = new Buttons.MessageMenuOption();
+        const menuOption = new Discord.MessageSelectOption();
         if (emoji) menuOption.setEmoji(emoji);
         if (def) menuOption.setDefault(def);
 
@@ -89,9 +109,9 @@ module.exports = class MessageButtons {
       }
     }
 
-    const menu = new Buttons.MessageMenu();
+    const menu = new Discord.MessageSelectMenu();
     if (options) menu.addOptions(optionsArray);
-    if (id) menu.setID(id);
+    if (id) menu.setCustomId(id);
     menu.setPlaceholder(placeholder);
     menu.setMinValues(min);
     menu.setMaxValues(max);

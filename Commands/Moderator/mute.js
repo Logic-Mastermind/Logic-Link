@@ -10,74 +10,65 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const code = `\`\`\``;
 
   const responses = {
-    selfWarning: `You are attempting to mute yourself.\n\n**Detailed Info**\n`,
-    botMute: `You are attempting to mute me.\n\n**Detailed Info**\n`,
-    serverOwner: `You are attempting to mute the server owner.\n\n**Detailed Info**\n`,
-    hierarchy: `This member has a higher or equal role position as your top role.\n\n**Detailed Info**\n`,
-    botHierarchy: `This member has a higher or equal role position as my top role.\n\n**Detailed Info**\n`,
-    pending: `Muting the member...`,
-    mutedRolePos: `The muted role for this server has a higher position than my top role.\n\n**Detailed Info**\n`,
-    hierarchy: `This member has a higher or equal role position as your top role.\n\n**Detailed Info**\n`
+    selfWarning: `You are attempting to mute yourself from the server.`,
+    botMute: `You are attempting to mute me from the server.`,
+    serverOwner: `You are attempting to mute the server owner.`,
+    mutedRolePos: `The muted role for this server has a higher or equal position than my top role.`
   }
 
   try {
     var member = message.mentions.members.first();
-    var mutedRole = message.guild.roles.cache.get(settings.mutedRole);
+    var mutedRole = settings.mutedRoleObj;
+
     if (!member) member = await client.functions.findMember(secArg, message.guild);
     if (secArg.toLowerCase() == "me") member = message.member;
 
     if (!member) {
-      const errorEmbed = client.embeds.noMember(command, secArg);
-      return message.lineReply(errorEmbed)
+      const embed = client.embeds.noMember(command, secArg);
+      return message.reply({ embeds: [embed] });
     }
 
     if (member.id === client.user.id) {
-      const errorEmbed = client.embeds.error(command, `${responses.botMute}Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`)
-      return message.lineReply(errorEmbed)
+      const embed = client.embeds.detailed(command, responses.botMute, `Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`);
+      return message.reply({ embeds: [embed] });
 
     } else if (member.id == message.author.id) {
-      const errorEmbed = client.embeds.error(command, `${responses.selfWarning}Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`);
-      return message.lineReply(errorEmbed)
+      const embed = client.embeds.detailed(command, responses.selfWarning, `Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`);
+      return message.reply({ embeds: [embed] });
+      
+    } else if (member.id == message.guild.ownerId) {
+      const embed = client.embeds.detailed(command, responses.serverOwner, `Server Owner - <@${member.guild.ownerId}>\nTargetted Member - <@${member.id}>`);
+      return message.reply({ embeds: [embed] });
     }
 
-    if (member.id == message.guild.owner.id) {
-      const errorEmbed = client.embeds.error(command, `${responses.serverOwner}Server Owner - <@${member.guild.owner.id}>\nTargetted Member - <@${member.id}>`);
-      return message.lineReply(errorEmbed)
-    }
-
-    if ((message.author.id !== message.guild.owner.id) && member.roles.highest) {
-      if (message.member.roles.highest.position <= member.roles.highest.position) {
-        const embed = client.embeds.error(command, `${responses.hierarchy}Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nInitiator - <@${message.author.id}>: Top Role Position \`${message.member.roles.highest.position}\`.`);
-        return message.lineReply(embed);
-      }
+    if (client.functions.hierarchy(message.member, member, message.guild)) {
+      const embed = client.embeds.detailed(command, client.util.hierarchyM, `Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.`, `Initiator - <@${message.author.id}>: Top Role Position \`${message.member.roles.highest.position}\`.`);
+      return message.reply({ embeds: [embed] });
     }
     
-    if (member.roles.highest) {
-      if (clientMember.roles.highest.position <= member.roles.highest.position) {
-        const clientTopRole = clientMember.roles.highest;
-        const embed = client.embeds.error(command, `${responses.botHierarchy}Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nClient Member - <@${clientMember.id}>: Top Role Position \`${clientTopRole.position}\`.`);
-        return message.lineReply(embed);
-      }
+    if (client.functions.hierarchy(clientMember, member, message.guild)) {
+      const embed = client.embeds.detailed(command, client.util.botHierarchyM, `Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nClient Member - <@${clientMember.id}>: Top Role Position \`${clientMember.roles.highest.position}\`.`);
+      return message.reply({ embeds: [embed] });
     }
 
-    if (member.hasPermission("ADMINISTRATOR")) {
-      const errorEmbed = client.embeds.error(command, `This member has administrator permissions, I cannot mute them.`);
-      return editMsg.edit(errorEmbed);
+    if (client.functions.isMod(member, message.guild, settings, true)) {
+      const embed = client.embeds.error(command, `This member is a server mod or admin, I cannot mute them.`);
+      return message.reply({ embeds: [embed] });
     }
 
-    const pendingEmbed = client.embeds.pending(command, responses.pending);
-    var editMsg = await message.lineReply(pendingEmbed);
+    var pendingEmbed = client.embeds.pending(command, "Muting the member...");
+    if (!mutedRole) pendingEmbed = client.embeds.pending(command, "Creating muted role...");
+    var editMsg = await message.reply({ embeds: [pendingEmbed] });
 
     if (!mutedRole) {
       mutedRole = message.guild.roles.cache.find(r => r.name.toLowerCase() == "muted");
 
       if (!mutedRole) {
-        if (!clientMember.hasPermission("MANAGE_ROLES")) {
-          const embed = client.embeds.botPermissionCustom("MANAGE_ROLES", `I am unable to create the server muted role.`);
-          return editMsg.edit(embed)
+        if (!clientMember.permissions.has("MANAGE_ROLES")) {
+          const embed = client.embeds.botPermission("MANAGE_ROLES", `I am unable to create the server muted role.`);
+          return editMsg.edit({ embeds: [embed] });
         }
 
-        const roleEmbed = client.embeds.pending(command, `Created the server muted role.`);
         mutedRole = await message.guild.roles.create({
           data: {
             name: "Muted",
@@ -87,115 +78,120 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
           },
           reason: `Created server muted role. Responsible User: ${message.author.tag}`
         });
-
-        await client.db.settings.set(message.guild.id, mutedRole.id, "mutedRole");
-        editMsg.edit(roleEmbed);
-      } else {
-        const savedEmbed = client.embeds.pending(command, `Set <@&${mutedRole.id}> as the server muted role.`)
-        await client.db.settings.set(message.guild.id, mutedRole.id, "mutedRole");
-        editMsg.edit(savedEmbed);
       }
 
-      editMsg.edit(pendingEmbed)
-    }
-
-    const clientTopRole = clientMember.roles.highest;
-    if (clientTopRole.position <= mutedRole.position) {
-      const errorEmbed = client.embeds.error(command, `${responses.mutedRolePos}Muted Role - <@&${mutedRole.id}>: Position \`${mutedRole.position}\`.\nMy Top Role - <@&${clientTopRole.id}>: Position \`${clientTopRole.position}\`.`);
-      return editMsg.edit(errorEmbed);
-    }
-
-    if (!clientMember.hasPermission("MANAGE_ROLES")) {
-      const errorEmbed = client.embeds.botPermission(command);
-      return editMsg.edit(errorEmbed);
+      client.db.settings.set(message.guild.id, mutedRole.id, "mutedRole");
+      pendingEmbed = client.embeds.pending(command, "Muting the member");
+      editMsg.edit({ embeds: [pendingEmbed] });
     }
 
     if (member.roles.cache.has(mutedRole.id)) {
-      const errorEmbed = client.embeds.error(command, `\`${member.user.tag}\` is already muted in this server.`);
-      return editMsg.edit(errorEmbed);
+      const embed = client.embeds.error(command, `<@${member.id}> is already muted in this server.`);
+      return editMsg.edit({ embeds: [embed] });
     }
 
-    if ((message.author.id !== message.guild.owner.id) && member.roles.highest) {
-      if (message.member.roles.highest.position <= member.roles.highest.position) {
-        const embed = client.embeds.error(command, `${responses.hierarchy}Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nInitiator - <@${message.author.id}>: Top Role Position \`${message.member.roles.highest.position}\`.`);
-        return editMsg.edit(embed);
-      }
+    if (client.functions.hierarchy(clientMember, mutedRole, message.guild)) {
+      const embed = client.embeds.detailed(command, client.util.hierarchyM, `Muted Role - <@${mutedRole.id}>: Position \`${mutedRole.position}\`.`, `My Top Role - <@${clientMember.roles.highest.id}>: Top Role Position \`${clientMember.roles.highest.position}\`.`);
+      return message.reply({ embeds: [embed] });
     }
 
-    var timeObj = null;
-    var reason = "No reason was provided.";
+    if (!clientMember.permissions.has("MANAGE_ROLES")) {
+      const embed = client.embeds.botPermission(command);
+      return editMsg.edit({ embeds: [embed] });
+    }
+
+    var timeObj = {};
+    var reason = client.util.reason;
 
     if (thirdArg) {
       if (fourthArg) {
         timeObj = await client.functions.getTime(thirdArg);
-        if (timeObj.passed == false) {
+        if (!timeObj.passed) {
           reason = args.slice(1).join(" ");
         } else {
-          reason = args.slice(2).join(" ")
+          reason = args.slice(2).join(" ");
         }
       } else {
         timeObj = await client.functions.getTime(thirdArg);
-        if (timeObj.passed == false) reason = args.slice(1).join(" ")
+        if (!timeObj.passed) reason = args.slice(1).join(" ");
       }
     }
 
-    if (settings.mutedRoleConfig == false) {
-      if (clientMember.hasPermission("MANAGE_CHANNELS")) {
-        const pendingEmbed1 = client.embeds.pending(command, `Configuring muted role...`);
-        editMsg.edit(pendingEmbed1);
-        
-        await message.guild.channels.cache.forEach((channel) => {
-          if (channel.permissionsFor(clientMember).has("MANAGE_CHANNELS")) {
-            channel.updateOverwrite(mutedRole, { SEND_MESSAGES: false });
-          }
-        })
+    if (!settings.mutedRoleConfig) {
+      if (clientMember.permissions.has("MANAGE_CHANNELS")) {
+        const pendEmbed = client.embeds.pending(command, `Configuring muted role...`);
+        editMsg.edit({ embeds: [pendEmbed] });
 
+        for await (const [key, channel] of message.guild.channels.cache.entries()) {
+          if (channel.permissionsFor(clientMember).has("MANAGE_CHANNELS")) {
+            await channel.permissionOverwrites.edit(mutedRole, { SEND_MESSAGES: false });
+          }
+        }
+        
         client.db.settings.set(message.guild.id, true, "mutedRoleConfig");
       }
     }
 
+    const embed = client.embeds.moderated("mute", message.guild, reason, timeObj.duration);
+    if (!member.user.bot) member.user.send({ embeds: [embed] });
+
     member.roles.add(mutedRole)
     .then(() => {
-      if (timeObj) {
-        if (timeObj.passed == true) {
-          const successEmbed = client.embeds.success(command, `Muted <@${member.id}> from the server for ${timeObj.timeView[0]} ${timeObj.unit}${timeObj.timeView[0] > 1 ? `s` : ``}.\n\n**Reason**\n${reason}`);
-          editMsg.edit(successEmbed);
+      const fields = [];
+      if (reason !== client.util.reason) fields.push({
+        name: "Reason",
+        value: reason,
+        inline: false
+      })
 
-          client.db.timeouts.set(`${member.id}-${message.guild.id}[mute]`, message.author.id, "muter");
-          client.db.timeouts.set(`${member.id}-${message.guild.id}[mute]`, "mute", "type");
-          client.db.timeouts.set(`${member.id}-${message.guild.id}[mute]`, member.id, "muted");
-          client.db.timeouts.set(`${member.id}-${message.guild.id}[mute]`, Date.now(), "mutedTimestamp");
-          client.db.timeouts.set(`${member.id}-${message.guild.id}[mute]`, timeObj.duration, "duration");
-          client.db.timeouts.set(`${member.id}-${message.guild.id}[mute]`, Date.now() + timeObj.duration, "end");
-          client.db.mtimeoutsutes.set(`${member.id}-${message.guild.id}[mute]`, message.guild.id, "guildId");
+      if (timeObj.passed) fields.push({
+        name: "Duration",
+        value: timeObj.display,
+        inline: false
+      })
 
-          if (timeObj.duration > 2147483647) return
+      const caseData = {
+        type: "MUTE",
+        user: member.id,
+        moderator: message.author.id,
+        reason: reason,
+        timestamp: Math.round(Date.now() / 1000)
+      }
 
-          setTimeout(function() {
-            if (member.roles.cache.has(mutedRole.id)) {
-              if (clientMember.hasPermission("MANAGE_ROLES")) {
-                if (clientMember.roles.highest.position > mutedRole.position) {
-                  member.roles.remove(mutedRole).catch(() => {});
-                  client.db.timeouts.delete(`${member.id}-${message.guild.id}[mute]`);
-                }
-              }
-            }
-          }, timeObj.duration)
-        } else {
-          const successEmbed = client.embeds.success(command, `Muted <@${member.id}> from the server. \n\n**Reason**\n${reason}`);
-          editMsg.edit(successEmbed);
-        }
+      client.functions.createCase(caseData, settings, message.guild);
+      if (timeObj.passed) {
+        const key = `${member.id}-${message.guild.id}[mute]`;
+        const successEmbed = client.embeds.success(command, `Muted <@${member.id}> from the server.`, fields);
+        editMsg.edit({ embeds: [successEmbed] });
+
+        client.db.timeouts.set(key, message.author.id, "muter");
+        client.db.timeouts.set(key, "mute", "type");
+        client.db.timeouts.set(key, member.id, "muted");
+        client.db.timeouts.set(key, Date.now(), "mutedTimestamp");
+        client.db.timeouts.set(key, timeObj.duration, "duration");
+        client.db.timeouts.set(key, Date.now() + timeObj.duration, "end");
+        client.db.timeouts.set(key, message.guild.id, "guildId");
+
+        if (timeObj.duration > 2147483647) return;
+        setTimeout(async () => {
+          if (!member.roles.cache.has(mutedRole.id)) return;
+          if (!clientMember.permissions.has("MANAGE_ROLES")) return;
+          if (client.functions.hierarchy(clientMember, mutedRole, message.guild)) return;
+          
+          member.roles.remove(mutedRole).catch(() => {});
+          client.db.timeouts.delete(key);
+        }, timeObj.duration);
       } else {
-        const successEmbed = client.embeds.success(command, `Muted <@${member.id}> from the server. \n\n**Reason**\n${reason}`);
-        editMsg.edit(successEmbed);
+        const successEmbed = client.embeds.success(command, `Muted <@${member.id}> from the server.`, fields);
+        editMsg.edit({ embeds: [successEmbed] });
       }
     })
     .catch(async (error) => {
-      const errorEmbed = await client.embeds.errorInfo(command, error);
-      editMsg.edit(errorEmbed);
+      const embed = await client.embeds.errorInfo(command, message, error);
+      editMsg.edit({ embeds: [embed] });
     })
     
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

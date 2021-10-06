@@ -12,13 +12,13 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
   try {
     const pendingEmbed = client.embeds.pending(command, `Shutting down Logic Link...`);
-    const editMsg = await message.lineReply(pendingEmbed);
+    const editMsg = await message.reply({ embeds: [pendingEmbed] });
 
-    const successEmbed = client.embeds.success(command, `Shutdown Logic Link.`);
-    await editMsg.edit(successEmbed)
+    const embed = client.embeds.success(command, `Shutdown Logic Link.`);
+    await editMsg.edit({ embeds: [embed] });
 
     setTimeout(async () => { await client.destroy() }, 800);
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

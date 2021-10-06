@@ -13,7 +13,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     selfWarning: `You are attempting to kick yourself from the server.`,
     botKick: `You are attempting to kick me from the server.`,
     serverOwner: `You are attempting to kick the server owner.`,
-    noUser: `No members were recorded from your message.`,
   }
 
   try {
@@ -26,58 +25,65 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
     if (member) {
       if (member.id === client.user.id) {
-        const errorEmbed = client.embeds.detailed(command, responses.botKick, `Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`);
-        return message.lineReply(errorEmbed);
+        const embed = client.embeds.detailed(command, responses.botKick, `Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`);
+        return message.reply({ embeds: [embed] });
 
       } else if (member.id == message.author.id) {
-        const errorEmbed = client.embeds.detailed(command, responses.selfWarning, `Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`);
-        return message.lineReply(errorEmbed);
+        const embed = client.embeds.detailed(command, responses.selfWarning, `Targetted Member - <@${member.id}>\nInitiator - <@${message.author.id}>`);
+        return message.reply({ embeds: [embed] });
         
-      } else if (member.id == message.guild.owner.id) {
-        const errorEmbed = client.embeds.error(command, responses.serverOwner, `Server Owner - <@${member.guild.owner.id}>\nTargetted Member - <@${member.id}>`);
-        return message.lineReply(errorEmbed);
+      } else if (member.id == message.guild.ownerId) {
+        const embed = client.embeds.detailed(command, responses.serverOwner, `Server Owner - <@${member.guild.ownerId}>\nTargetted Member - <@${member.id}>`);
+        return message.reply({ embeds: [embed] });
       }
 
       if (client.functions.hierarchy(message.member, member, message.guild)) {
         const embed = client.embeds.detailed(command, client.util.hierarchyM, `Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.`, `Initiator - <@${message.author.id}>: Top Role Position \`${message.member.roles.highest.position}\`.`);
-        return message.lineReply(embed);
+        return message.reply({ embeds: [embed] });
       }
       
       if (client.functions.hierarchy(clientMember, member, message.guild)) {
-        const clientTopRole = clientMember.roles.highest;
-        const embed = client.embeds.detailed(command, client.util.botHierarchyM, `Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nClient Member - <@${clientMember.id}>: Top Role Position \`${clientTopRole.position}\`.`);
-        return message.lineReply(embed);
+        const embed = client.embeds.detailed(command, client.util.botHierarchyM, `Targetted Member - <@${member.id}>: Top Role Position \`${member.roles.highest.position}\`.\nClient Member - <@${clientMember.id}>: Top Role Position \`${clientMember.roles.highest.position}\`.`);
+        return message.reply({ embeds: [embed] });
       }
 
       const pendingEmbed = client.embeds.pending(command, "Kicking the member...");
-      const editMsg = await message.lineReply(pendingEmbed);
+      const editMsg = await message.reply({ embeds: [pendingEmbed] });
 
       const kickedEmbed = client.embeds.moderated("kick", message.guild, reason);
-      if (!member.user.bot) member.user.send(kickedEmbed);
+      if (!member.user.bot) member.user.send({ embeds: [kickedEmbed] });
       setTimeout(kickMember, 500);
 
       function kickMember() {
-        member
-        .kick(`${member.user.tag} was kicked. Responsible User: ${message.author.tag}`)
+        member.kick(`${member.user.tag} was kicked. Responsible User: ${message.author.tag}`)
         .then(() => {
           const successEmbed = client.embeds.success(command, `Kicked <@${member.id}> from the server.`, [{
             name: "Reason",
             value: reason,
             inline: false
-          }])
+          }]);
 
-          editMsg.edit(successEmbed)
+          const caseData = {
+            type: "KICK",
+            user: member.id,
+            moderator: message.author.id,
+            reason: reason,
+            timestamp: Math.round(Date.now() / 1000)
+          }
+
+          client.functions.createCase(caseData, settings, message.guild);
+          editMsg.edit({ embeds: [successEmbed] });
         })
         .catch(async (error) => {
-          const errorEmbed = await client.embeds.errorInfo(command, message, error);
-          editMsg.edit(errorEmbed);
+          const embed = await client.embeds.errorInfo(command, message, error);
+          editMsg.edit({ embeds: [embed] });
         })
       }
     } else {
-      const errorEmbed = client.embeds.noMember(command, secArg);
-      message.lineReply(errorEmbed)
+      const embed = client.embeds.noMember(command, secArg);
+      message.reply({ embeds: [embed] });
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

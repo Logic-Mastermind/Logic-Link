@@ -13,11 +13,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   try {
     const pendingEmbed = client.embeds.pending(command, `Restarting Logic Link...`);
     const successEmbed = client.embeds.success(command, `Restarted Logic Link.`);
-    const editMsg = await message.lineReply(pendingEmbed);
+    const editMsg = await message.reply({ embeds: [pendingEmbed] });
 
     await client.schemas.restart();
-    editMsg.edit(successEmbed);
+    editMsg.edit({ embeds: [successEmbed] });
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

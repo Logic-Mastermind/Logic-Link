@@ -16,7 +16,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     if (cmd) {
       const path = client.functions.getCmdPath(cmd);
       const pendEmbed = client.embeds.pending(command, `Reloading the command...`);
-      const editMsg = await message.lineReply(pendEmbed);
+      const editMsg = await message.reply({ embeds: [pendEmbed] });
 
       delete require.cache[require.resolve(path)];
       const embed = client.embeds.success(command, `Reloaded the \`${cmd.commandName}\` command.`);
@@ -24,13 +24,13 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
       await client.commands.delete(cmd.commandName);
       await client.commands.set(cmd.commandName, props);
-      editMsg.edit(embed);
+      editMsg.edit({ embeds: [embed] });
       
     } else {
       const embed = client.embeds.detailed(command, `I could not record any commands from your message.`, `\`${secArg}\` is not a valid command.`);
-      message.lineReply(embed);
+      message.reply({ embeds: [embed] });
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

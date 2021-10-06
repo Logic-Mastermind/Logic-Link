@@ -11,40 +11,44 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const responses = {};
 
   try {
-    var hasSupportRole = false;
+    const modPerms = ["BAN_MEMBERS", "KICK_MEMBERS", "MANAGE_MESSAGES"];
+    const adminPerms = ["ADMINISTRATOR", "MANAGE_ROLES", "MANAGE_CHANNELS"];
 
-    for await (const [key, val] of tsettings.panels.all) {
-      for await (const role of val.support) {
-        if (message.member.roles.cache.has(role)) {
-          hasSupportRole = true;
-          break;
-        }
-      }
-    }
-
-    const supportMember = await client.guilds.cache.get(client.util.supportServer).members.cache.get(message.author.id);
+    const hasSupportRole = extra.hasSupport;
+    const hasBotSupport = extra.hasBotSupport || extra.isDev;
     const noPanels = tsettings.panels.count == 0;
 
-    const modPermissions = `${message.member.roles.cache.has(settings.modRole) || message.member.roles.cache.has(settings.adminRole) || message.member.hasPermission("BAN_MEMBERS") || message.member.hasPermission("KICK_MEMBERS") || message.member.hasPermission("MANAGE_CHANNELS") || message.member.hasPermission("MANAGE_MESSAGES") ? `<:IconLock:868118375170211852> ` : `${client.util.error} `}`;
+    const isMod = await modPerms.some(x => message.member.permissions.has(x)) || client.functions.isMod(message.member, message.guild, settings);
 
-    const adminPermissions = `${message.member.roles.cache.has(settings.adminRole) || message.member.hasPermission("MANAGE_ROLES") || message.member.hasPermission("ADMINISTRATOR") ? `<:IconSettings:868117828341997588> ` : `${client.util.error} `}`;
+    const isAdmin = await adminPerms.some(x => message.member.permissions.has(x)) || client.functions.isAdmin(message.member, message.guild, settings);
 
-    const ticketPermissions = `${(hasSupportRole || message.member.hasPermission("ADMINISTRATOR") || message.member.roles.cache.has(settings.adminRole)) ? `${client.util.panel} ` : `${client.util.error} `}`;
-    const supportPermissions = `${supportMember ? `${supportMember.roles.cache.has(client.util.supportRole) && (message.guild.id == client.util.supportServer) || (message.author.id == client.util.devId) ? `${client.util.support} ` : `${client.util.error} `}` : `${client.util.error} `}`;
+    const tckPerms = isAdmin || hasSupportRole;
+    const noPanel = noPanels && isAdmin;
 
-    const devPermissions = message.author.id == client.util.devId ? `${client.util.integration} ` : null;
-    const noPanel = noPanels && (message.member.hasPermission("ADMINISTRATOR") || message.member.roles.cache.has(settings.adminRole));
+    const genView = `${client.util.members} General Commands`;
+    const modView = `${isMod ? client.util.locked : client.util.error} Moderator Commands`;
+    const adminView = `${isAdmin ? client.util.settings : client.util.error} Administrator Commands`;
+    const tckView = `${tckPerms ? client.util.panel : client.util.error} Ticket Commands`;
+    const supView = `${hasBotSupport ? client.util.support : client.util.error} Support Commands`;
+    const devView = `${extra.isDev ? client.util.integration : client.util.error} Developer Commands`;
+
+    const admin = `${isAdmin ? client.util.settings : client.util.error} Administrator Commands`;
+    const support = `${tckPerms ? client.util.panel : client.util.error} Support Commands`;
 
     const cmdArray = [
-      { name: `${client.util.members} General Commands`, value: `${code}\n${guildPrefix}help general${code}\u200b`, inline: true },
-      { name: `${modPermissions}Moderator Commands`, value: `${code}\n${guildPrefix}help moderator${code}`, inline: true },
-      { name: `${adminPermissions}Administrator Commands`, value: `${code}\n${guildPrefix}help administrator${code}`, inline: true },
-      { name: `${ticketPermissions}Ticket Commands`, value: `${code}\n${guildPrefix}help ticket${code}`, inline: true },
-      { name: `${supportPermissions}Support Commands`, value: `${code}\n${guildPrefix}help support${code}`, inline: true },
+      { name: genView, value: `${code}${guildPrefix}help general${code}\u200b`, inline: true },
+      { name: modView, value: `${code}${guildPrefix}help moderator${code}`, inline: true },
+      { name: adminView, value: `${code}${guildPrefix}help administrator${code}`, inline: true },
+      { name: tckView, value: `${code}${guildPrefix}help ticket${code}`, inline: true },
+      { name: supView, value: `${code}${guildPrefix}help support${code}`, inline: true },
     ]
 
-    if (devPermissions) {
-      cmdArray[5] = { name: `${devPermissions}Developer Commands`, value: `${code}\n${guildPrefix}help developer${code}`, inline: true }
+    if (extra.isDev) {
+      cmdArray[5] = {
+        name: devView,
+        value: `${code}\n${guildPrefix}help developer${code}`,
+        inline: true
+      }
     }
 
     if (!secArg) {
@@ -56,24 +60,42 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         { label: "Support", value: "Helpful commands for our support team used to diagnose issues.", id: "Help_Menu:Support", emoji: "868117797429997578" }
       ]
 
-      if (devPermissions) {
-        selectOptions[5] = { label: "Developer", value: "Secret development commands used to debug problems and fix bugs.", id: "Help_Menu:Developer", emoji: "868118554497671238" }
+      if (extra.isDev) {
+        selectOptions[5] = {
+          label: "Developer",
+          value: "Secret development commands used to debug problems and fix bugs.",
+          id: "Help_Menu:Developer",
+          emoji: "868118554497671238"
+        }
       }
 
       const selectMenu = await client.buttons.selectMenu("Select Command Category...", selectOptions, "Help_Menu_Select", 1, 1);
+      const actionRow = new Discord.MessageActionRow().addComponents(selectMenu);
 
-      const helpEmbed = client.embeds.field(command, `${client.util.welcomeBotInfo}\n\n**Command List**\nBelow shows a list of command categories.\nTo view commands in each category, run the command associated with it.\nIf you would like a detailed guide on the help menu, run \`${guildPrefix}help guide\`.\n\n${code}Commands${code}\u200b`, cmdArray)
+      const helpEmbed = client.embeds.blue(command, `${client.util.welcomeBotInfo}\n\n**Command List**\nBelow shows a list of command categories.\nTo view commands in each category, run the command associated with it.\nIf you would like a detailed guide on the help menu, run \`${guildPrefix}help guide\`.\n\n${code}Commands${code}\u200b`, cmdArray)
 
-      const msg = await message.channel.send(helpEmbed, selectMenu);
-      client.prompts.helpMenu(msg, message, modPermissions, adminPermissions, ticketPermissions, supportPermissions, guildPrefix, noPanel);
+      const msg = await message.channel.send({ embeds: [helpEmbed], components: [actionRow] });
+      const obj = {
+        mod: modView,
+        admin: adminView,
+        support: supView,
+        gen: genView,
+        dev: devView,
+        tck: admin,
+        sup: support,
+        prefix: guildPrefix,
+        noPanel: noPanel
+      }
+
+      client.prompts.helpMenu(msg, message, obj);
     } else {
       switch (secArg) {
         case "g":
         case "gen":
         case "general":
         {
-          const helpEmbed = client.embeds.helpCategory("General", `${client.util.members} `, guildPrefix);
-          message.lineReply(helpEmbed);
+          const embed = client.embeds.helpCategory("General", genView, guildPrefix);
+          message.reply({ embeds: [embed] });
           break;
         }
         case "m":
@@ -81,8 +103,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         case "moderator":
         case "moderation":
         {
-          const helpEmbed = client.embeds.helpCategory("Moderator", modPermissions, guildPrefix);
-          message.lineReply(helpEmbed);
+          const embed = client.embeds.helpCategory("Moderator", modView, guildPrefix);
+          message.reply({ embeds: [embed] });
           break;
         }
         case "a":
@@ -91,8 +113,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         case "administrator":
         case "administration":
         {
-          const helpEmbed = client.embeds.helpCategory("Administrator", adminPermissions, guildPrefix);
-          message.lineReply(helpEmbed);
+          const embed = client.embeds.helpCategory("Administrator", adminView, guildPrefix);
+          message.reply({ embeds: [embed] });
           break;
         }
         case "t":
@@ -100,48 +122,55 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         case "ticket":
         case "tickets":
         {
-          const noPanel = noPanels && (message.member.hasPermission("ADMINISTRATOR") || message.member.roles.cache.has(settings.adminRole));
-
-          const helpEmbed = client.embeds.helpCategory("Ticket", `${client.util.members} `, guildPrefix, ticketPermissions, adminPermissions, noPanel);
-          message.lineReply(helpEmbed);
+          const embed = client.embeds.helpCategory("Ticket", admin, guildPrefix, support, noPanel);
+          message.reply({ embeds: [embed] });
           break;
         }
         case "s":
         case "sup":
         case "support":
         {
-          const helpEmbed = client.embeds.helpCategory("Support", supportPermissions, guildPrefix);
-          message.lineReply(helpEmbed);
+          const embed = client.embeds.helpCategory("Support", supView, guildPrefix);
+          message.reply({ embeds: [embed] });
           break;
         }
         case "d":
         case "dev":
         case "developer":
         {
-          const helpEmbed = client.embeds.helpCategory("Developer", devPermissions, guildPrefix);
-          message.lineReply(helpEmbed);
+          const embed = client.embeds.helpCategory("Developer", devView, guildPrefix);
+          message.reply({ embeds: [embed] });
           break;
         }
         default:
         {
           if (secArg == "guide") {
             const embed = client.embeds.blue(command, `\`<>\` <:Line:867201669371265054> Required field.\n\`[]\` <:Line:867201669371265054> Optional field.\n\`|\` <:Line:867201669371265054> Or indicator.`);
-            return message.lineReply(embed)
+            return message.reply({ embeds: [embed] })
           }
           
           var infoCmd = await client.functions.findCommand(secArg);
           if (infoCmd) {
+            if (thirdArg) {
+              const option = await client.functions.findOption(infoCmd, thirdArg);
+
+              if (option) {
+                const embed = client.embeds.helpMenu(option, guildPrefix);
+                return message.reply({ embeds: [embed] });
+              }
+            }
+
             const embed = client.embeds.helpMenu(infoCmd, guildPrefix);
-            message.lineReply(embed);
+            message.reply({ embeds: [embed] });
             
           } else {
             const embed = client.embeds.detailed(command, `I could not find a command or category that matched that query.`, `\`${secArg}\` is not a command or category.`);
-            message.lineReply(embed);
+            message.reply({ embeds: [embed] });
           }
         }
       }
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   } 
 }

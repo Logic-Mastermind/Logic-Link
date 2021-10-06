@@ -15,15 +15,12 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     var reason = client.util.reason;
     var fields = [];
 
-    if (!channel && secArg) channel = await client.functions.findChannel(secArg, message.guild);
-    if (!channel) reason = args.join(" ");
-    else reason = args.slice(1).join(" ");
+    if (!channel) channel = await client.functions.findChannel(secArg, message.guild);
+    if (!reason) reason = client.util.reason;
 
-    if (!channel && secArg) {
-      reason = args.join(" ")
-      channel = message.channel;
-    } else if (!channel && !secArg) {
-      channel = message.channel;
+    if (!channel) {
+      const embed = client.embeds.noChannel(command, secArg);
+      return message.reply({ embeds: [embed] });
     }
 
     const memPerms = channel.permissionsFor(message.member).has(command.permissions);
@@ -79,6 +76,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       }
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

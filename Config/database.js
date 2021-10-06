@@ -1,4 +1,5 @@
 const Enmap = require("enmap");
+const Discord = require("discord.js");
 
 module.exports = {
   settings: new Enmap({
@@ -17,7 +18,8 @@ module.exports = {
       mutedRole: null,
       welcomeSystem: false,
       mutedRoleConfig: false,
-      panelSetup: false
+      panelSetup: false,
+      cases: new Map()
     }
   }),
   first: new Enmap({
@@ -132,7 +134,7 @@ module.exports = {
     autoFetch: true,
     dataDir: "./Data/",
     autoEnsure: {
-      warnings: [],
+      warnings: new Map(),
       inPrompt: false
     }
   }),

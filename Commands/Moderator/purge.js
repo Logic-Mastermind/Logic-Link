@@ -10,73 +10,58 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const code = `\`\`\``;
 
   const responses = {
-    tooLow: `The purge limit must be greater than 1.\n\n**Detailed Info**\n`,
-    nAn: `The purge limit must be a number.\n\n**Detailed Info**\n`
+    lessThan: `The purge number must be greater than or equal to 1.`,
+    notNum: `The purge number must be a numerical value from 1 to 1000.`
   }
 
   try {
-    var purgeNumber = Number(secArg);
-    purgeNumber = Math.round(purgeNumber);
-
-    if (!clientMember.hasPermission(command.clientPerms)) {
-      const errorEmbed = client.embeds.botPermission(command);
-      return message.lineReply(errorEmbed)
+    var purgeNumber = Math.round(secArg);
+    if (isNaN(secArg)) {
+      const embed = client.embeds.detailed(command, responses.notNum, `\`${secArg}\` is not a number.`);
+      return message.reply({ embeds: [embed] });
     }
 
     if (purgeNumber < 1) {
-      const embed = client.embeds.error(command, `${responses.tooLow}\`${secArg}\` is less than 1.`)
-      return message.lineReply(embed)
-    }
-
-    if (isNaN(secArg)) {
-      const embed = client.embeds.error(command, `${responses.nAn}\`${secArg}\` is not a number.`)
-      return message.lineReply(embed);
+      const embed = client.embeds.detailed(command, responses.lessThan, `\`${purgeNumber}\` is less than 1.`);
+      return message.reply({ embeds: [embed] });
     }
 
     await message.delete();
     if (purgeNumber > 1000) purgeNumber = 1000;
-    const purgeTimes = Math.ceil(purgeNumber / 100);
-    const purgeArray = [];
+    const times = Math.ceil(purgeNumber / 100);
+    const loops = [];
+    var totalSize = 0;
 
-    var remainder = purgeNumber % 100;
-    var success = null;
-    var error = null;
+    if (purgeNumber <= 100) {
+      loops.push(purgeNumber);
+    } else {
+      var remainder = purgeNumber % 100;
+      if (remainder == 0) remainder = 100;
 
-    for (var i = 1; i <= purgeTimes; i++) {
-      if (purgeNumber < 100) {
-        const col = await message.channel.bulkDelete(purgeNumber, true);
-        success += col.size;
-        break;
-
-      } else if (purgeNumber.toString().endsWith("00")) {
-        const col = await message.channel.bulkDelete(100, true);
-        success += col.size
-        continue;
-      }
-
-      if (remainder) {
-        const col = await message.channel.bulkDelete(remainder, true);
-        success += col.size
-        remainder = null;
-
-      } else {
-        const col = await message.channel.bulkDelete(100, true);
-        success += col.size
+      for (var i = 1; i <= times; ++i) {
+        if (i !== times) {
+          await loops.push(100);
+          continue;
+        } else {
+          await loops.push(remainder);
+        }
       }
     }
 
-    setTimeout(async function() {
-      if (success) {
-        const embed = client.embeds.success(command, `Purged \`${success}\` message${success == 1 ? `` : `s`} from this channel.`);
-        const msg = await message.channel.send(embed);
-        msg.delete({ timeout: 5000 });
+    for await (const num of loops) {
+      const collected = await message.channel.bulkDelete(num, true);
+      totalSize += collected.size;
+    }
 
-      } else {
-        const embed = await client.embeds.errorInfo(command, error);
-        message.channel.send(embed);
-      }
-    }, purgeNumber < 350 ? 1200 : 700)
+    if (totalSize !== 0) {
+      const embed = client.embeds.success(command, `Purged \`${totalSize}\` messages from this channel.`);
+      const msg = await message.channel.send({ embeds: [embed] });
+      setTimeout(async () => msg.delete(), 3000);
+    } else {
+      const embed = client.embeds.detailed(command, `No messages were deleted from this channel.`, `This is likely due to messages being more than 2 weeks old.`);
+      message.channel.send({ embeds: [embed] });
+    }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command, extra.logId);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }

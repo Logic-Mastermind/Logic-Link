@@ -16,7 +16,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     if (error) {
       if (error.info) {
         const embed = client.embeds.error(command, `No readable information is associated with this error.`);
-        return message.lineReply(embed);
+        return message.reply({ embeds: [embed] });
       }
 
       const fields = [{
@@ -24,14 +24,19 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         value: `${error.name ? `**Name:** \`${error.name}\`` : ``}${error.message ? `\n**Message:** \`${error.message}\`` : ``}${error.path ? `\n**Path:** \`${error.path}\`` : ``}${error.code ? `\n**Code:** \`${error.code}\`` : ``}${error.method ? `\n**Method:** \`${error.method}\`` : ``}${error.httpStatus ? `\n**HTTP Status:** \`${error.httpStatus}\`‎` : ``}`
       }];
 
-      const embed = client.embeds.fieldSuccess(command, `Found an error with the ID: \`${secArg}\`.`, fields);
-
-      message.lineReply(embed);
+      const embed = client.embeds.success(command, `Found an error with the ID: \`${secArg}\`.`, fields);
+      message.reply({ embeds: [embed] });
     } else {
+      if (secArg == "clear") {
+        client.db.errors.clear();
+        const embed = client.embeds.success(command, `Cleared all bot errors.`);
+        return message.reply({ embeds: [embed] });
+      }
+
       const embed = client.embeds.error(command, `No errors were found matching the associated ID: \`${secArg}\`.`);
-      message.lineReply(embed);
+      message.reply({ embeds: [embed] });
     }
   } catch (error) {
-    client.functions.sendErrorMsg(error, true, message, command);
+    client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
 }
