@@ -93,8 +93,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       await pages.push(embed);
     }
 
-    const leftBtn = client.buttons.emoji("Button_Left", client.util.arrowLeft, "SECONDARY");
-    const rightBtn = client.buttons.emoji("Button_Right", client.util.arrowRight, "SECONDARY");
+    const leftBtn = client.buttons.emoji("Button_Left:DevLogs", client.util.arrowLeft, "SECONDARY");
+    const rightBtn = client.buttons.emoji("Button_Right:DevLogs", client.util.arrowRight, "SECONDARY");
 
     if (allLogs.length <= 15) rightBtn.setDisabled();
     await leftBtn.setDisabled();
@@ -104,6 +104,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     pages = await pages.slice(1);
 
     client.functions.paginate(msg, pages);
+    if (pages[0]) client.functions.paginate(msg, pages);
   } catch (error) {
     client.functions.sendErrorMsg(error, message, command, extra.logId);
   }
