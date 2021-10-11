@@ -91,6 +91,9 @@ module.exports = class Buttons {
   }
 
   async selectMenu(placeholder, options, id, min, max) {
+    if (!placeholder) throw new Error("Select menu placeholder is required");
+    if (!options) throw new Error("Select menu options is required");
+    if (!Array.isArray(options)) throw new TypeError("Select menu options is not an array");
     const optionsArray = [];
 
     if (options) {

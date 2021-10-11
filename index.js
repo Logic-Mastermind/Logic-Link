@@ -15,6 +15,7 @@ const logger = require("./Config/logger.js");
 const util = require("./Config/util.js");
 const schemas = require("./Config/schemas.js");
 const discordFn = require("./Config/discordFn.js");
+const slashCommands = require("./Config/slashCommands.js");
 const clear = require("clear-module");
 const os = require("os");
 
@@ -35,7 +36,9 @@ const client = new Discord.Client({
   }
 });
 
+console.time("Login");
 client.command = commands;
+client.slashCommands = slashCommands;
 client.config = config;
 client.db = database;
 client.util = util;

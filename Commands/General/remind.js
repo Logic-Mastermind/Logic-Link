@@ -25,8 +25,13 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       return message.reply({ embeds: [embed] });
     }
 
-    const embed = client.embeds.success(command, `In \`${time.display}\`, I will direct message you this reminder.`, [{
-      name: "Reminder",
+    if (task.length > 1024) {
+      const embed = client.embeds.error(command, `This task is over the limit of 1024 characters.`);
+      return message.reply({ embeds: [embed] });
+    }
+
+    const embed = client.embeds.success(command, `In \`${time.display}\`, I will direct message you this task.`, [{
+      name: "Task",
       value: task,
       inline: false
     }]);
@@ -35,15 +40,29 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     var reminders = client.db.timeouts.get(`${message.author.id}[reminders]`, "reminders");
     if (!reminders) reminders = new Map();
 
-    reminders.set(reminders.size + 1, { task: task, duration: time.duration });
-    client.db.timeouts.set(`${message.author.id}[reminders]`, reminders, "reminders");
+    var key = reminders.size + 1;
+    var dbKey = `${message.author.id}[reminders]`;
 
+    reminders.set(key, {
+      task: task,
+      user: message.author.id,
+      date: now,
+      end: now + time.duration
+    });
+    
+    client.db.timeouts.set(dbKey, reminders, "reminders");
+    client.db.timeouts.set(dbKey, "reminders", "type");
+
+    if (time.duration > client.util.timeoutLimit) return;
     setTimeout(async () => {
-      const embed = client.embeds.warn(command, `Your reminder from <t:${now}:R> has just went off.`, [{
-        name: "Reminder",
+      const embed = client.embeds.warn("Reminder", `Your reminder from <t:${now}:R> has just went off.`, [{
+        name: "Task",
         value: task
       }]);
+
       message.author.send({ embeds: [embed] });
+      reminders.delete(key);
+      client.db.timeouts.set(dbKey, reminders, "reminders");
     }, time.duration);
 
   } catch (error) {

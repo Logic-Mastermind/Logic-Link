@@ -110,7 +110,7 @@ module.exports = class Prompts {
     });
 
     collector.on("end", async () => {
-      msg.edit({ embeds: [original], components: [] });
+      msg.edit({ embeds: [original], components: [client.buttons.actionRow([select.setDisabled()])] });
     })
   }
 

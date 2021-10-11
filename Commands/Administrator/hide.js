@@ -65,11 +65,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         client.db.channelHides.set(channel.id, channel.id, "channel");
         client.db.channelHides.set(channel.id, Date.now(), "lockedAt");
 
-        if (reason !== client.util.reason && reason) fields[0] = {
+        fields[0] = {
           name: "Reason", value: reason, inline: true
         };
         
-        const embed = client.embeds.success(command, `Hid <#${channel.id}> from other members.`, fields);
+        const embed = client.embeds.green(command, `Hid <#${channel.id}> from regular server members.\nUse the \`unhide\` command to remove the channel hide.`, fields);
         editMsg.edit({ embeds: [embed] });
       }
     }

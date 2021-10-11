@@ -1,3 +1,4 @@
+const { REST } = require('@discordjs/rest');
 const Discord = require("discord.js");
 const Fetch = require("node-fetch");
 const Chalk = require("chalk");
@@ -817,6 +818,22 @@ module.exports = class Functions {
     const devMode = client.db.devSettings.get(client.util.devId, "devMode") ? target.id == client.util.devId : false;
 
     return hasPerm || hasMod || hasAdmin || isOwner || devMode;
+  }
+
+  async updateApplicationCommands(data, guildId) {
+    try {
+      const id = this.client.user.id;
+      const token = this.client.token;
+
+      const route = guildId ? `/applications/${id}/guilds/${guildId}/commands` : `/applications/${id}/commands`;
+      const rest = new REST({ version: "9" }).setToken(token);
+      await rest.put(route, { body: data });
+      return true;
+
+    } catch (error) {
+      this.sendError(error);
+      return false;
+    }
   }
 
   hasPerm(command, target, guild, settings, supRole) {

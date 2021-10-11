@@ -773,6 +773,20 @@ module.exports = {
       category: "Administrator",
       commandName: "lock"
     },
+    lockdown: {
+      name: "Lockdown",
+      description: "Locks all channels from being typed in from regular server members.",
+      permissions: ["MANAGE_CHANNELS"],
+      clientPerms: ["MANAGE_CHANNELS"],
+      cooldown: 8,
+      minArgs: 0,
+      options: [],
+      aliases: ["ld"],
+      usage: "lockdown [off]",
+      required: "admin",
+      category: "Administrator",
+      commandName: "lockdown"
+    },
     removerole: {
       name: "Remove Role",
       description: "Removes a specific role from a user.",

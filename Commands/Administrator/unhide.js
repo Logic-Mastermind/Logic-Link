@@ -66,7 +66,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
           name: "Reason", value: reason, inline: true
         };
         
-        const embed = client.embeds.success(command, `Un-hid <#${channel.id}> from other members.`, fields);
+        const embed = client.embeds.success(command, `Un-hid <#${channel.id}> from regular server members.`, fields);
         editMsg.edit({ embeds: [embed] });
       }
     }

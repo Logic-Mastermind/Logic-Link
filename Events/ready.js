@@ -3,18 +3,20 @@ const Fetch = require("node-fetch");
 
 module.exports = async (client) => {
   client.functions.log(`\n[${client.user.tag}]\nTotal Channels: ${client.channels.cache.size}\nTotal Servers: ${client.guilds.cache.size}\nTotal Users: ${client.users.cache.size}`);
+  console.timeEnd("Login");
 
   client.ready = true;
   client.readySince = Math.floor(Date.now() / 1000);
   client.readySinceMS = Date.now();
 
-  for (const [key, val] of client.db.timeouts.fetchEverything().entries()) {
+  const timeouts = client.db.timeouts.fetchEverything();
+  for (const [key, val] of timeouts.entries()) {
     if (val.type == "mute") {
-      const guild = await client.guilds.cache.get(val.guildId);
-      const member = await guild.members.cache.get(val.muted);
+      const guild = client.guilds.cache.get(val.guildId);
+      const member = guild.members.cache.get(val.muted);
 
       const mutedRoleId = await client.db.settings.get(guild.id, "mutedRole");
-      const mutedRole = await guild.roles.cache.get(mutedRoleId);
+      const mutedRole = guild.roles.cache.get(mutedRoleId);
       const timeLeft = val.end - Date.now();
       const clientMember = guild.me;
 
@@ -32,6 +34,27 @@ module.exports = async (client) => {
 
       if (val.end >= Date.now()) setTimeout(remove, timeLeft);
       else remove();
+      
+    } else if (val.type == "reminders") {
+      const reminders = val.reminders;
+      
+      for (const [k, v] of reminders.entries()) {
+        const content = `Your reminder from <t:${v.date}:R> has just went off.`;
+        const user = client.users.cache.get(v.user) || client.users.fetch(v.user);
+        const fields = [{ name: "Task", value: v.task, inline: false }];
+        const timeLeft = v.end - Date.now();
+
+        if (timeLeft > client.util.timeoutLimit) continue;
+        if (!user) continue;
+        
+        setTimeout(async () => {
+          const embed = client.embeds.warn("Reminder", content, fields);
+          reminders.delete(k);
+
+          client.db.timeouts.set(`${v.user}[reminders]`, reminders, "reminders");
+          user.send({ embeds: [embed] });
+        }, timeLeft);
+      }
     }
   }
 }

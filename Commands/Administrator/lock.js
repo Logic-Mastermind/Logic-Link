@@ -12,7 +12,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
   try {
     var channel = message.mentions.channels.first();
-    var reason = client.util.reason;
+    var reason = args.slice(1).join(" ");
     var fields = [];
 
     if (!channel) channel = await client.functions.findChannel(secArg, message.guild);
@@ -70,11 +70,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         client.db.channelLocks.set(channel.id, channel.id, "channel");
         client.db.channelLocks.set(channel.id, Date.now(), "lockedAt");
 
-        if (reason !== client.util.reason && reason) fields[0] = {
+        fields[0] = {
           name: "Reason", value: reason, inline: true
         };
         
-        const embed = client.embeds.success(command, `Locked <#${channel.id}> from other members.`, fields);
+        const embed = client.embeds.green(command, `Locked <#${channel.id}> from regular server members.\nUse the \`unlock\` command to remove the command lock.`, fields);
         editMsg.edit({ embeds: [embed] });
       }
     }
