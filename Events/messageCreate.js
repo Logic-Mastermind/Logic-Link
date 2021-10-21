@@ -59,7 +59,7 @@ module.exports = async (client, message) => {
     const settings = await client.functions.getSettings(message.guild);
     const tsettings = await client.functions.getTicketData(message.guild);
     const devMode = client.db.devSettings.get(client.util.devId, "devMode");
-    const logId = await client.logger.log(`${message.author.tag} ran the ${command.commandName} command.`, message.author);
+    const logId = await client.logger.log(`Command ${command.commandName} ran by ${message.author.id}`, message.author);
     
     const permissionWhitelist = ["delete", "lock", "hide", "unhide", "unlock"];
     const checkBotPerms = ["addrole", "addroles", "hide", "hoist", "lock", "removerole", "removeroles", "unhide", "unhoist", "unlock", "announce", "ban", "kick", "purge", "slowmode", "nickname", "softban", "tempban", "unban", "unmute"];

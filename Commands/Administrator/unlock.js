@@ -24,7 +24,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     }
 
     const memPerms = channel.permissionsFor(message.member).has(command.permissions);
-    if (!memPerms && !client.functions.isAdmin(command, message.member, message.guild)) {
+    if (!memPerms && !client.functions.isAdmin(message.member, message.guild, settings)) {
       const embed = client.embeds.permission(command);
       return message.reply({ embeds: [embed] });
     }

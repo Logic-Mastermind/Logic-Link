@@ -14,8 +14,7 @@ const database = require("./Config/database.js");
 const logger = require("./Config/logger.js");
 const util = require("./Config/util.js");
 const schemas = require("./Config/schemas.js");
-const discordFn = require("./Config/discordFn.js");
-const slashCommands = require("./Config/slashCommands.js");
+const discordFn = require("./Config/discord.js");
 const clear = require("clear-module");
 const os = require("os");
 
@@ -38,7 +37,6 @@ const client = new Discord.Client({
 
 console.time("Login");
 client.command = commands;
-client.slashCommands = slashCommands;
 client.config = config;
 client.db = database;
 client.util = util;
@@ -54,8 +52,8 @@ client.prompts = new prompts(client);
 client.schemas = new schemas(client);
 client.server = require('./server')();
 
-client.commands = new Enmap();
-client.category = new Enmap();
+client.commands = new Discord.Collection();
+client.category = new Discord.Collection();
 
 client.ready = false;
 client.readySince = null;

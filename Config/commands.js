@@ -2,7 +2,7 @@ module.exports = {
   general: {
     avatar: {
       name: "Avatar",
-      description: "Fetches the profile avatar of any user.",
+      description: "Displays the profile avatar of any user.",
       permissions: ["ALL"],
       clientPerms: [],
       cooldown: 2,
@@ -1098,6 +1098,20 @@ module.exports = {
           commandName: "view",
         }
       }
+    },
+    devlockdown: {
+      name: "Developer Lockdown",
+      description: "Disables all commands bein being used.",
+      permissions: ["BOT_DEVELOPER"],
+      clientPerms: [],
+      cooldown: 0,
+      minArgs: 1,
+      options: [],
+      aliases: ["devld"],
+      usage: "devlockdown [guild] <reason>",
+      required: "dev",
+      category: "Developer",
+      commandName: "devlockdown"
     },
     devhelp: {
       name: "Developer Help",

@@ -17,7 +17,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     if (!secArg) {
       const fields = [];
       tsettings.panels.all.forEach((v, k) => {
-        if (v.id == "1" || v.id == "2") {
+        if (v.id <= "2") {
           var opened = message.guild.channels.cache.get(v.opened);
           var closed = message.guild.channels.cache.get(v.closed);
 
@@ -56,8 +56,6 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
             const embed = client.embeds.blue(command, `Showing info for the panel with the ID: \`${secArg}\`.\nThis panel was created <t:${Math.round(panelInfo.createdAt / 1000)}:R> by <@${panelInfo.createdBy}>.\nTo modify this panel's configuration, run: \`${guildPrefix}panel modify ${panelInfo.id}\`.\n\u200b`, fields);
             message.reply({ embeds: [embed] });
-          } else {
-
           }
         } else {
           const embed = client.embeds.error(command, `\`${secArg}\` is not a valid panel ID.`);
@@ -79,7 +77,23 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         {
           if (thirdArg) {
             if (panelIds.includes(thirdArg)) {
+              const embed = client.embeds.orange(command.option.modify, `What panel option would you like to modify?\nSelect the option(s) that you would like to modify from the menu below.`);
 
+              const select = await client.buttons.selectMenu("Select options...", [
+                { label: "Name", value: "Change the name of the panel.", id: "Panel_Modify:Name", emoji: "" },
+                { label: "Opened Category", value: "Change the opened ticket category.", id: "Panel_Modify:Opened", emoji: "" },
+                { label: "Closed Category", value: "Change the closed ticket category.", id: "Panel_Modify:Closed", emoji: "" },
+                { label: "Claiming", value: "Enable or disable ticket claiming", id: "Panel_Modify:Claiming", emoji: "" },
+                { label: "Panel Channel", value: "Change the channel where the panel is sent to.", id: "Panel_Modify:Channel", emoji: "" },
+                { label: "Support Roles", value: "Change the support roles for this panel.", id: "Panel_Modify:Support", emoji: "" },
+                { label: "Additional Roles", value: "Change the additional roles for this panel.", id: "Panel_Modify:Additional", emoji: "" },
+                { label: "Ticket Format", value: "Change the ticket format for new tickets.", id: "Panel_Modify:Ticket", emoji: "" },
+                { label: "Claimed Format", value: "Change the ticket format for claimed tickets.", id: "Panel_Modify:Claimed", emoji: "" },
+              ], "Panel_Settings:Modify", 1);
+              
+              const row = client.buttons.actionRow([select]);
+              const msg = await message.reply({ embeds: [embed], components: [row] });
+              client.prompts.modifyPanel(command, msg, thirdArg, tsettings);
             } else {
               const embed = client.embeds.error(command.option.modify, `\`${thirdArg}\` is not a valid panel ID.`);
               message.reply({ embeds: [embed] });

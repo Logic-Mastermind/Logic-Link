@@ -1,6 +1,23 @@
 const Enmap = require("enmap");
 const Discord = require("discord.js");
 
+class BetterEnmap extends Enmap {
+  constructor() {
+    return super();
+  }
+
+  sort(fn = Discord.Collection.defaultSort) {
+    const entries = [...this.entries()];
+    entries.sort((a, b) => fn(a[1], b[1], a[0], b[0]));
+
+    Map.prototype.clear.call(this);
+    for (const [k, v] of entries) {
+      Map.prototype.set.call(this, k, v);
+    }
+    return this;
+  }
+}
+
 module.exports = {
   settings: new Enmap({
     name: "settings",

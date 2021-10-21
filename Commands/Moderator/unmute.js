@@ -36,7 +36,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
           type: "UNMUTE",
           user: member.id,
           moderator: message.author.id,
-          reason: warning,
+          reason: reason,
           timestamp: Math.round(Date.now() / 1000)
         }
 

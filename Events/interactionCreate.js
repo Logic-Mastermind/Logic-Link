@@ -13,6 +13,11 @@ module.exports = async (client, interaction) => {
   const responses = {};
 
   try {
+    if (interaction.isCommand()) {
+      const embed = client.embeds.warn("Slash Commands", `Slash commands are currently in development and cannot be used.`);
+      return interaction.reply({ embeds: [embed] });
+    }
+    
     if (interaction.customId == "Support_Server:Verify") {
       var verifiedRole = guild.roles.cache.get(client.util.supportVerifyRole);
       var unverifiedRole = guild.roles.cache.get(client.util.supportUnverifyRole);

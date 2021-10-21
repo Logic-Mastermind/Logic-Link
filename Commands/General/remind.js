@@ -30,7 +30,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       return message.reply({ embeds: [embed] });
     }
 
-    const embed = client.embeds.success(command, `In \`${time.display}\`, I will direct message you this task.`, [{
+    const end = Date.now() + time.duration;
+    const embed = client.embeds.success(command, `In \`${time.display}\` at <t:${Math.round(end / 1000)}:t>, I will direct message you this task.`, [{
       name: "Task",
       value: task,
       inline: false
@@ -47,7 +48,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       task: task,
       user: message.author.id,
       date: now,
-      end: now + time.duration
+      end
     });
     
     client.db.timeouts.set(dbKey, reminders, "reminders");

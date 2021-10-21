@@ -88,7 +88,7 @@ module.exports = class Logger {
     try {
       await this.client.db.logs.clear();
       await this.client.db.devSettings.set(this.client.util.devId, Date.now(), "logsCleared");
-      return null
+      return null;
     } catch (error) {
       return error;
     }

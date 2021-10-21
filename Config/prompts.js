@@ -143,7 +143,7 @@ module.exports = class Prompts {
 
     const filter = (m) => m.author.id == message.author.id;
     const collector = message.channel.createMessageCollector(filter, { idle: 60 * 1000 });
-    const startMsg = await message.lineReply(startEmbed);
+    const startMsg = await message.reply(startEmbed);
     startMsg.edit(embeds[0]);
 
     var current = 1;
@@ -218,7 +218,7 @@ module.exports = class Prompts {
     const startEmbed = this.client.embeds.pending(command, `Starting panel setup prompt...`);
     if (settings.panelSetup) {
       const embed = this.client.embeds.error(command.option.new, `A panel is already being created in this server.`);
-      return message.lineReply(embed);
+      return message.reply(embed);
     }
     
     const embeds = [
@@ -233,7 +233,7 @@ module.exports = class Prompts {
 
     const filter = (m) => m.author.id == message.author.id;
     const collector = message.channel.createMessageCollector(filter, { idle: 60 * 1000 });
-    const startMsg = await message.lineReply(startEmbed);
+    const startMsg = await message.reply(startEmbed);
     startMsg.edit(embeds[0])
 
     var current = 1;

@@ -90,7 +90,8 @@ module.exports = class Schemas {
       await client.login(config.token);
       return true;
     } catch (error) {
-      return error;
+      client.functions.sendError(error);
+      return false;
     }
   }
 }
