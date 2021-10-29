@@ -46,20 +46,23 @@ module.exports = async (client) => {
 
       for (const [k, v] of reminders.entries()) {
         const content = `Your reminder from <t:${v.date}:R> has just went off.`;
-        const user = client.users.cache.get(v.user) || client.users.fetch(v.user);
+        const user = client.users.cache.get(v.user) || await client.users.fetch(v.user);
         const fields = [{ name: "Task", value: v.task, inline: false }];
         const timeLeft = v.end - Date.now();
 
         if (timeLeft > client.util.timeoutLimit) continue;
         if (!user) continue;
-        
-        setTimeout(async () => {
+
+        const remind = () => {
           const embed = client.embeds.warn("Reminder", content, fields);
           reminders.delete(k);
 
           client.db.timeouts.set(`${v.user}[reminders]`, reminders, "reminders");
           user.send({ embeds: [embed] });
-        }, timeLeft);
+        };
+
+        if (v.end >= Date.now()) setTimeout(remind, timeLeft);
+        else remind();
       }
     }
   }

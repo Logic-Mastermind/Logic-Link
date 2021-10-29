@@ -199,6 +199,8 @@ module.exports = class Functions {
 
     for await (const [id, channel] of guildC.entries()) {
       if (filter.length < 3) break;
+      if (channel.type !== "GUILD_CATEGORY") continue;
+
       var nameL = channel.name.toLowerCase();
       var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
@@ -209,8 +211,7 @@ module.exports = class Functions {
     }
 
     if (found) channel = guildC.get(found);
-    if (channel.type !== "category") channel = null;
-    if (!channel) channel = null;
+    if (!channel) return null;
     return channel;
   }
 
@@ -455,20 +456,11 @@ module.exports = class Functions {
   async getTicketData(guild) {
     const settings = await this.client.db.tsettings.get(guild.id);
     const panels = await this.client.db.panels.get(guild.id, "panels");
-    const panelMap = await new Map(Object.entries(panels));
+    const panelMap = new Discord.Collection(panels);
 
     return {
-      settings: {
-        dmUsers: settings.dmUsers
-      },
-      panels: {
-        all: panelMap,
-        count: panelMap.size
-      },
-      tickets: {
-        all: null,
-        count: null
-      }
+      settings,
+      panels: panelMap
     }
   }
 
@@ -551,6 +543,7 @@ module.exports = class Functions {
   async paginate(message = {}, pages, filter = () => true, timeout = 60000) {
     if (!message.components[0].components[1]) throw new Error("Message does not have 2 button components");
 
+    const client = this.client;
     const original = message.embeds[0];
     const collector = await message.createMessageComponentCollector({ filter, idle: timeout });
 
@@ -595,7 +588,11 @@ module.exports = class Functions {
     });
 
     collector.on("end", async () => {
-      message.edit({ embeds: [original], components: [] });
+      button1.setDisabled();
+      button2.setDisabled();
+
+      const row1 = client.buttons.actionRow([button1, button2]);
+      message.edit({ embeds: [original], components: [row] });
     });
   }
 
@@ -690,10 +687,11 @@ module.exports = class Functions {
     return await this.client.db.errors.get(id);
   }
 
-  async next(channel, idObj, embeds, num) {
+  async next(channel, obj, embeds, num) {
     const msg = await channel.send({ embeds: [embeds[num - 1]] });
-    idObj[num - 1] = msg.id;
-    return idObj;
+    Object.defineProperty(obj, num - 1, {
+      value: msg.id
+    });
   }
 
   async getMemory() {

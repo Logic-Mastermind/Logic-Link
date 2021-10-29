@@ -94,4 +94,42 @@ module.exports = class Schemas {
       return false;
     }
   }
+
+  async sendPanel(panel, tsettings, guildId) {
+    const client = this.client;
+    const channel = client.channels.cache.get(panel.channel);
+    const embed = client.embeds.blue(panel.name, `${client.util.ticket} To create a ticket, click on the button below.`, [{
+      name: "Additional Info",
+      value: `Clicking the button below will create a ticket for this panel.\nPlease remember to adhere to this server's rules within the ticket.`,
+      inline: false
+    }]);
+
+    const button = client.buttons.green("Create Ticket", `Ticket_Create:${guildId}-${panel.id}`);
+    const row = client.buttons.actionRow([button]);
+
+    const msg = await channel.send({ embeds: [embed], components: [row] });
+    const panels = new Map(tsettings.panels);
+    panel.msg = msg.id;
+    
+    panels.set(panel.id, panel);
+    client.db.panels.set(guildId, panels, "panels");
+    return true;
+  }
+
+  async editPanelMsg(panel, tsettings, guildId) {
+    const client = this.client;
+    const channel = client.channels.cache.get(panel.channel);
+    const embed = client.embeds.blue(panel.name, `${client.util.ticket} To create a ticket, click on the button below.`, [{
+      name: "Additional Info",
+      value: `Clicking the button below will create a ticket for this panel.\nPlease remember to adhere to this server's rules within the ticket.`,
+      inline: false
+    }]);
+
+    const button = client.buttons.green("Create Ticket", `Ticket_Create:${guildId}-${panel.id}`);
+    const row = client.buttons.actionRow([button]);
+
+    const msg = await client.channels.cache.get(panel.channel).messages.fetch(panel.msg);
+    await msg.edit({ embeds: [embed], components: [row] });
+    return true;
+  }
 }

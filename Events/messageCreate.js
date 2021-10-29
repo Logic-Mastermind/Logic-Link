@@ -23,7 +23,7 @@ module.exports = async (client, message) => {
       return message.reply({ embeds: [embed] });
     }
 
-    if (userInfo.inPrompt) return;
+    if (userInfo.inPrompt == message.channel.id) return;
     if (message.author.id == client.util.devId) {
       if (message.content.startsWith(".")) prefix = ".";
       if (message.content.startsWith("-")) prefix = "-";
@@ -186,8 +186,8 @@ module.exports = async (client, message) => {
     }
 
     var hasSupportRole = false;
-    for await (const [key, val] of tsettings.panels.all.entries()) {
-      hasSupportRole = await val.supportRoles.some(r => message.member.roles.cache.has(r));
+    for await (const [key, val] of tsettings.panels.entries()) {
+      hasSupportRole = await val.support.some((r) => message.member.roles.cache.has(r));
     }
 
     const extra = {

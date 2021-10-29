@@ -115,6 +115,7 @@ module.exports = class Prompts {
   }
 
   async bugReport(message, command) {
+    const client = this.client;
     const clientMember = message.guild.me;
     const prompt = {
       description: `Please describe the bug in full detail.\nProvide images or videos if you can.`,
@@ -130,21 +131,21 @@ module.exports = class Prompts {
       actual: `Actual Results`
     }
 
-    const startEmbed = this.client.embeds.pending(command, `Starting bug report prompt...`);
+    const startEmbed = client.embeds.pending(command, `Starting bug report prompt...`);
     const embeds = [
-      this.client.embeds.blue(title.name, prompt.name),
-      this.client.embeds.blue(title.opened, prompt.opened),
-      this.client.embeds.blue(title.closed, prompt.closed),
-      this.client.embeds.blue(title.claiming, prompt.claiming),
-      this.client.embeds.blue(title.support, prompt.support),
-      this.client.embeds.blue(title.additional, prompt.additional),
-      this.client.embeds.blue(title.channel, prompt.channel)
+      client.embeds.blue(title.name, prompt.name),
+      client.embeds.blue(title.opened, prompt.opened),
+      client.embeds.blue(title.closed, prompt.closed),
+      client.embeds.blue(title.claiming, prompt.claiming),
+      client.embeds.blue(title.support, prompt.support),
+      client.embeds.blue(title.additional, prompt.additional),
+      client.embeds.blue(title.channel, prompt.channel)
     ];
 
     const filter = (m) => m.author.id == message.author.id;
-    const collector = message.channel.createMessageCollector(filter, { idle: 60 * 1000 });
-    const startMsg = await message.reply(startEmbed);
-    startMsg.edit(embeds[0]);
+    const collector = message.channel.createMessageCollector({ filter, idle: 60 * 1000 });
+    const startMsg = await message.reply({ embeds: [startEmbed] });
+    startMsg.edit({ embeds: [embeds[0]] });
 
     var current = 1;
     var cancelled = false;
@@ -162,47 +163,30 @@ module.exports = class Prompts {
     ]
 
     var collected = {};
-    await this.client.db.userInfo.set(`${message.author.id}-${message.guild.id}`, true, "inPrompt");
+    await client.db.userInfo.set(`${message.author.id}-${message.guild.id}`, true, "inPrompt");
 
     collector.on("collect", async (msg) => {
-      const msgArgs = msg.content.split(/ +/g);
 
-      if (current == 1) {
-        const editMsg = msg.channel.messages.cache.get(msgId[0]);
-
-        if (this.client.util.skipAliases.includes(msg.content.toLowerCase())) {
-          const embed = this.client.embeds.error(title.description, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.description}`);
-          return editMsg.edit(embed);
-
-        } else if (this.client.util.cancelAliases.includes(msg.content.toLowerCase())) {
-          const embed = this.client.embeds.error(title.description, `This question has stopped looking for responses.`);
-
-          editMsg.edit(embed);
-          cancelled = true;
-          return collector.stop();
-        }
-
-        collected.description = msg.content;
-        const embed = this.client.embeds.success(title.name, `Bug description set to:\n${code}${msg.content}${code}`);
-        editMsg.edit(embed);
-
-        current = 2;
-        msgId = await this.client.functions.next(message.channel, msgId, embeds, 2);
-
-      }
     })
   }
 
   async newPanel(settings, tsettings, message, command) {
+    const client = this.client;
     const clientMember = message.guild.me;
+
+    if (settings.panelSetup) {
+      const embed = client.embeds.error(command.option.new, `A panel is already being created in this server.`);
+      return message.reply({ embeds: [embed] });
+    }
+
     const prompt = {
-      name: `What should be the name of this panel?\nThe name must be within 3 and 50 characters long.`,
-      opened: `Where would you like opened tickets to go?\nType the name or ID of a category you want to set this to.`,
-      closed: `Where would you like closed tickets to go?\nType the name or ID of a category you want to set this to.`,
-      claiming: `Would you like panel claiming to be on, or off?\nType the option that you would like this to set to.`,
-      support: `What are some support roles that you would like for this panel?\nMembers who have these roles will be able to view and manage support tickets.\nMention or type the names of those roles below.`,
-      additional: `What are some additional roles that you would like for this panel?\nBy default, members who have these roles will be able to view support tickets.\nMention or type the names of those roles below.`,
-      channel: `Where should this panel be sent?\nMention or type the name of the channel that you would like this panel to be sent.`
+      name: [`What should be the name of this panel?`, `The name must be within 3 and 32 characters long.\nThe name must also be unique to other panels.`],
+      opened: [`Where would you like opened tickets to go?`, `Type the name or ID of a category you want to set this to.\nTickets will be moved here once they are opened.`],
+      closed: [`Where would you like closed tickets to go?`, `Type the name or ID of a category you want to set this to.\nTickets will be moved here once they are closed.`],
+      claiming: [`Would you like to enable or disable panel claiming? (\`on\` or \`off\`)`, `Type the option that you would like this to set to.\nWhen enabled, support team roles will be able to claim tickets.`],
+      support: [`What are some support roles that you would like for this panel?`, `Members with these roles will be able to view and manage support tickets.\nMention or type the names of those roles below.`],
+      additional: [`What are some additional roles that you would like for this panel?`, `By default, members with these roles will be able to view support tickets.\nMention or type the names of those roles below.`],
+      channel: [`Where would you like this panel to be sent to?`, `Mention or type the name of a channel for this setting.\nMake sure that I have the required permissions to send messages here.`]
     }
 
     const title = {
@@ -214,29 +198,58 @@ module.exports = class Prompts {
       additional: `Additional Roles`,
       channel: `Panel Channel`
     }
-
-    const startEmbed = this.client.embeds.pending(command, `Starting panel setup prompt...`);
-    if (settings.panelSetup) {
-      const embed = this.client.embeds.error(command.option.new, `A panel is already being created in this server.`);
-      return message.reply(embed);
-    }
     
     const embeds = [
-      this.client.embeds.blue(title.name, prompt.name),
-      this.client.embeds.blue(title.opened, prompt.opened),
-      this.client.embeds.blue(title.closed, prompt.closed),
-      this.client.embeds.blue(title.claiming, prompt.claiming),
-      this.client.embeds.blue(title.support, prompt.support),
-      this.client.embeds.blue(title.additional, prompt.additional),
-      this.client.embeds.blue(title.channel, prompt.channel)
+      client.embeds.question(title.name, prompt.name[0], [{
+        name: "Details",
+        value: prompt.name[1],
+        inline: false
+      }]),
+      client.embeds.question(title.opened, prompt.opened[0], [{
+        name: "Details",
+        value: prompt.opened[1],
+        inline: false
+      }]),
+      client.embeds.question(title.closed, prompt.closed[0], [{
+        name: "Details",
+        value: prompt.closed[1],
+        inline: false
+      }]),
+      client.embeds.question(title.claiming, prompt.claiming[0], [{
+        name: "Details",
+        value: prompt.claiming[1],
+        inline: false
+      }]),
+      client.embeds.question(title.support, prompt.support[0], [{
+        name: "Details",
+        value: prompt.support[1],
+        inline: false
+      }]),
+      client.embeds.question(title.additional, prompt.additional[0], [{
+        name: "Details",
+        value: prompt.additional[1],
+        inline: false
+      }]),
+      client.embeds.question(title.channel, prompt.channel[0], [{
+        name: "Details",
+        value: prompt.channel[1],
+        inline: false
+      }])
     ];
 
     const filter = (m) => m.author.id == message.author.id;
-    const collector = message.channel.createMessageCollector(filter, { idle: 60 * 1000 });
-    const startMsg = await message.reply(startEmbed);
-    startMsg.edit(embeds[0])
+    const collector = message.channel.createMessageCollector({ filter, idle: 60 * 1000 });
+    const startEmbed = client.embeds.green(command.option.new, `${client.util.pending} Starting the panel setup prompt.`, [{
+      name: "Additional Info",
+      value: `You are limited to 5 attempts per question.\nType \`cancel\` to cancel the prompt.`,
+      inline: false
+    }]);
+    const startMsg = await message.reply({ embeds: [startEmbed] });
+    await client.functions.sleep(800);
+    startMsg.edit({ embeds: [embeds[0]] });
 
-    var current = 1;
+    var current = "name";
+    var currentNum = 1;
     var cancelled = false;
     var finished = false;
     var attempted = false;
@@ -252,57 +265,59 @@ module.exports = class Prompts {
     ]
 
     var attempts = {
-      name: 1,
-      opened: 1,
-      closed: 1,
-      claiming: 1,
-      support: 1,
-      additional: 1,
-      channel: 1
+      name: 0,
+      opened: 0,
+      closed: 0,
+      claiming: 0,
+      support: 0,
+      additional: 0,
+      channel: 0
     }
 
     var collected = {};
-    await this.client.db.settings.set(message.guild.id, true, "panelSetup");
-    await this.client.db.userInfo.set(`${message.author.id}-${message.guild.id}`, true, "inPrompt");
+    await client.db.settings.set(message.guild.id, true, "panelSetup");
+    await client.db.userInfo.set(`${message.author.id}-${message.guild.id}`, message.channel.id, "inPrompt");
 
     collector.on("collect", async (msg) => {
       const msgArgs = msg.content.split(/ +/g);
+      const editMsg = msg.channel.messages.cache.get(msgId[currentNum - 1]);
+      const originalQuestion = [{ name: "Original Question", value: `${prompt[current][0]}\n\n${prompt[current][1]}`, inline: false }];
+      const currentAttempt = ++attempts[current];
 
-      if (current == 1) {
-        const editMsg = msg.channel.messages.cache.get(msgId[0]);
-        ++attempts.name;
+      if (currentAttempt >= 5) {
+        const embed = client.embeds.error(title[current], `You have attempted this question too many times.`);
+        editMsg.edit({ embeds: [embed] });
 
-        if (attempts.name > 4) {
-          const embed = this.client.embeds.error(title.name, `You have attempted this question too many times.`);
+        attempted = true;
+        return collector.stop();
+      }
 
-          editMsg.edit(embed);
-          attempted = true;
-          return collector.stop();
-        }
+      if (client.util.skipAliases.includes(msg.content.toLowerCase())) {
+        const embed = client.embeds.error(title[current], `Skipping is disallowed in this prompt, please try again.`, [{ name: "Original Question", value: prompt[current], inline: false }]);
+        return editMsg.edit({ embeds: [embed] });
 
-        if (this.client.util.skipAliases.includes(msg.content.toLowerCase())) {
-          const embed = this.client.embeds.error(title.name, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.name}`);
-          return editMsg.edit(embed);
+      } else if (client.util.cancelAliases.includes(msg.content.toLowerCase())) {
+        const embed = client.embeds.error(title[current], `This question has stopped looking for responses.`);
+        editMsg.edit({ embeds: [embed] });
 
-        } else if (this.client.util.cancelAliases.includes(msg.content.toLowerCase())) {
-          const embed = this.client.embeds.error(title.name, `This question has stopped looking for responses.`);
+        cancelled = true;
+        return collector.stop();
+      }
 
-          editMsg.edit(embed);
-          cancelled = true;
-          return collector.stop();
-        }
+      // -------------------------
 
-        if (msg.content.length > 50) {
-          const embed = this.client.embeds.error(title.name, `This name is greater than 50 characters, please try again.\n\n**Original Question**\n${prompt.name}`);
-          return editMsg.edit(embed);
+      if (current == "name") {
+        if (msg.content.length > 32) {
+          const embed = client.embeds.error(title[current], `This name is greater than 32 characters, please try again.`, originalQuestion);
+          return editMsg.edit({ embeds: [embed] });
 
         } else if (msg.content.length < 3) {
-          const embed = this.client.embeds.error(title.name, `This name is less than 3 characters, please try again.\n\n**Original Question**\n${prompt.name}`);
-          return editMsg.edit(embed);
+          const embed = client.embeds.error(title[current], `This name is less than 3 characters, please try again.`, originalQuestion);
+          return editMsg.edit({ embeds: [embed] });
         }
 
         var taken = null;
-        for (const pan of tsettings.panels.all.values()) {
+        for (const pan of tsettings.panels.values()) {
           if (pan.name == msg.content) {
             taken = true;
             break;
@@ -310,284 +325,157 @@ module.exports = class Prompts {
         }
 
         if (taken) {
-          const embed = this.client.embeds.error(title.name, `This name has already been used in another panel, please try again.\n\n**Original Question**\n${prompt.name}`);
-          return editMsg.edit(embed);
+          const embed = client.embeds.error(title[current], `This name has already been used in another panel, please try again.`, originalQuestion);
+          return editMsg.edit({ embeds: [embed] });
         }
 
-        collected.name = msg.content;
-        const embed = this.client.embeds.success(title.name, `Panel name has been set to: \`${collected.name}\`.`);
-        editMsg.edit(embed);
+        collected[current] = msg.content;
+        const embed = client.embeds.success(title[current], `Panel name has been set to: \`${collected[current]}\`.`);
+        editMsg.edit({ embeds: [embed] });
 
-        current = 2;
-        msgId = await this.client.functions.next(message.channel, msgId, embeds, 2);
+        current = "opened";
+        currentNum = 2;
+        client.functions.next(msg.channel, msgId, embeds, currentNum);
 
-      } else if (current == 2) {
-        const editMsg = msg.channel.messages.cache.get(msgId[1]);
-        ++attempts.opened;
-
-        if (attempts.opened > 4) {
-          const embed = this.client.embeds.error(title.opened, `You have attempted this question too many times.`);
-
-          editMsg.edit(embed);
-          attempted = true;
-          return collector.stop();
-        }
-
-        if (this.client.util.skipAliases.includes(msg.content.toLowerCase())) {
-          const embed = this.client.embeds.error(title.opened, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.opened}`);
-          return editMsg.edit(embed);
-
-        } else if (this.client.util.cancelAliases.includes(msg.content.toLowerCase())) {
-          const embed = this.client.embeds.error(title.opened, `This question has stopped looking for responses.`);
-
-          editMsg.edit(embed);
-          cancelled = true;
-          return collector.stop();
-        }
-
-        var category = await this.client.functions.findCategory(msgArgs.join(" "), msg.guild);
+      } else if (current == "opened") {
+        var category = await client.functions.findCategory(msgArgs.join(" "), msg.guild);
         if (!category) {
-          const embed = this.client.embeds.error(title.opened, `I could not record any categories from your message, please try again.\n\n**Original Question**\n${prompt.opened}`);
-          return editMsg.edit(embed);
+          const embed = client.embeds.error(title[current], `I could not record any categories from your message, please try again.`, originalQuestion);
+          return editMsg.edit({ embeds: [embed] });
         }
 
         if (!category.permissionsFor(clientMember).has("MANAGE_CHANNELS")) {
-          const embed = this.client.embeds.error(title.opened, `I do not have the required permissions in this category, please try again.\n\n**Original Question**\n${prompt.opened}`);
-          return editMsg.edit(embed);
+          const embed = client.embeds.error(title[current], `I do not have the \`MANAGE_CHANNELS\` permission in this category, please try again.`, originalQuestion);
+          return editMsg.edit({ embeds: [embed] });
         }
 
-        collected.opened = category.id;
-        const embed = this.client.embeds.success(title.opened, `Panel opened category has been set to: \`#${category.name}\`.`);
-        editMsg.edit(embed);
+        collected[current] = category.id;
+        const embed = client.embeds.success(title[current], `Panel opened category has been set to: \`#${category.name}\`.`);
+        editMsg.edit({ embeds: [embed] });
 
-        current = 3;
-        msgId = await this.client.functions.next(message.channel, msgId, embeds, 3);
+        current = "closed";
+        currentNum = 3
+        client.functions.next(msg.channel, msgId, embeds, currentNum);
 
-      } else if (current == 3) {
-        const editMsg = msg.channel.messages.cache.get(msgId[2]);
-        ++attempts.closed;
-
-        if (attempts.closed > 4) {
-          const embed = this.client.embeds.error(title.closed, `You have attempted this question too many times.`);
-
-          editMsg.edit(embed);
-          attempted = true;
-          return collector.stop();
-        }
-
-        if (this.client.util.skipAliases.includes(msg.content.toLowerCase())) {
-          const embed = this.client.embeds.error(title.closed, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.closed}`);
-          return editMsg.edit(embed);
-
-        } else if (this.client.util.cancelAliases.includes(msg.content.toLowerCase())) {
-          const embed = this.client.embeds.error(title.closed, `This question has stopped looking for responses.`);
-
-          editMsg.edit(embed);
-          cancelled = true;
-          return collector.stop();
-        }
-
-        var category = await this.client.functions.findCategory(msgArgs.join(" "), msg.guild);
+      } else if (current == "closed") {
+        var category = await client.functions.findCategory(msgArgs.join(" "), msg.guild);
         if (!category) {
-          const embed = this.client.embeds.error(title.closed, `I could not record any categories from your message, please try again.\n\n**Original Question**\n${prompt.closed}`);
-          return editMsg.edit(embed);
+          const embed = client.embeds.error(title[current], `I could not record any categories from your message, please try again.`, originalQuestion);
+          return editMsg.edit({ embeds: [embed] });
         }
 
         if (!category.permissionsFor(clientMember).has("MANAGE_CHANNELS")) {
-          const embed = this.client.embeds.error(title.closed, `I do not have the \`MANAGE_CHANNELS\` permission in this category, please try again.\n\n**Original Question**\n${prompt.closed}`);
-          return editMsg.edit(embed);
+          const embed = client.embeds.error(title[current], `I do not have the \`MANAGE_CHANNELS\` permission in this category, please try again.`, originalQuestion);
+          return editMsg.edit({ embeds: [embed] });
         }
 
-        collected.closed = category.id;
-        const embed = this.client.embeds.success(title.closed, `Panel closed category has been set to: \`#${category.name}\`.`);
-        editMsg.edit(embed);
+        collected[current] = category.id;
+        const embed = client.embeds.success(title[current], `Panel closed category has been set to: \`#${category.name}\`.`);
+        editMsg.edit({ embeds: [embed] });
 
-        current = 4;
-        msgId = await this.client.functions.next(message.channel, msgId, embeds, 4);
+        current = "claiming";
+        currentNum = 4;
+        client.functions.next(msg.channel, msgId, embeds, currentNum);
         
-      } else if (current == 4) {
-        const editMsg = msg.channel.messages.cache.get(msgId[3]);
-        ++attempts.claiming;
-
-        if (attempts.claiming > 4) {
-          const embed = this.client.embeds.error(title.claiming, `You have attempted this question too many times.`);
-
-          editMsg.edit(embed);
-          attempted = true;
-          return collector.stop();
-        }
-
-        if (this.client.util.skipAliases.includes(msg.content.toLowerCase())) {
-          const embed = this.client.embeds.error(title.claiming, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.claiming}`);
-          return editMsg.edit(embed);
-
-        } else if (this.client.util.cancelAliases.includes(msg.content.toLowerCase())) {
-          const embed = this.client.embeds.error(title.claiming, `This question has stopped looking for responses.`);
-
-          editMsg.edit(embed);
-          cancelled = true;
-          return collector.stop();
-        }
-
+      } else if (current == "claiming") {
         var option = null;
-        if (msg.content.includes("yes") || msg.content.includes("on")) option = "true";
-        if (msg.content.includes("no") || msg.content.includes("off")) option = "false";
+        if (msg.content.includes("yes") || msg.content.includes("on")) option = true;
+        if (msg.content.includes("no") || msg.content.includes("off")) option = false;
 
-        if (!option) {
-          const embed = this.client.embeds.error(title.claiming, `An invalid option was recieved, please type \`on\` or \`off\`.\n\n**Original Question**\n${prompt.claiming}`);
-          return editMsg.edit(embed);
+        if (option == null) {
+          const embed = client.embeds.error(title[current], `An invalid option was recieved, please type \`on\` or \`off\`.`, originalQuestion);
+          return editMsg.edit({ embeds: [embed] });
         }
         
-        collected.claiming = option == "true" ? true : false;
-        const embed = this.client.embeds.success(title.claiming, `Ticket claiming in this panel has been turned \`${option == "true" ? `on` : `off`}\`.`);
-        editMsg.edit(embed);
+        collected[current] = option;
+        const embed = client.embeds.success(title[current], `Ticket claiming in this panel has been turned \`${option ? `on` : `off`}\`.`);
+        editMsg.edit({ embeds: [embed] });
 
-        current = 5;
-        msgId = await this.client.functions.next(message.channel, msgId, embeds, 5);
+        current = "support";
+        currentNum = 5;
+        client.functions.next(msg.channel, msgId, embeds, currentNum);
 
-      } else if (current == 5) {
-        const editMsg = msg.channel.messages.cache.get(msgId[4]);
-        ++attempts.support;
+      } else if (current == "support") {
+        var roles = [];
+        var args = msgArgs.filter((v) => (!v.startsWith("<@&") || !v.startsWith("<@!")) && !v.endsWith(">"));
+        var mentions = msg.mentions.roles;
 
-        if (attempts.support > 4) {
-          const embed = this.client.embeds.error(title.support, `You have attempted this question too many times.`);
-
-          editMsg.edit(embed);
-          attempted = true;
-          return collector.stop();
+        for (const array of mentions) {
+          roles.push(array[0]); // Role ID
         }
 
-        if (this.client.util.skipAliases.includes(msg.content.toLowerCase())) {
-          const embed = this.client.embeds.error(title.support, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.support}`);
-          return editMsg.edit(embed);
-
-        } else if (this.client.util.cancelAliases.includes(msg.content.toLowerCase())) {
-          const embed = this.client.embeds.error(title.support, `This question has stopped looking for responses.`);
-
-          editMsg.edit(embed);
-          cancelled = true;
-          return collector.stop();
+        for await (const arg of args) {
+          var role = await client.functions.findRole(arg, msg.guild);
+          if (role) roles.push(role.id);
         }
 
-        var mentionedRoles = await msg.mentions.roles.map(r => r.id)
-        var roles = msgArgs;
-        var roleObj = [];
-
-        await roles.unshift(...mentionedRoles);
-        roles = roles.filter((v) => (!v.startsWith("<@&") || !v.startsWith("<@!")) && !v.endsWith(">"));
         roles = [...new Set(roles)];
-
-        await roles.forEach(async (v) => {
-          var role = await this.client.functions.findRole(v, msg.guild);
-          if (role) roleObj.push(role.id);
-        })
-
-        roleObj = [...new Set(roleObj)];
-        if (roleObj.length < 1) {
-          const embed = this.client.embeds.error(title.support, `I couldn't record any roles from your message, please try again.\n\n**Original Question**\n${prompt.support}`);
-          return editMsg.edit(embed);
+        if (roles.length < 1) {
+          const embed = client.embeds.error(title[current], `I could not record any roles from your message, please try again.`, originalQuestion);
+          return editMsg.edit({ embeds: [embed] });
         }
 
-        collected.support = roleObj;
-        const embed = this.client.embeds.success(title.support, `I have collected \`${roleObj.length}\` role${roleObj.length == 1 ? `` : `s`} from your message.\n\n**Roles**\n<@&${roleObj.join(">\n<@&")}>`);
-        editMsg.edit(embed);
+        collected[current] = roles;
+        const embed = client.embeds.success(title[current], `I have collected \`${roles.length}\` role${roles.length == 1 ? `` : `s`} from your message.`, [{
+          name: "Roles",
+          value: `<@&${roles.join(">\n<@&")}>`,
+          inline: false
+        }]);
+        editMsg.edit({ embeds: [embed] });
 
-        current = 6;
-        msgId = await this.client.functions.next(message.channel, msgId, embeds, 6);
+        current = "additional";
+        currentNum = 6;
+        client.functions.next(msg.channel, msgId, embeds, currentNum);
 
-      } else if (current == 6) {
-        const editMsg = msg.channel.messages.cache.get(msgId[5]);
-        ++attempts.additional;
+      } else if (current == "additional") {
+        var roles = [];
+        var args = msgArgs.filter((v) => (!v.startsWith("<@&") || !v.startsWith("<@!")) && !v.endsWith(">"));
+        var mentions = msg.mentions.roles;
 
-        if (attempts.additional > 4) {
-          const embed = this.client.embeds.error(title.additional, `You have attempted this question too many times.`);
-
-          editMsg.edit(embed);
-          attempted = true;
-          return collector.stop();
+        for (const array of mentions) {
+          roles.push(array[0]); // Role ID
         }
 
-        if (this.client.util.skipAliases.includes(msg.content.toLowerCase())) {
-          const embed = this.client.embeds.success(title.additional, `This question has been skipped.`);
-          editMsg.edit(embed);
-          current = 7;
-          msgId = await this.client.functions.next(message.channel, msgId, embeds, 7);
-          return;
-
-        } else if (this.client.util.cancelAliases.includes(msg.content.toLowerCase())) {
-          const embed = this.client.embeds.error(title.additional, `This question has stopped looking for responses.`);
-
-          editMsg.edit(embed);
-          cancelled = true;
-          return collector.stop();
+        for await (const arg of args) {
+          var role = await client.functions.findRole(arg, msg.guild);
+          if (role) roles.push(role.id);
         }
 
-        var mentionedRoles = await msg.mentions.roles.map(r => r.id)
-        var roles = msgArgs;
-        var roleObj = [];
-
-        await roles.unshift(...mentionedRoles);
-        roles = roles.filter((v) => (!v.startsWith("<@&") || !v.startsWith("<@!")) && !v.endsWith(">"));
         roles = [...new Set(roles)];
-
-        await roles.forEach(async (v) => {
-          var role = await this.client.functions.findRole(v, msg.guild);
-          if (role) roleObj.push(role.id);
-        })
-
-        roleObj = [...new Set(roleObj)];
-        if (roleObj.length < 1) {
-          const embed = this.client.embeds.error(title.additional, `I couldn't record any roles from your message, please try again.\n\n**Original Question**\n${prompt.additional}`);
-          return editMsg.edit(embed);
+        if (roles.length < 1) {
+          const embed = client.embeds.error(title[current], `I could not record any roles from your message, please try again.`, originalQuestion);
+          return editMsg.edit({ embeds: [embed] });
         }
 
-        collected.additional = roleObj;
-        const embed = this.client.embeds.success(title.additional, `I have collected \`${roleObj.length}\` role${roleObj.length == 1 ? `` : `s`} from your message.\n\n**Roles**\n<@&${roleObj.join(">\n<@&")}>`);
-        editMsg.edit(embed);
+        collected[current] = roles;
+        const embed = client.embeds.success(title[current], `I have collected \`${roles.length}\` role${roles.length == 1 ? `` : `s`} from your message.`, [{
+          name: "Roles",
+          value: `<@&${roles.join(">\n<@&")}>`,
+          inline: false
+        }]);
+        editMsg.edit({ embeds: [embed] });
 
-        current = 7;
-        msgId = await this.client.functions.next(message.channel, msgId, embeds, 7);
+        current = "channel";
+        currentNum = 7;
+        client.functions.next(msg.channel, msgId, embeds, currentNum);
 
-      } else if (current == 7) {
-        const editMsg = msg.channel.messages.cache.get(msgId[6]);
-        ++attempts.channel;
-
-        if (attempts.channel > 4) {
-          const embed = this.client.embeds.error(title.channel, `You have attempted this question too many times.`);
-
-          editMsg.edit(embed);
-          attempted = true;
-          return collector.stop();
-        }
-
-        if (this.client.util.skipAliases.includes(msg.content.toLowerCase())) {
-          const embed = this.client.embeds.error(title.channel, `Skipping is disallowed in this prompt, please try again.\n\n**Original Question**\n${prompt.channel}`);
-          return editMsg.edit(embed);
-
-        } else if (this.client.util.cancelAliases.includes(msg.content.toLowerCase())) {
-          const embed = this.client.embeds.error(title.channel, `This question has stopped looking for responses.`);
-
-          editMsg.edit(embed);
-          cancelled = true;
-          return collector.stop();
-        }
-
+      } else if (current == "channel") {
         var channel = msg.mentions.channels.first();
-        if (!channel) channel = await this.client.functions.findChannel(msgArgs.join(" "), msg.guild);
+        if (!channel) channel = await client.functions.findChannel(msgArgs.join(" "), msg.guild);
 
         if (!channel) {
-          const embed = this.client.embeds.error(title.channel, `I could not record any channels from your message, please try again.\n\n**Original Question**\n${prompt.channel}`);
-          return editMsg.edit(embed);
+          const embed = client.embeds.error(title[current], `I could not record any channels from your message, please try again.`, originalQuestion);
+          return editMsg.edit({ embeds: [embed] });
         }
 
         if (!channel.permissionsFor(clientMember).has("SEND_MESSAGES")) {
-          const embed = this.client.embeds.error(title.channel, `I do not have the \`SEND_MESSAGES\` permission in this channel, please try again.\n\n**Original Question**\n${prompt.channel}`);
-          return editMsg.edit(embed);
+          const embed = client.embeds.error(title[current], `I do not have the \`SEND_MESSAGES\` permission in this channel, please try again.`, originalQuestion);
+          return editMsg.edit({ embeds: [embed] });
         }
 
-        collected.channel = channel.id;
-        const embed = this.client.embeds.success(title.channel, `Panel channel has been set to: <#${channel.id}>.`);
-        editMsg.edit(embed);
+        collected[current] = channel.id;
+        const embed = client.embeds.success(title[current], `Panel channel has been set to: <#${channel.id}>.`);
+        editMsg.edit({ embeds: [embed] });
 
         finished = true;
         collector.stop();
@@ -595,129 +483,633 @@ module.exports = class Prompts {
     });
 
     collector.on("end", async () => {
-      await this.client.db.settings.set(message.guild.id, false, "panelSetup");
-      await this.client.db.userInfo.set(`${message.author.id}-${message.guild.id}`, false, "inPrompt");
+      client.db.settings.set(message.guild.id, false, "panelSetup");
+      client.db.userInfo.set(`${message.author.id}-${message.guild.id}`, null, "inPrompt");
 
       if (finished) {
         var categoryOpened = message.guild.channels.cache.get(collected.opened);
         var categoryClosed = message.guild.channels.cache.get(collected.closed);
 
         const fields = [
-          { name: `General Configuration`, value: `${this.client.util.text} Name: \`${collected.name}\`\n${this.client.util.category} Opened Category: \`#${categoryOpened.name}\`\n${this.client.util.category} Closed Category: \`#${categoryClosed.name}\`\n${this.client.util.override} Claiming: \`${collected.claiming ? `On` : `Off`}\`\n${this.client.util.channel} Panel Channel: <#${collected.channel}>\n\u200b`, inline: false },
-          { name: `Role Configuration`, value: `${this.client.util.moderator} Support Roles:\n<@&${collected.support.join(">\n<@&")}>${collected.additional ? `\n\n${this.client.util.moderator} Additional Roles:\n<@&${collected.additional.join(">\n<@&")}>` : ``}` }
+          { name: `General Configuration`, value: `${client.util.text} Name: \`${collected.name}\`\n${client.util.category} Opened Category: \`#${categoryOpened.name}\`\n${client.util.category} Closed Category: \`#${categoryClosed.name}\`\n${client.util.override} Claiming: \`${collected.claiming ? `On` : `Off`}\`\n${client.util.channel} Panel Channel: <#${collected.channel}>\n\u200b`, inline: false },
+          { name: `Role Configuration`, value: `${client.util.moderator} Support Roles:\n<@&${collected.support.join(">\n<@&")}>${collected.additional ? `\n\n${client.util.moderator} Additional Roles:\n<@&${collected.additional.join(">\n<@&")}>` : ``}` }
         ];
 
-        const confirmBtn = this.client.buttons.confirm("Panel_Config_Confirm");
-        const cancelBtn = this.client.buttons.cancel("Panel_Config_Cancel");
+        const confirmBtn = client.buttons.confirm("Panel_Config:Confirm");
+        const cancelBtn = client.buttons.cancel("Panel_Config:Cancel");
+        const row = client.buttons.actionRow([confirmBtn, cancelBtn]);
         const btnFilter = () => true;
         var clicked = false;
 
-        const embed = this.client.embeds.green(command.option.new, `This prompt has been completed.\nClick on a button below to confirm or cancel the configuration.\n\u200b`, fields);
+        const embed = client.embeds.green(command.option.new, `This prompt has been completed.\nClick on a button below to confirm or cancel the configuration.\n\u200b`, fields);
 
-        const confirmMsg = await message.channel.send({ embed: embed, buttons: [confirmBtn, cancelBtn] });
-        const confirmCollector = confirmMsg.createButtonCollector(btnFilter, { idle: 60 * 1000 });
+        const confirmMsg = await message.channel.send({ embeds: [embed], components: [row] });
+        const confirmCollector = confirmMsg.createMessageComponentCollector({ filter: btnFilter, idle: 60 * 1000 });
 
-        confirmCollector.on("collect", async (button) => {
-          if (button.clicker.user.id !== message.author.id) {
-            const embed = this.client.embeds.permission(command, `ADMINISTRATOR`);
-            return button.reply.send({ embed: embed, ephemeral: true });
+        confirmCollector.on("collect", async (component) => {
+          if (component.user.id !== message.author.id) {
+            const embed = client.embeds.permission("ADMINISTRATOR");
+            return component.reply({ embeds: [embed], ephemeral: true });
           }
 
-          if (button.id == "Panel_Config_Confirm") {
-            const newCount = (tsettings.panels.count + 1).toString();
-            const panels = Object.fromEntries(tsettings.panels.all)
+          if (component.customId == "Panel_Config:Confirm") {
+            const newCount = (settings.cases.last() ? Number(settings.cases.last().id) + 1 : 1).toString();
+            const panels = new Map(tsettings.panels);
 
-            panels[newCount] = {
-              name: collected.name,
-              opened: collected.opened,
-              closed: collected.closed,
-              claiming: collected.claiming,
-              channel: collected.channel,
-              support: collected.support,
-              additional: collected.additional || [],
-              ticket: `ticket-[number]`,
-              claimed: `claimed-[number]`,
-              createdAt: Date.now(),
-              createdBy: message.author.id,
-              id: newCount
-            }
+            collected.createdAt = Date.now();
+            collected.createdBy = message.author.id;
+            collected.tickets = new Map();
+            collected.claimed = `claimed-[number]`;
+            collected.ticket = `ticket-[number]`;
+            collected.id = newCount;
+            
+            panels.set(newCount, collected);
+            client.db.panels.set(message.guild.id, panels, "panels");
+            await client.schemas.sendPanel(collected, tsettings, message.guild.id);
 
-            await this.client.db.panels.set(message.guild.id, panels, "panels");
-            const embed = this.client.embeds.success(command.option.new, `Created a new panel with the name: \`${collected.name}\`.`);
-            await button.reply.send(embed);
+            const embed = client.embeds.success(command.option.new, `Created a new panel with the name: \`${collected.name}\`.`);
+            await component.reply({ embeds: [embed] });
 
             clicked = true;
             confirmMsg.delete();
             confirmCollector.stop();
 
           } else {
-            const embed = this.client.embeds.success(command.option.new, `Cancelled the panel setup prompt.`);
-            await button.reply.send(embed);
+            const embed = client.embeds.success(command.option.new, `Cancelled the panel setup prompt.`);
+            await component.reply({ embeds: [embed] });
 
             clicked = true;
             confirmMsg.delete();
             confirmCollector.stop();
           }
-        })
+        });
 
         confirmCollector.on("end", async () => {
           if (!clicked) {
-            const embed = this.client.embeds.error(command.option.new, `This prompt has timed out due to inactivity.`);
-            await message.channel.send(embed);
+            const embed = client.embeds.inactivity(command.option.new);
+            await message.channel.send({ embeds: [embed] });
             confirmMsg.delete();
           }
-        })
+        });
 
       } else if (cancelled) {
-        const embed = this.client.embeds.success(command.option.new, `This prompt has been cancelled.`);
-        message.channel.send(embed);
+        const embed = client.embeds.success(command.option.new, `This prompt has been cancelled.`);
+        message.channel.send({ embeds: [embed] });
 
       } else if (attempted) {
-        const embed = this.client.embeds.error(command.option.new, `This prompt has been stopped.`);
-        message.channel.send(embed);
+        const embed = client.embeds.error(command.option.new, `This prompt has been stopped.`);
+        message.channel.send({ embeds: [embed] });
 
       } else {
-        const embed = this.client.embeds.error(command.option.new, `This prompt has timed out due to inactivity.`);
-        message.channel.send(embed);
+        const embed = client.embeds.inactivity(command.option.new);
+        message.channel.send({ embeds: [embed] });
+
+        const editMsg = message.channel.messages.cache.get(msgId[currentNum - 1]);
+        const embed1 = client.embeds.warn(title[current], `This question has stopped looking for responses.`);
+        editMsg.edit({ embeds: [embed1] });
       }
     });
   }
 
+  async modifyPanel(command, message, msg, id, tsettings) {
+    const client = this.client;
+    const clientMember = message.guild.me;
+    const filter = () => true;
+    var clicked1 = false;
+    const collector1 = msg.createMessageComponentCollector({ filter, idle: 60000 });
+
+    collector1.on("collect", async (component) => {
+      if (message.author.id !== component.user.id) {
+        const embed = client.embeds.notComponent();
+        return component.reply({ embeds: [embed], ephemeral: true });
+      }
+
+      msg.delete();
+      clicked1 = true;
+
+      const prompt = {
+        name: [`What should be the name of this panel?`, `The name must be within 3 and 32 characters long.\nThe name must also be unique to other panels.`],
+        opened: [`Where would you like opened tickets to go?`, `Type the name or ID of a category you want to set this to.\nTickets will be moved here once they are opened.`],
+        closed: [`Where would you like closed tickets to go?`, `Type the name or ID of a category you want to set this to.\nTickets will be moved here once they are closed.`],
+        claiming: [`Would you like to enable or disable panel claiming? (\`on\` or \`off\`)`, `Type the option that you would like this to set to.\nWhen enabled, support team roles will be able to claim tickets.`],
+        support: [`What are some support roles that you would like for this panel?`, `Members with these roles will be able to view and manage support tickets.\nMention or type the names of those roles below.`],
+        additional: [`What are some additional roles that you would like for this panel?`, `By default, members with these roles will be able to view support tickets.\nMention or type the names of those roles below.`],
+        channel: [`Where would you like this panel to be sent to?`, `Mention or type the name of a channel for this setting.\nMake sure that I have the required permissions to send messages here.`],
+        ticket: [`What format should ticket names follow?`, `The format must be within 3 and 32 characters long.\nText that includes \`[number]\` will be replaced with the current ticket number.`],
+        claimed: [`What format should claimed ticket names follow?`, `The format must be within 3 and 32 characters long.\nText that includes \`[number]\` will be replaced with the current ticket number.`]
+      }
+
+      const title = {
+        name: `Panel Name`,
+        opened: `Opened Category`,
+        closed: `Closed Category`,
+        claiming: `Ticket Claiming`,
+        support: `Support Roles`,
+        additional: `Additional Roles`,
+        channel: `Panel Channel`,
+        ticket: `Ticket Format`,
+        claimed: `Claimed Format`
+      }
+
+      const embeds = [];
+      const values = [];
+      var num = 0;
+
+      for await (const option of component.values) {
+        values.push({ name: option, number: ++num });
+
+        switch (option) {
+          case "name":
+          {
+            const embed = client.embeds.question(title.name, prompt.name[0], [{
+              name: "Details",
+              value: prompt.name[1],
+              inline: false
+            }]);
+            embeds.push(embed);
+            break;
+          }
+          case "opened":
+          {
+            const embed = client.embeds.question(title.opened, prompt.opened[0], [{
+              name: "Details",
+              value: prompt.opened[1],
+              inline: false
+            }]);
+            embeds.push(embed);
+            break;
+          }
+          case "closed":
+          {
+            const embed = client.embeds.question(title.closed, prompt.closed[0], [{
+              name: "Details",
+              value: prompt.closed[1],
+              inline: false
+            }]);
+            embeds.push(embed);
+            break;
+          }
+          case "claiming":
+          {
+            const embed = client.embeds.question(title.claiming, prompt.claiming[0], [{
+              name: "Details",
+              value: prompt.claiming[1],
+              inline: false
+            }]);
+            embeds.push(embed);
+            break;
+          }
+          case "channel":
+          {
+            const embed = client.embeds.question(title.channel, prompt.channel[0], [{
+              name: "Details",
+              value: prompt.channel[1],
+              inline: false
+            }]);
+            embeds.push(embed);
+            break;
+          }
+          case "support":
+          {
+            const embed = client.embeds.question(title.support, prompt.support[0], [{
+              name: "Details",
+              value: prompt.support[1],
+              inline: false
+            }]);
+            embeds.push(embed);
+            break;
+          }
+          case "additional":
+          {
+            const embed = client.embeds.question(title.additional, prompt.additional[0], [{
+              name: "Details",
+              value: prompt.additional[1],
+              inline: false
+            }]);
+            embeds.push(embed);
+            break;
+          }
+          case "ticket":
+          {
+            const embed = client.embeds.question(title.ticket, prompt.ticket[0], [{
+              name: "Details",
+              value: prompt.ticket[1],
+              inline: false
+            }]);
+            embeds.push(embed);
+            break;
+          }
+          case "claimed":
+          {
+            const embed = client.embeds.question(title.claimed, prompt.claimed[0], [{
+              name: "Details",
+              value: prompt.claimed[1],
+              inline: false
+            }]);
+            embeds.push(embed);
+            break;
+          }
+        }
+      }
+      
+      const filter = (m) => m.author.id == message.author.id;
+      const collector = message.channel.createMessageCollector({ filter, idle: 60 * 1000 });
+      const startEmbed = client.embeds.green(command.option.modify, `${client.util.pending} Starting the panel modify prompt.`, [{
+        name: "Additional Info",
+        value: `You are limited to 5 attempts per question.\nType \`cancel\` to cancel the prompt.`,
+        inline: false
+      }]);
+      
+      const startMsg = await message.reply({ embeds: [startEmbed] });
+      await client.functions.sleep(800);
+      startMsg.edit({ embeds: [embeds[0]] });
+
+      var current = values[0].name;
+      var currentNum = values[0].number;
+      var cancelled = false;
+      var finished = false;
+      var attempted = false;
+
+      var msgId = [
+        startMsg.id,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+
+      var attempts = {
+        name: 0,
+        opened: 0,
+        closed: 0,
+        claiming: 0,
+        support: 0,
+        additional: 0,
+        channel: 0,
+        ticket: 0,
+        claimed: 0
+      }
+
+      var collected = {};
+      client.db.userInfo.set(`${message.author.id}-${message.guild.id}`, message.channel.id, "inPrompt");
+
+      collector.on("collect", async (m) => {
+        const msgArgs = m.content.split(/ +/g);
+        const editMsg = m.channel.messages.cache.get(msgId[currentNum - 1]);
+        const originalQuestion = [{ name: "Original Question", value: `${prompt[current][0]}\n\n${prompt[current][1]}`, inline: false }];
+        const currentAttempt = ++attempts[current];
+
+        if (currentAttempt >= 5) {
+          const embed = client.embeds.error(title[current], `You have attempted this question too many times.`);
+          editMsg.edit({ embeds: [embed] });
+
+          attempted = true;
+          return collector.stop();
+        }
+
+        if (client.util.skipAliases.includes(m.content.toLowerCase())) {
+          const embed = client.embeds.error(title[current], `Skipping is disallowed in this prompt, please try again.`, [{ name: "Original Question", value: prompt[current], inline: false }]);
+          return editMsg.edit({ embeds: [embed] });
+
+        } else if (client.util.cancelAliases.includes(m.content.toLowerCase())) {
+          const embed = client.embeds.error(title[current], `This question has stopped looking for responses.`);
+          editMsg.edit({ embeds: [embed] });
+
+          cancelled = true;
+          return collector.stop();
+        }
+
+        // -------------------------
+
+        async function validateOption(value) {
+          if (value == "name") {
+            if (m.content.length > 32) {
+              const embed = client.embeds.error(title[current], `This name is greater than 32 characters, please try again.`, originalQuestion);
+              return editMsg.edit({ embeds: [embed] });
+
+            } else if (m.content.length < 3) {
+              const embed = client.embeds.error(title[current], `This name is less than 3 characters, please try again.`, originalQuestion);
+              return editMsg.edit({ embeds: [embed] });
+            }
+
+            var taken = null;
+            for (const pan of tsettings.panels.values()) {
+              if (pan.name == m.content) {
+                taken = true;
+                break;
+              }
+            }
+
+            if (taken) {
+              const embed = client.embeds.error(title[current], `This name has already been used in another panel, please try again.`, originalQuestion);
+              return editMsg.edit({ embeds: [embed] });
+            }
+
+            collected[current] = m.content;
+            const embed = client.embeds.success(title[current], `Panel name has been set to: \`${collected[current]}\`.`);
+            editMsg.edit({ embeds: [embed] });
+
+          } else if (value == "opened") {
+            var category = await client.functions.findCategory(msgArgs.join(" "), m.guild);
+            if (!category) {
+              const embed = client.embeds.error(title[current], `I could not record any categories from your message, please try again.`, originalQuestion);
+              return editMsg.edit({ embeds: [embed] });
+            }
+
+            if (!category.permissionsFor(clientMember).has("MANAGE_CHANNELS")) {
+              const embed = client.embeds.error(title[current], `I do not have the \`MANAGE_CHANNELS\` permission in this category, please try again.`, originalQuestion);
+              return editMsg.edit({ embeds: [embed] });
+            }
+
+            collected[current] = category.id;
+            const embed = client.embeds.success(title[current], `Panel opened category has been set to: \`#${category.name}\`.`);
+            editMsg.edit({ embeds: [embed] });
+
+          } else if (value == "closed") {
+            var category = await client.functions.findCategory(msgArgs.join(" "), m.guild);
+            if (!category) {
+              const embed = client.embeds.error(title[current], `I could not record any categories from your message, please try again.`, originalQuestion);
+              return editMsg.edit({ embeds: [embed] });
+            }
+
+            if (!category.permissionsFor(clientMember).has("MANAGE_CHANNELS")) {
+              const embed = client.embeds.error(title[current], `I do not have the \`MANAGE_CHANNELS\` permission in this category, please try again.`, originalQuestion);
+              return editMsg.edit({ embeds: [embed] });
+            }
+
+            collected[current] = category.id;
+            const embed = client.embeds.success(title[current], `Panel closed category has been set to: \`#${category.name}\`.`);
+            editMsg.edit({ embeds: [embed] });
+            
+          } else if (value == "claiming") {
+            var option = null;
+            if (m.content.includes("yes") || m.content.includes("on")) option = true;
+            if (m.content.includes("no") || m.content.includes("off")) option = false;
+
+            if (option == null) {
+              const embed = client.embeds.error(title[current], `An invalid option was recieved, please type \`on\` or \`off\`.`, originalQuestion);
+              return editMsg.edit({ embeds: [embed] });
+            }
+            
+            collected[current] = option;
+            const embed = client.embeds.success(title[current], `Ticket claiming in this panel has been turned \`${option ? `on` : `off`}\`.`);
+            editMsg.edit({ embeds: [embed] });
+
+          } else if (value == "support") {
+            var roles = [];
+            var args = msgArgs.filter((v) => (!v.startsWith("<@&") || !v.startsWith("<@!")) && !v.endsWith(">"));
+            var mentions = m.mentions.roles;
+
+            for (const array of mentions) {
+              roles.push(array[0]); // Role ID
+            }
+
+            for await (const arg of args) {
+              var role = await client.functions.findRole(arg, m.guild);
+              if (role) roles.push(role.id);
+            }
+
+            roles = [...new Set(roles)];
+            if (roles.length < 1) {
+              const embed = client.embeds.error(title[current], `I could not record any roles from your message, please try again.`, originalQuestion);
+              return editMsg.edit({ embeds: [embed] });
+            }
+
+            collected[current] = roles;
+            const embed = client.embeds.success(title[current], `I have collected \`${roles.length}\` role${roles.length == 1 ? `` : `s`} from your message.`, [{
+              name: "Roles",
+              value: `<@&${roles.join(">\n<@&")}>`,
+              inline: false
+            }]);
+            editMsg.edit({ embeds: [embed] });
+
+          } else if (value == "additional") {
+            var roles = [];
+            var args = msgArgs.filter((v) => (!v.startsWith("<@&") || !v.startsWith("<@!")) && !v.endsWith(">"));
+            var mentions = m.mentions.roles;
+
+            for (const array of mentions) {
+              roles.push(array[0]); // Role ID
+            }
+
+            for await (const arg of args) {
+              var role = await client.functions.findRole(arg, m.guild);
+              if (role) roles.push(role.id);
+            }
+
+            roles = [...new Set(roles)];
+            if (roles.length < 1) {
+              const embed = client.embeds.error(title[current], `I could not record any roles from your message, please try again.`, originalQuestion);
+              return editMsg.edit({ embeds: [embed] });
+            }
+
+            collected[current] = roles;
+            const embed = client.embeds.success(title[current], `I have collected \`${roles.length}\` role${roles.length == 1 ? `` : `s`} from your message.`, [{
+              name: "Roles",
+              value: `<@&${roles.join(">\n<@&")}>`,
+              inline: false
+            }]);
+            editMsg.edit({ embeds: [embed] });
+
+          } else if (value == "channel") {
+            var channel = m.mentions.channels.first();
+            if (!channel) channel = await client.functions.findChannel(msgArgs.join(" "), m.guild);
+
+            if (!channel) {
+              const embed = client.embeds.error(title[current], `I could not record any channels from your message, please try again.`, originalQuestion);
+              return editMsg.edit({ embeds: [embed] });
+            }
+
+            if (!channel.permissionsFor(clientMember).has("SEND_MESSAGES")) {
+              const embed = client.embeds.error(title[current], `I do not have the \`SEND_MESSAGES\` permission in this channel, please try again.`, originalQuestion);
+              return editMsg.edit({ embeds: [embed] });
+            }
+
+            collected[current] = channel.id;
+            const embed = client.embeds.success(title[current], `Panel channel has been set to: <#${channel.id}>.`);
+            editMsg.edit({ embeds: [embed] });
+
+          } else if (value == "ticket") {
+            if (m.content.length < 3) {
+              const embed = client.embeds.error(title[current], `This format is less than 3 characters, please try again.`, originalQuestion);
+              return editMsg.edit({ embeds: [embed] });
+            }
+
+            if (m.content.length > 32) {
+              const embed = client.embeds.error(title[current], `This format is greater than 32 characters, please try again.`, originalQuestion);
+              return editMsg.edit({ embeds: [embed] });
+            }
+
+            collected[current] = m.content;
+            const embed = client.embeds.success(title[current], `Ticket format has been set to: \`${m.content}\`.`);
+            editMsg.edit({ embeds: [embed] });
+
+          } else if (value == "claimed") {
+            if (m.content.length < 3) {
+              const embed = client.embeds.error(title[current], `This format is less than 3 characters, please try again.`, originalQuestion);
+              return editMsg.edit({ embeds: [embed] });
+            }
+
+            if (m.content.length > 32) {
+              const embed = client.embeds.error(title[current], `This format is greater than 32 characters, please try again.`, originalQuestion);
+              return editMsg.edit({ embeds: [embed] });
+            }
+
+            collected[current] = m.content;
+            const embed = client.embeds.success(title[current], `Claimed format has been set to: \`${m.content}\`.`);
+            editMsg.edit({ embeds: [embed] });
+          }
+
+          if (!values[currentNum]) {
+            finished = true;
+            return collector.stop();
+          }
+
+          currentNum++;
+          current = values[currentNum - 1].name;
+          client.functions.next(m.channel, msgId, embeds, currentNum);
+        }
+
+        await validateOption(current);
+      });
+
+      collector.on("end", async () => {
+        client.db.userInfo.set(`${message.author.id}-${message.guild.id}`, null, "inPrompt");
+
+        if (finished) {
+          var panelInfo = tsettings.panels.get(id);
+          var categoryOpened = message.guild.channels.cache.get(panelInfo.opened);
+          var categoryClosed = message.guild.channels.cache.get(panelInfo.closed);
+          var panelMsg = await client.channels.cache.get(panelInfo.channel).messages.fetch(panelInfo.msg);
+
+          for (const [key, val] of Object.entries(collected)) {
+            panelInfo[key] = val;
+          }
+
+          const fields = [
+            { name: `General Configuration`, value: `${collected.name ? `${client.util.dash}` : ``} ${client.util.text} Name: \`${panelInfo.name}\`\n${collected.opened ? `${client.util.dash}` : ``} ${client.util.category} Opened Category: \`#${categoryOpened.name}\`\n${collected.closed ? `${client.util.dash}` : ``} ${client.util.category} Closed Category: \`#${categoryClosed.name}\`\n${collected.ticket ? `${client.util.dash}` : ``} ${client.util.message} Ticket Format: \`${panelInfo.ticket}\`\n${panelInfo.claiming ? `${collected.claiming ? `${client.util.dash}` : ``} ${client.util.message} Claimed Format: \`${panelInfo.claimed}\n` : ``}\`${collected.claiming ? `${client.util.dash}` : ``} ${client.util.override} Claiming: \`${panelInfo.claiming ? `On` : `Off`}\`\n${collected.channel ? `${client.util.dash}` : ``} ${client.util.channel} Panel Channel: <#${panelInfo.channel}>\n\u200b`, inline: false },
+            { name: `Role Configuration`, value: `${collected.support ? `${client.util.dash}` : ``} ${client.util.moderator} Support Roles:\n<@&${panelInfo.support.join(">\n<@&")}>${panelInfo.additional ? `\n\n${collected.additional ? `${client.util.dash}` : ``} ${client.util.moderator} Additional Roles:\n<@&${panelInfo.additional.join(">\n<@&")}>` : ``}` }
+          ];
+
+          const confirmBtn = client.buttons.confirm("Panel_Config:Confirm");
+          const cancelBtn = client.buttons.cancel("Panel_Config:Cancel");
+          const row = client.buttons.actionRow([confirmBtn, cancelBtn]);
+          const btnFilter = () => true;
+          var clicked = false;
+
+          const embed = client.embeds.green(command.option.new, `This prompt has been completed.\nClick on a button below to confirm or cancel the configuration.\n\u200b`, fields);
+
+          const confirmMsg = await message.channel.send({ embeds: [embed], components: [row] });
+          const confirmCollector = confirmMsg.createMessageComponentCollector({ filter: btnFilter, idle: 60 * 1000 });
+
+          confirmCollector.on("collect", async (component) => {
+            if (component.user.id !== message.author.id) {
+              const embed = client.embeds.permission("ADMINISTRATOR");
+              return component.reply({ embeds: [embed], ephemeral: true });
+            }
+
+            if (component.customId == "Panel_Config:Confirm") {
+              const panels = new Map(tsettings.panels);
+              panels.set(id, panelInfo);
+
+              client.db.panels.set(message.guild.id, panels, "panels");
+              if (collected.channel) {
+                await client.schemas.sendPanel(panelInfo, tsettings, message.guild.id);
+                await panelMsg.delete();
+
+              } else {
+                await client.schemas.editPanelMsg(panelInfo, tsettings, message.guild.id);
+              }
+
+              const embed = client.embeds.success(command.option.modify, `Successfully modified the \`${panelInfo.name}\` panel.`);
+              await component.reply({ embeds: [embed] });
+
+              clicked = true;
+              confirmMsg.delete();
+              confirmCollector.stop();
+
+            } else {
+              const embed = client.embeds.success(command.option.new, `Cancelled the panel modify prompt.`);
+              await component.reply({ embeds: [embed] });
+
+              clicked = true;
+              confirmMsg.delete();
+              confirmCollector.stop();
+            }
+          });
+
+          confirmCollector.on("end", async () => {
+            if (!clicked) {
+              const embed = client.embeds.inactivity(command.option.new);
+              await message.channel.send({ embeds: [embed] });
+              confirmMsg.delete();
+            }
+          });
+        } else if (cancelled) {
+          const embed = client.embeds.success(command.option.new, `This prompt has been cancelled.`);
+          message.channel.send({ embeds: [embed] });
+
+        } else if (attempted) {
+          const embed = client.embeds.error(command.option.new, `This prompt has been stopped.`);
+          message.channel.send({ embeds: [embed] });
+
+        } else {
+          const embed = client.embeds.inactivity(command.option.new);
+          message.channel.send({ embeds: [embed] });
+
+          const editMsg = message.channel.messages.cache.get(msgId[currentNum - 1]);
+          const embed1 = client.embeds.warn(title[current], `This question has stopped looking for responses.`);
+          editMsg.edit({ embeds: [embed1] });
+        }
+      });
+    });
+
+    collector1.on("end", async () => {
+      if (clicked1) return;
+      const embed = client.embeds.inactivity(command.option.modify);
+      const embed1 = client.embeds.warn(command.option.modify);
+
+      msg.channel.send({ embeds: [embed] });
+      msg.edit({ embeds: [embed1] });
+    });
+  }
+
   async deletePanel(message, tsettings, panel, command, userMsg) {
-    const btnFilter = () => true;
-    const collector = message.createButtonCollector(btnFilter, { idle: 60000 });
+    const client = this.client;
+    const filter = () => true;
+    const collector = message.createMessageComponentCollector({ filter, idle: 60000 });
     var clicked = false;
 
-    collector.on("collect", async (button) => {
-      if (button.clicker.user.id !== userMsg.author.id) {
-        const embed = this.client.embeds.permission(command, `ADMINISTRATOR`);
-        return button.reply.send({ embed: embed, ephemeral: true });
+    collector.on("collect", async (component) => {
+      if (component.user.id !== userMsg.author.id) {
+        const embed = client.embeds.permission(["ADMINISRATOR"]);
+        return component.reply({ embeds: [embed], ephemeral: true });
       }
 
-      if (button.id == "Panel_Delete_Confirm") {
-        clicked = true;
-        await tsettings.panels.all.delete(panel.id);
-        const panels = Object.fromEntries(tsettings.panels.all);
+      clicked = true;
+      if (component.customId == "Panel_Delete:Confirm") {
+        tsettings.panels.delete(panel.id);
+        const panels = new Map(tsettings.panels);
 
-        this.client.db.panels.set(message.guild.id, panels, "panels");
-        const embed = this.client.embeds.success(command.option.delete, `Deleted the panel with ID: \`${panel.id}\`.`);
-        await button.reply.send(embed);
-        message.delete();
-        collector.stop();
+        client.db.panels.set(message.guild.id, panels, "panels");
+        const embed = client.embeds.success(command.option.delete, `Deleted the panel with ID: \`${panel.id}\`.`);
+        await component.reply({ embeds: [embed] });
 
       } else {
-        clicked = true;
-        const embed = this.client.embeds.success(command.option.delete, `Cancelled the panel deletetion.`);
-        await button.reply.send(embed);
-        message.delete();
-        collector.stop();
+        const embed = client.embeds.success(command.option.delete, `Cancelled the panel deletetion.`);
+        await component.reply({ embeds: [embed] });
       }
+
+      message.delete();
+      collector.stop();
     })
 
     collector.on("end", async () => {
       if (!clicked) {
-        const embed = this.client.embeds.error(command.option.delete, `This prompt has timed out due to inactivity.`);
-        await message.channel.send(embed);
+        const embed = client.embeds.inactivity(command.option.delete);
+        await message.channel.send({ embeds: [embed] });
         message.delete();
       }
     })

@@ -24,7 +24,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     const author = message.author;
     const member = message.member;
     const pasteClient = new Paste(client.config.pasteBinAPI);
-    const dbKey = `${member.id}-${guild.id}`;
+    const ugKey = `${member.id}-${guild.id}`;
 
     try {
       var execCode;

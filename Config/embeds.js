@@ -7,6 +7,7 @@ const footer2 = `https://cdn.discordapp.com/emojis/775848533298905130.png?v=1`;
 
 const cross = "<:Cross:867955785978761266>";
 const check = "<:Check:867931890437476353>";
+const question = "<:IconSupport:868117797429997578>";
 const error = "<:MessageFail:868113159737720912>";
 const warn = "<:Warn:868113114221121586>";
 
@@ -148,6 +149,18 @@ module.exports = class Embeds {
     embed.setTitle(command.name || command);
     embed.setColor(`BLUE`);
     embed.setDescription(`${description}`);
+    embed.setFooter(footer1, footer2);
+    if (fields[0]) embed.addFields(fields);
+    embed.setTimestamp();
+
+    return embed;
+  }
+
+  question(command, description, fields = []) {
+    const embed = new Discord.MessageEmbed();
+    embed.setTitle(command.name || command);
+    embed.setColor(`BLUE`);
+    embed.setDescription(`${question} ${description}`);
     embed.setFooter(footer1, footer2);
     if (fields[0]) embed.addFields(fields);
     embed.setTimestamp();
@@ -352,7 +365,7 @@ module.exports = class Embeds {
     embed.setFooter(footer1, footer2);
     embed.addFields([{
       name: "Detailed Info",
-      value: `\`${arg1}\` is not a member.${arg2 ? `\n${arg2} is not a role`: ``}`,
+      value: `\`${arg1}\` is not a member.${arg2 ? `\n\`${arg2}\` is not a role`: ``}`,
       inline: false
     }]);
     embed.setTimestamp();

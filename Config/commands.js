@@ -310,7 +310,7 @@ module.exports = {
           minArgs: 0,
           options: [],
           aliases: [],
-          usage: "panels modify <panel id> [option] [option parameter]",
+          usage: "panels modify <panel id>",
           required: "ticket",
           category: "Ticket",
           subCategory: "Administrator",

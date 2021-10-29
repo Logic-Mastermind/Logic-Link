@@ -125,3 +125,4 @@ process.on("unhandledException", async (error) => {
 });
 
 client.login(config.token);
+module.exports = client;

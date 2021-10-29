@@ -16,7 +16,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
     const hasSupportRole = extra.hasSupport;
     const hasBotSupport = extra.hasBotSupport || extra.isDev;
-    const noPanels = tsettings.panels.count == 0;
+    const noPanels = tsettings.panels.size == 0;
 
     const isMod = await modPerms.some(x => message.member.permissions.has(x)) || client.functions.isMod(message.member, message.guild, settings);
 
@@ -74,7 +74,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
       const helpEmbed = client.embeds.blue(command, `${client.util.welcomeBotInfo}\n\n**Command List**\nBelow shows a list of command categories.\nTo view commands in each category, run the command associated with it.\nIf you would like a detailed guide on the help menu, run \`${guildPrefix}help guide\`.\n\n${code}Commands${code}\u200b`, cmdArray)
 
-      const msg = await message.channel.send({ embeds: [helpEmbed], components: [actionRow] });
+      const msg = await message.reply({ embeds: [helpEmbed], components: [actionRow] });
       const obj = {
         mod: modView,
         admin: adminView,
@@ -84,7 +84,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         tck: admin,
         sup: support,
         prefix: guildPrefix,
-        noPanel: noPanel
+        noPanel
       }
 
       client.prompts.helpMenu(msg, message, obj);

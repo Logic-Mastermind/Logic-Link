@@ -21,12 +21,12 @@ module.exports = async (client, member) => {
         var memberRole = guild.roles.cache.get(client.util.supportMemberRole);
 
         return member.roles.add([unverifiedRole, dividerRole, memberRole]);
+      } else {
+        if (!client.functions.hierarchy(clientMember, role, member.guild)) { 
+          member.roles.add(role)
+          .catch((error) => client.functions.sendError(error));
+        }
       }
-
-      if (clientMember.roles.highest.position <= role.position) return;
-
-      member.roles.add(role)
-      .catch((error) => client.functions.sendError(error))
     }
 
     if (channel) {
@@ -40,7 +40,7 @@ module.exports = async (client, member) => {
       }
 
       const defaultMsg = `Hello <@${member.id}>.\nWelcome to \`${member.guild.name}\`, enjoy your stay!`;
-      const embed = client.embeds.green(`Welcome`, `${settings.welcomeMsg ? welcomeMsg : defaultMsg}`);
+      const embed = client.embeds.green(`Welcome`, `${welcomeMsg || defaultMsg}`);
       channel.send({ embeds: [embed] });
     }
   } catch (error) {

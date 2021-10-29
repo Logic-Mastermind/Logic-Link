@@ -11,24 +11,21 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const responses = {};
 
   try {
-    const panelIds = Array.from(tsettings.panels.all.keys());
-    const panelCount = tsettings.panels.count;
+    const panelIds = Array.from(tsettings.panels.keys());
+    const panelCount = tsettings.panels.size;
 
     if (!secArg) {
       const fields = [];
-      tsettings.panels.all.forEach((v, k) => {
+      tsettings.panels.forEach((v, k) => {
         if (v.id <= "2") {
-          var opened = message.guild.channels.cache.get(v.opened);
-          var closed = message.guild.channels.cache.get(v.closed);
-
-          fields[k - 1] = {
+          fields.push({
             name: `${client.util.panel} Panel: \`${v.id}\``,
-            value: `${client.util.text} Name: \`${v.name}\`\n${client.util.category} Opened Category: \`#${opened.name}\`\n${client.util.category} Closed Category: \`#${closed.name}\`\n${client.util.override} Claiming: \`${v.claiming ? `On` : `Off`}\`\n${client.util.channel} Panel Channel: <#${v.channel}>`,
+            value: `${client.util.text} Name: \`${v.name}\`\n${client.util.moderator} Created By: <@${v.createdBy}>\n${client.util.clock} Created At: <t:${Math.round(v.createdAt / 1000)}:R>\n${client.util.ticket} Active Tickets: \`${v.tickets.size}\``,
             inline: true
-          }
+          });
         }
       });
-
+      
       if (panelCount == 0) {
         fields[0] = {
           name: `${client.util.panel} Panel: \`None\``,
@@ -37,14 +34,14 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         }
       }
 
-      const embed = client.embeds.blue(command, `${client.util.welcomeBotInfo}\n\n**Panels**\nBelow shows a list of ticket panels.\nTo view information about a specific panel, run: \`${guildPrefix}panel <id>\`.\nThis server has ${panelCount == 0 ? `no` : `\`${panelCount}\``} panel${panelCount == 1 ? `` : `s`}.\n\n${code}Panels${code}${(panelCount == 0 && (message.member.permissions.has("ADMINISTRATOR") || message.member.roles.cache.has(settings.adminRole))) ? `\n${client.util.warn} This server does not have any panels. Run \`${guildPrefix}panels new\` to create one.` : ``}\u200b`, fields);
+      const embed = client.embeds.blue(command, `${client.util.welcomeBotInfo}\n\n**Panels**\nBelow shows a list of ticket panels.\nTo view information about a specific panel, run: \`${guildPrefix}panel <id>\`.${panelCount >= 1 ? `\nTo view a list of all panels, run \`${guildPrefix}panels all\`.` : ``}\nThis server has ${panelCount == 0 ? `no` : `\`${panelCount}\``} panel${panelCount == 1 ? `` : `s`}.\n\n${code}Panels${code}${(panelCount == 0 && (message.member.permissions.has("ADMINISTRATOR") || message.member.roles.cache.has(settings.adminRole))) ? `\n${client.util.warn} This server does not have any panels. Run \`${guildPrefix}panels new\` to create one.` : ``}\u200b`, fields);
       message.reply({ embeds: [embed] });
 
     } else {
       if (!isNaN(secArg)) {
         if (panelIds.includes(secArg)) {
           if (!thirdArg) {
-            const panelInfo = tsettings.panels.all.get(secArg);
+            const panelInfo = tsettings.panels.get(secArg);
             var opened = message.guild.channels.cache.get(panelInfo.opened);
             var closed = message.guild.channels.cache.get(panelInfo.closed);
             
@@ -54,7 +51,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               { name: `Role Configuration`, value: `${client.util.moderator} Support Roles:\n<@&${panelInfo.support.join(">\n<@&")}>\n\n${client.util.moderator} Additional Roles:\n<@&${panelInfo.additional.join(">\n<@&")}>` }
             ];
 
-            const embed = client.embeds.blue(command, `Showing info for the panel with the ID: \`${secArg}\`.\nThis panel was created <t:${Math.round(panelInfo.createdAt / 1000)}:R> by <@${panelInfo.createdBy}>.\nTo modify this panel's configuration, run: \`${guildPrefix}panel modify ${panelInfo.id}\`.\n\u200b`, fields);
+            const embed = client.embeds.blue(command, `Showing info for the panel with the ID: \`${panelInfo.id}\`.\nThis panel was created <t:${Math.round(panelInfo.createdAt / 1000)}:R> by <@${panelInfo.createdBy}>.\nTo modify this panel's configuration, run: \`${guildPrefix}panel modify ${panelInfo.id}\`.\n\u200b`, fields);
             message.reply({ embeds: [embed] });
           }
         } else {
@@ -77,23 +74,23 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         {
           if (thirdArg) {
             if (panelIds.includes(thirdArg)) {
-              const embed = client.embeds.orange(command.option.modify, `What panel option would you like to modify?\nSelect the option(s) that you would like to modify from the menu below.`);
+              const embed = client.embeds.blue(command.option.modify, `What panel option would you like to modify?\nSelect the option(s) that you would like to modify from the menu below.`);
 
               const select = await client.buttons.selectMenu("Select options...", [
-                { label: "Name", value: "Change the name of the panel.", id: "Panel_Modify:Name", emoji: "" },
-                { label: "Opened Category", value: "Change the opened ticket category.", id: "Panel_Modify:Opened", emoji: "" },
-                { label: "Closed Category", value: "Change the closed ticket category.", id: "Panel_Modify:Closed", emoji: "" },
-                { label: "Claiming", value: "Enable or disable ticket claiming", id: "Panel_Modify:Claiming", emoji: "" },
-                { label: "Panel Channel", value: "Change the channel where the panel is sent to.", id: "Panel_Modify:Channel", emoji: "" },
-                { label: "Support Roles", value: "Change the support roles for this panel.", id: "Panel_Modify:Support", emoji: "" },
-                { label: "Additional Roles", value: "Change the additional roles for this panel.", id: "Panel_Modify:Additional", emoji: "" },
-                { label: "Ticket Format", value: "Change the ticket format for new tickets.", id: "Panel_Modify:Ticket", emoji: "" },
-                { label: "Claimed Format", value: "Change the ticket format for claimed tickets.", id: "Panel_Modify:Claimed", emoji: "" },
+                { label: "Name", value: "Change the name of the panel.", id: "name", emoji: "868119251897163786" },
+                { label: "Opened Category", value: "Change the opened ticket category.", id: "opened", emoji: "868119798620512297" },
+                { label: "Closed Category", value: "Change the closed ticket category.", id: "closed", emoji: "868119798620512297" },
+                { label: "Claiming", value: "Enable or disable ticket claiming", id: "claiming", emoji: "868118920140300339" },
+                { label: "Panel Channel", value: "Change the channel where the panel is sent to.", id: "channel", emoji: "868119367689334834" },
+                { label: "Support Roles", value: "Change the support roles for this panel.", id: "support", emoji: "868117933237358642" },
+                { label: "Additional Roles", value: "Change the additional roles for this panel.", id: "additional", emoji: "868117933237358642" },
+                { label: "Ticket Format", value: "Change the ticket format for new tickets.", id: "ticket", emoji: "868113305565278218" },
+                { label: "Claimed Format", value: "Change the ticket format for claimed tickets.", id: "claimed", emoji: "868113305565278218" },
               ], "Panel_Settings:Modify", 1);
               
               const row = client.buttons.actionRow([select]);
               const msg = await message.reply({ embeds: [embed], components: [row] });
-              client.prompts.modifyPanel(command, msg, thirdArg, tsettings);
+              client.prompts.modifyPanel(command, message, msg, thirdArg, tsettings);
             } else {
               const embed = client.embeds.error(command.option.modify, `\`${thirdArg}\` is not a valid panel ID.`);
               message.reply({ embeds: [embed] });
@@ -110,13 +107,18 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         {
           if (thirdArg) {
             if (panelIds.includes(thirdArg)) {
-              const panelInfo = tsettings.panels.all.get(thirdArg);
+              const panelInfo = tsettings.panels.get(thirdArg);
               const confirmBtn = client.buttons.confirm("Panel_Delete:Confirm");
               const cancelBtn = client.buttons.cancel("Panel_Delete:Cancel");
+              const row = client.buttons.actionRow([confirmBtn, cancelBtn]);
 
-              const embed = client.embeds.blue(command.option.delete, `Are you sure you would like to delete this panel?\nClick on a button below to either confirm or cancel your choice.\n\n**Panel Info**\n${client.util.clock} Created At: <t:${Math.round(panelInfo.createdAt / 1000)}:R>\n${client.util.moderator} Created By: <@${panelInfo.createdBy}>\n${client.util.text} Panel Name: \`${panelInfo.name}\``);
+              const embed = client.embeds.blue(command.option.delete, `Are you sure you would like to delete this panel?\nClick on a button below to either confirm or cancel your choice.`, [{
+                name: "Panel Info",
+                value: `${client.util.clock} Created At: <t:${Math.round(panelInfo.createdAt / 1000)}:R>\n${client.util.moderator} Created By: <@${panelInfo.createdBy}>\n${client.util.text} Panel Name: \`${panelInfo.name}\``,
+                inline: false
+              }]);
 
-              const confirmMsg = await message.channel.send({ embed: embed, buttons: [confirmBtn, cancelBtn] });
+              const confirmMsg = await message.channel.send({ embeds: [embed], components: [row] });
               client.prompts.deletePanel(confirmMsg, tsettings, panelInfo, command, message);
             } else {
               const embed = client.embeds.error(command.option.delete, `\`${thirdArg}\` is not a valid panel ID.`);
@@ -131,6 +133,37 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         case "a":
         case "all":
         {
+          if (tsettings.panels.size == 0) {
+            const embed = client.embeds.error(command, `This server has no panels, use the \`${guildPrefix}panels new\` command to create one.`);
+            return message.reply({ embeds: [embed] });
+          }
+
+          var pages = [];
+          for await (const [key, panelInfo] of tsettings.panels.entries()) {
+            var opened = message.guild.channels.cache.get(panelInfo.opened);
+            var closed = message.guild.channels.cache.get(panelInfo.closed);
+            
+            const fields = [
+              { name: `Panel Configuration`, value: `${client.util.text} Name: \`${panelInfo.name}\`\n${client.util.category} Opened Category: \`#${opened.name}\`\n${client.util.category} Closed Category: \`#${closed.name}\`\n${client.util.message} Ticket Format: \`${panelInfo.ticket}\`${panelInfo.claiming ? `\n${client.util.message} Claimed Format: \`${panelInfo.claimed}\`` : ``}\n${client.util.override} Claiming: \`${panelInfo.claiming ? `On` : `Off`}\`\n${client.util.channel} Panel Channel: <#${panelInfo.channel}>\n\u200b` },
+
+              { name: `Role Configuration`, value: `${client.util.moderator} Support Roles:\n<@&${panelInfo.support.join(">\n<@&")}>\n\n${client.util.moderator} Additional Roles:\n<@&${panelInfo.additional.join(">\n<@&")}>` }
+            ];
+
+            const embed = client.embeds.blue(command, `Showing info for the panel with the ID: \`${panelInfo.id}\`.\nThis panel was created <t:${Math.round(panelInfo.createdAt / 1000)}:R> by <@${panelInfo.createdBy}>.\nTo modify this panel's configuration, run: \`${guildPrefix}panel modify ${panelInfo.id}\`.\n\u200b`, fields);
+            pages.push(embed);
+          }
+
+          const leftBtn = client.buttons.emoji("Button_Left:Panels", client.util.arrowLeft, "SECONDARY");
+          const rightBtn = client.buttons.emoji("Button_Right:Panels", client.util.arrowRight, "SECONDARY");
+
+          leftBtn.setDisabled();
+          if (!pages[1]) rightBtn.setDisabled();
+          const row = client.buttons.actionRow([leftBtn, rightBtn]);
+          
+          const msg = await message.reply({ embeds: [pages[0]], components: [row] });
+          pages = await pages.slice(1);
+
+          if (pages[0]) client.functions.paginate(msg, pages);
           break;
         }
         default:
