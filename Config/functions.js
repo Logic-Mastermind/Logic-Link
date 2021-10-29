@@ -212,6 +212,8 @@ module.exports = class Functions {
 
     if (found) channel = guildC.get(found);
     if (!channel) return null;
+
+    if (channel.type !== "GUILD_CATEGORY") return null;
     return channel;
   }
 

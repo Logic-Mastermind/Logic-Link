@@ -104,7 +104,7 @@ module.exports = class Schemas {
       inline: false
     }]);
 
-    const button = client.buttons.green("Create Ticket", `Ticket_Create:${guildId}-${panel.id}`);
+    const button = client.buttons.green("Create Ticket", `Ticket_Create:${panel.id}`);
     const row = client.buttons.actionRow([button]);
 
     const msg = await channel.send({ embeds: [embed], components: [row] });
@@ -118,18 +118,34 @@ module.exports = class Schemas {
 
   async editPanelMsg(panel, tsettings, guildId) {
     const client = this.client;
-    const channel = client.channels.cache.get(panel.channel);
+    const channel = await client.channels.fetch(panel.channel);
     const embed = client.embeds.blue(panel.name, `${client.util.ticket} To create a ticket, click on the button below.`, [{
       name: "Additional Info",
       value: `Clicking the button below will create a ticket for this panel.\nPlease remember to adhere to this server's rules within the ticket.`,
       inline: false
     }]);
 
-    const button = client.buttons.green("Create Ticket", `Ticket_Create:${guildId}-${panel.id}`);
+    const button = client.buttons.green("Create Ticket", `Ticket_Create:${panel.id}`);
     const row = client.buttons.actionRow([button]);
 
-    const msg = await client.channels.cache.get(panel.channel).messages.fetch(panel.msg);
-    await msg.edit({ embeds: [embed], components: [row] });
+    const msg = channel ? await channel.messages.fetch(panel.msg) : null;
+    if (msg) await msg.edit({ embeds: [embed], components: [row] });
     return true;
+  }
+
+  async createTicket(guild, panel, member) {
+    const client = this.client;
+    const tickets = new Discord.Collection(panel.tickets);
+    const panels = new Map(await client.functions.getTicketData(guild).panels);
+    const count = tickets.last() ? tickets.last().id + 1 : 1;
+
+    const name = panel.ticket.replaceAll("[number]", count);
+    const ticket = await guild.channels.create(name, { parent: panel.opened });
+
+    panel.set({ opener: member.id, claimer: null });
+    panels.set(panel.id, panels);
+    
+    client.db.panels.set(guild.id, panels, "panels")
+    return ticket;
   }
 }

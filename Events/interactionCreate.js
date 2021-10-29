@@ -16,18 +16,26 @@ module.exports = async (client, interaction) => {
     if (interaction.isCommand()) {
       const embed = client.embeds.warn("Slash Commands", `Slash commands are currently in development and cannot be used.`);
       return interaction.reply({ embeds: [embed] });
-    }
-    
-    if (interaction.customId == "Support_Server:Verify") {
-      var verifiedRole = guild.roles.cache.get(client.util.supportVerifyRole);
-      var unverifiedRole = guild.roles.cache.get(client.util.supportUnverifyRole);
 
-      if (member.roles.cache.has(verifiedRole.id)) return interaction.deferUpdate();
-      member.roles.add(verifiedRole);
-      member.roles.remove(unverifiedRole);
+    } else if (interaction.isButton()) {
+      if (interaction.customId.startsWith("Ticket_Create")) {
+        var panelId = interaction.customId.split("Ticket_Create:")[1];
+        const ticket = await client.schemas.createTicket(guild, tsettings.panels.get(panelId));
 
-      const embed = client.embeds.success("Verification", `You have been verified.`);
-      interaction.reply({ embeds: [embed], ephemeral: true });
+        const embed = client.embeds.success("Ticket Creaated", `Created the <#${ticket.id}> ticket.`);
+        interaction.reply({ embeds: [embed], ephemeral: true });
+
+      } else if (interaction.customId == "Support_Server:Verify") {
+        var verifiedRole = guild.roles.cache.get(client.util.supportVerifyRole);
+        var unverifiedRole = guild.roles.cache.get(client.util.supportUnverifyRole);
+
+        if (member.roles.cache.has(verifiedRole.id)) return interaction.deferUpdate();
+        member.roles.add(verifiedRole);
+        member.roles.remove(unverifiedRole);
+
+        const embed = client.embeds.success("Verification", `You have been verified.`);
+        interaction.reply({ embeds: [embed], ephemeral: true });
+      }
     }
   } catch (error) {
     client.functions.sendError(error);

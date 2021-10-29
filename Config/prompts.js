@@ -513,7 +513,7 @@ module.exports = class Prompts {
           }
 
           if (component.customId == "Panel_Config:Confirm") {
-            const newCount = (settings.cases.last() ? Number(settings.cases.last().id) + 1 : 1).toString();
+            const newCount = settings.cases.last() ? settings.cases.last().id + 1 : 1;
             const panels = new Map(tsettings.panels);
 
             collected.createdAt = Date.now();
