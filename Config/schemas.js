@@ -136,16 +136,22 @@ module.exports = class Schemas {
   async createTicket(guild, panel, member) {
     const client = this.client;
     const tickets = new Discord.Collection(panel.tickets);
-    const panels = new Map(await client.functions.getTicketData(guild).panels);
+    const panels = new Map((await client.functions.getTicketData(guild)).panels);
     const count = tickets.last() ? tickets.last().id + 1 : 1;
 
     const name = panel.ticket.replaceAll("[number]", count);
-    const ticket = await guild.channels.create(name, { parent: panel.opened });
-
-    panel.set({ opener: member.id, claimer: null });
-    panels.set(panel.id, panels);
+    const channel = await guild.channels.create(name, { parent: panel.opened });
     
-    client.db.panels.set(guild.id, panels, "panels")
-    return ticket;
+    panel.tickets.set(count, {
+      id: count,
+      channel: channel.id,
+      opener: member.id,
+      claimer: null,
+      timestamp: Date.now()
+    });
+
+    panels.set(panel.id, panel);
+    client.db.panels.set(guild.id, panels, "panels");
+    return channel;
   }
 }

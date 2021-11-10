@@ -19,10 +19,10 @@ module.exports = async (client, interaction) => {
 
     } else if (interaction.isButton()) {
       if (interaction.customId.startsWith("Ticket_Create")) {
-        var panelId = interaction.customId.split("Ticket_Create:")[1];
-        const ticket = await client.schemas.createTicket(guild, tsettings.panels.get(panelId));
+        const panelId = interaction.customId.split("Ticket_Create:")[1];
+        const ticket = await client.schemas.createTicket(guild, tsettings.panels.get(panelId), member);
 
-        const embed = client.embeds.success("Ticket Creaated", `Created the <#${ticket.id}> ticket.`);
+        const embed = client.embeds.success("Ticket Created", `Created the <#${ticket.id}> ticket.`);
         interaction.reply({ embeds: [embed], ephemeral: true });
 
       } else if (interaction.customId == "Support_Server:Verify") {

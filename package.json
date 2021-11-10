@@ -23,6 +23,7 @@
     "enmap": "^5.8.5",
     "express": "^4.17.1",
     "ffmpeg-static": "^4.3.0",
+    "googleapis": "^89.0.0",
     "home": "^2.0.0",
     "lodash": "^4.17.21",
     "mongoose": "^6.0.6",

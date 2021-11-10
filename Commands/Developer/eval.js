@@ -1,5 +1,6 @@
 const Discord = require("discord.js");
 const Fetch = require("node-fetch");
+const googleApis = require("googleapis");
 const Paste = require("pastebin-api").default;
 const YouTube = require("ytdl-core-discord");
 const Chalk = require("chalk");

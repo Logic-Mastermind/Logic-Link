@@ -36,7 +36,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       const titleMsg = await message.author.send({ embeds: [embeds[0]] });
       const collector = titleMsg.channel.createMessageCollector({ filter, idle: 60 * 1000 });
 
-      var current = 1;
+      var current = "name";
+      var currentNum = 1;
       var cancelled = false;
       var finished = false;
 
@@ -49,14 +50,16 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       var channel = titleMsg.channel;
 
       collector.on("collect", async (msg) => {
-        if (current == 1) {
-          const editMsg = await channel.messages.cache.get(msgId[0]);
+        const editMsg = channel.messages.cache.get(msgId[currentNum - 1]);
+
+        if (current == "name") {
           if (msg.content.toLowerCase() == "skip") {
             const embed = client.embeds.warn(command, `This question has been skipped.`);
             editMsg.edit({ embeds: [embed] });
             
-            current = 2;
-            msgId = await client.functions.next(channel, msgId, embeds, 2);
+            current = "content";
+            currentNum = 2;
+            client.functions.next(channel, msgId, embeds, currentNum);
             return;
           }
 
@@ -76,14 +79,14 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
           }
 
           collected.title = msg.content;
-          const embed = client.embeds.success(command, `Paste name has been set to: \`${collected.title}\`.`);
-
+          const embed = client.embeds.success(command, `Paste name has been set to: \`${collected.title.replaceAll("`", "\u02cb")}\`.`);
           editMsg.edit({ embeds: [embed] });
-          current = 2;
-          msgId = await client.functions.next(channel, msgId, embeds, 2);
 
-        } else if (current == 2) {
-          const editMsg = await msg.channel.messages.cache.get(msgId[1]);
+          current = "content";
+          currentNum = 2;
+          client.functions.next(channel, msgId, embeds, currentNum);
+
+        } else if (current == "content") {
           if (msg.content.toLowerCase() == "skip") {
             const embed = client.embeds.warn(command, `This is a required field, you may not skip it.`, [
               { name: "Question", value: prompt.content, inline: false }
@@ -117,7 +120,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
           collected.content = content;
           collected.format = format;
 
-          const embed = client.embeds.success(command, `Paste content has been set to:\n\n${format ? msg.content : `${code}${content.replaceAll("`", "\\`")}${code}`}`);
+          const embed = client.embeds.success(command, `Paste content has been set to:\n\n${format ? msg.content : `${code}${content.replaceAll("`", "\u02cb")}${code}`}`);
 
           editMsg.edit({ embeds: [embed] });
           finished = true;
@@ -149,7 +152,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             editMsg.edit({ embeds: [embed] });
           } catch (error) {
             if (error.endsWith("api_paste_format")) {
-              const embed = client.embeds.error(command, `You have used an invalid language format.`);
+              const embed = client.embeds.detailed(command, `You have used an invalid language format, this prompt has ended.`);
               return editMsg.edit({ embeds: [embed] });
             }
 
