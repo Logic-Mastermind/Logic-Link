@@ -37,8 +37,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         return message.reply({ embeds: [embed] });
       }
 
-      await client.db.blacklists.set(user.id, true, "blacklisted");
-      await client.db.blacklists.set(user.id, reason, "reason");
+      client.db.blacklists.set(user.id, true, "blacklisted");
+      client.db.blacklists.set(user.id, reason, "reason");
       
       const embed = client.embeds.success(command, `Blacklisted <@${user.id}> from Logic Link.`, [{ name: "Reason", value: reason, inline: true }]);
       message.reply({ embeds: [embed] });

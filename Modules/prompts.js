@@ -163,7 +163,7 @@ module.exports = class Prompts {
     ]
 
     var collected = {};
-    await client.db.userInfo.set(`${message.author.id}-${message.guild.id}`, true, "inPrompt");
+    client.db.userInfo.set(`${message.author.id}-${message.guild.id}`, true, "inPrompt");
 
     collector.on("collect", async (msg) => {
 
@@ -275,8 +275,8 @@ module.exports = class Prompts {
     }
 
     var collected = {};
-    await client.db.settings.set(message.guild.id, true, "panelSetup");
-    await client.db.userInfo.set(`${message.author.id}-${message.guild.id}`, message.channel.id, "inPrompt");
+    client.db.settings.set(message.guild.id, true, "panelSetup");
+    client.db.userInfo.set(`${message.author.id}-${message.guild.id}`, message.channel.id, "inPrompt");
 
     collector.on("collect", async (msg) => {
       const msgArgs = msg.content.split(/ +/g);
@@ -468,6 +468,11 @@ module.exports = class Prompts {
           return editMsg.edit({ embeds: [embed] });
         }
 
+        if (!channel.isText()) {
+          const embed = client.embeds.error(title[current], `<#${channel.id}> is not a text channel, please try again.`, originalQuestion);
+          return editMsg.edit({ embeds: [embed] });
+        }
+
         if (!channel.permissionsFor(clientMember).has("SEND_MESSAGES")) {
           const embed = client.embeds.error(title[current], `I do not have the \`SEND_MESSAGES\` permission in this channel, please try again.`, originalQuestion);
           return editMsg.edit({ embeds: [embed] });
@@ -508,24 +513,31 @@ module.exports = class Prompts {
 
         confirmCollector.on("collect", async (component) => {
           if (component.user.id !== message.author.id) {
-            const embed = client.embeds.permission("ADMINISTRATOR");
+            const embed = client.embeds.notComponent();
             return component.reply({ embeds: [embed], ephemeral: true });
           }
 
           if (component.customId == "Panel_Config:Confirm") {
-            const newCount = settings.cases.last() ? settings.cases.last().id + 1 : 1;
-            const panels = new Map(tsettings.panels);
+            const newCount = tsettings.panels.last() ? tsettings.panels.last().id + 1 : 1;
+            const panels = tsettings.panels;
 
             collected.createdAt = Date.now();
             collected.createdBy = message.author.id;
-            collected.tickets = new Map();
+            collected.tickets = new Discord.Collection();
+            collected.totalTicketCount = 0;
+            collected.ticketLimit = 1;
             collected.claimed = `claimed-[number]`;
             collected.ticket = `ticket-[number]`;
+            collected.panelMessage = null;
+            collected.ticketMessage = null;
             collected.id = newCount;
             
             panels.set(newCount, collected);
             client.db.panels.set(message.guild.id, panels, "panels");
-            await client.schemas.sendPanel(collected, tsettings, message.guild.id);
+            const result = await client.schemas.sendPanel(collected, tsettings, message.guild.id);
+            const fields1 = [];
+
+            if (!result) fields1.push({ name: "Status", value: "An error has occured sending the panel message.", inline: false });
 
             const embed = client.embeds.success(command.option.new, `Created a new panel with the name: \`${collected.name}\`.`);
             await component.reply({ embeds: [embed] });
@@ -922,6 +934,11 @@ module.exports = class Prompts {
               return editMsg.edit({ embeds: [embed] });
             }
 
+            if (!channel.isText()) {
+              const embed = client.embeds.error(title[current], `<#${channel.id}> is not a text channel, please try again.`, originalQuestion);
+              return editMsg.edit({ embeds: [embed] });
+            }
+
             if (!channel.permissionsFor(clientMember).has("SEND_MESSAGES")) {
               const embed = client.embeds.error(title[current], `I do not have the \`SEND_MESSAGES\` permission in this channel, please try again.`, originalQuestion);
               return editMsg.edit({ embeds: [embed] });
@@ -982,7 +999,9 @@ module.exports = class Prompts {
           var panelInfo = tsettings.panels.get(id);
           var categoryOpened = message.guild.channels.cache.get(panelInfo.opened);
           var categoryClosed = message.guild.channels.cache.get(panelInfo.closed);
-          var panelMsg = await client.channels.cache.get(panelInfo.channel).messages.fetch(panelInfo.msg);
+
+          var panelChannel = await client.channels.fetch(panelInfo.channel).catch(() => {});
+          var panelMsg = panelChannel ? await panelChannel.messages.fetch(panelInfo.msg).catch(() => {}) : null;
 
           for (const [key, val] of Object.entries(collected)) {
             panelInfo[key] = val;
@@ -1011,16 +1030,22 @@ module.exports = class Prompts {
             }
 
             if (component.customId == "Panel_Config:Confirm") {
-              const panels = new Map(tsettings.panels);
+              const panels = tsettings.panels;
               panels.set(id, panelInfo);
 
               client.db.panels.set(message.guild.id, panels, "panels");
               if (collected.channel) {
                 await client.schemas.sendPanel(panelInfo, tsettings, message.guild.id);
-                await panelMsg.delete();
+                if (panelMsg) await panelMsg.delete();
 
               } else {
-                await client.schemas.editPanelMsg(panelInfo, tsettings, message.guild.id);
+                if (panelMsg) {
+                  await client.schemas.editPanelMsg(panelInfo, tsettings, message.guild.id);
+                } else {
+                  if (panelChannel) {
+                    await client.schemas.sendPanel(panelInfo, tsettings, message.guild.id);
+                  }
+                }
               }
 
               const embed = client.embeds.success(command.option.modify, `Successfully modified the \`${panelInfo.name}\` panel.`);
@@ -1091,11 +1116,15 @@ module.exports = class Prompts {
       clicked = true;
       if (component.customId == "Panel_Delete:Confirm") {
         tsettings.panels.delete(panel.id);
-        const panels = new Map(tsettings.panels);
+        const panels = tsettings.panels;
 
         client.db.panels.set(message.guild.id, panels, "panels");
-        const embed = client.embeds.success(command.option.delete, `Deleted the panel with ID: \`${panel.id}\`.`);
+        const embed = client.embeds.success(command.option.delete, `Deleted the \`${panel.name}\` panel.`);
         await component.reply({ embeds: [embed] });
+
+        var panelChannel = await client.channels.fetch(panel.channel);
+        var panelMsg = panelChannel ? await panelChannel.messages.fetch(panel.msg) : null;
+        if (panelMsg) panelMsg.delete();
 
       } else {
         const embed = client.embeds.success(command.option.delete, `Cancelled the panel deletetion.`);

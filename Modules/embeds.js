@@ -32,6 +32,7 @@ module.exports = class Embeds {
   permission(command, msg) {
     var permissions = command;
     if (typeof command == "object") permissions = command.permissions;
+    if (typeof command == "string") command = [command];
     
     if (/[A-Z_]/.test(msg)) {
       permissions = [msg];
@@ -54,6 +55,7 @@ module.exports = class Embeds {
   botPermission(command, msg) {
     var permissions = command;
     if (typeof command == "object") permissions = command.permissions;
+    if (typeof command == "string") command = [command];
 
     if (/[A-Z_]/.test(msg)) {
       permissions = [msg];
@@ -122,7 +124,7 @@ module.exports = class Embeds {
 
   red(command, description, fields = []) {
     const embed = new Discord.MessageEmbed();
-    embed.setTitle(command.name || command);
+    if (command) embed.setTitle(command.name || command);
     embed.setColor(`RED`);
     embed.setDescription(`${description}`);
     embed.setFooter(footer1, footer2);
@@ -134,7 +136,7 @@ module.exports = class Embeds {
 
   green(command, description, fields = []) {
     const embed = new Discord.MessageEmbed();
-    embed.setTitle(command.name || command);
+    if (command) embed.setTitle(command.name || command);
     embed.setColor(`GREEN`);
     embed.setDescription(`${description}`);
     embed.setFooter(footer1, footer2);
@@ -146,7 +148,7 @@ module.exports = class Embeds {
 
   blue(command, description, fields = []) {
     const embed = new Discord.MessageEmbed();
-    embed.setTitle(command.name || command);
+    if (command) embed.setTitle(command.name || command);
     embed.setColor(`BLUE`);
     embed.setDescription(`${description}`);
     embed.setFooter(footer1, footer2);
@@ -245,8 +247,8 @@ module.exports = class Embeds {
       { name: `Permissions`, value: `${command.permissions == "ALL" ? `${this.client.util.noPerms}` : `${command.required == "dev" ? `Locked to bot developer.` : `\`${command.permissions.join(" | ")}\``}`}`, inline: true },
       { name: `Bot Permissions`, value: `${command.clientPerms ? command.clientPerms[0] ? `\`${command.clientPerms.join(" | ")}\`` : this.client.util.noPerms : this.client.util.noPerms}`, inline: true },
       { name: `\u200b`, value: `\u200b`, inline: true },
-      { name: `Aliases`, value: `${command.aliases ? `\`${command.aliases.join("\`\n\`")}\`` : this.client.util.noAlias}`, inline: true },
-      { name: `Options`, value: `${command.options ? `\`${command.options.join("\`\n\`")}\`` : this.client.util.noOption}`, inline: true },
+      { name: `Aliases`, value: `${command.aliases[0] ? `\`${command.aliases.join("\`\n\`")}\`` : this.client.util.noAlias}`, inline: true },
+      { name: `Options`, value: `${command.options[0] ? `\`${command.options.join("\`\n\`")}\`` : this.client.util.noOption}`, inline: true },
       { name: `\u200b`, value: `\u200b`, inline: true },
     ]
     
@@ -407,10 +409,10 @@ module.exports = class Embeds {
 
   detailed(command, content, ...descriptions) {
     const embed = new Discord.MessageEmbed()
-    embed.setTitle(command.name);
+    if (command) embed.setTitle(command.name || command);
     embed.setColor(`RED`);
     embed.setDescription(`${error} ${content}`);
-    embed.addFields([{
+    if (descriptions) embed.addFields([{
       name: "Detailed Info",
       value: descriptions.join("\n"),
       inline: false
@@ -500,12 +502,15 @@ module.exports = class Embeds {
         { name: "Created At", value: info.createdAt, inline: true },
         { name: "Joined At", value: info.joinedAt, inline: true },
         { name: `Roles [${info.roleCount}]`, value: info.roles, inline: false },
+        { name: "User ID", value: `\`${info.id}\``, inline: false },
         { name: "Permissions", value: info.permissions, inline: false },
-        { name: "Badges", value: info.badges, inline: false },
+        { name: "Badges", value: info.badges, inline: true },
+        { name: "Server Owner", value: info.owner ? `Yes` : `No`, inline: true },
       ]);
 
       embed.setThumbnail(info.profile);
-      embed.setDescription(`${check} Showing whois information for: ${info.mention}.\n\u200b`);
+      embed.setDescription(`${check} Showing whois information for: <@${info.id}>.\n\u200b`);
+      
     } else if (type == "guild") {
       embed.addFields([
         { name: "Server Owner", value: info.owner, inline: true },
@@ -520,8 +525,9 @@ module.exports = class Embeds {
 
       embed.setThumbnail(info.icon);
       embed.setDescription(`${check} Showing server information for ${info.name}.\n\u200b`);
+
     } else if (type == "channel") {
-      embed.addFields([
+      const fields = [
         { name: "Name", value: info.name, inline: true },
         { name: "ID", value: info.id, inline: true },
         { name: "\u200b", value: "\u200b", inline: true },
@@ -531,10 +537,12 @@ module.exports = class Embeds {
         { name: "Topic", value: info.topic, inline: false },
         { name: "Permission Overwrites", value: info.overwrites, inline: true },
         { name: "Raw Position", value: info.position, inline: true },
-        { name: "Pinned", value: info.pinned, inline: true }
-      ]);
+      ];
 
+      if (info.pinned) fields.push({ name: "Pinned", value: info.pinned, inline: true })
+      embed.addFields(fields);
       embed.setDescription(`${check} Showing channel information for: ${info.mention}.\n\u200b`);
+
     } else if (type == "role") {
       embed.addFields([
         { name: "Name", value: info.name, inline: true },
@@ -554,7 +562,7 @@ module.exports = class Embeds {
   }
 
   async errorInfo(command, message, error) {
-    const errorId = await this.client.functions.getRandomString(10);
+    const errorId = this.client.functions.getRandomString(10);
     error ? await this.client.functions.setErrorData(error, errorId) : console.log("Recieved Invalid Error");
     
     const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa" });
@@ -616,7 +624,7 @@ module.exports = class Embeds {
   }
 
   async noArgs(command = {}, guild) {
-    const prefix = await this.client.functions.fetchPrefix(guild);
+    const prefix = this.client.functions.fetchPrefix(guild);
     const noArgs = {
       title: `${command.name}`,
       color: `ORANGE`,

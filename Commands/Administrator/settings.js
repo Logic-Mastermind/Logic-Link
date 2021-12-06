@@ -49,7 +49,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             if (client.util.resetAliases.includes(thirdArg.toLowerCase())) {
               newPrefix = client.util.defaultPrefix;
               const editMsg = await message.reply({ embeds: [pendingEmbed] });
-              await client.db.settings.set(message.guild.id, newPrefix, "prefix");
+              client.db.settings.set(message.guild.id, newPrefix, "prefix");
 
               const successEmbed = client.embeds.success(command.option.prefix, `Reset the server prefix to the default: \`${newPrefix}\`.`)
 
@@ -62,7 +62,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             }
 
             const editMsg = await message.reply({ embeds: [pendingEmbed] });
-            await client.db.settings.set(message.guild.id, newPrefix, "prefix");
+            client.db.settings.set(message.guild.id, newPrefix, "prefix");
             
             const successEmbed = client.embeds.success(command.option.prefix, `Set the server prefix to: \`${newPrefix}\`.`)
             editMsg.edit({ embeds: [successEmbed] });
@@ -90,7 +90,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               const editMsg = await message.reply({ embeds: [pendingEmbed] });
-              await client.db.settings.delete(message.guild.id, "modRole");
+              client.db.settings.delete(message.guild.id, "modRole");
               const successEmbed = client.embeds.success(command.option.modrole, `Removed the server moderator role.`);
 
               return editMsg.edit({ embeds: [successEmbed] });
@@ -104,7 +104,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               const editMsg = await message.reply({ embeds: [pendingEmbed] });
-              await client.db.settings.set(message.guild.id, newRole.id, "modRole");
+              client.db.settings.set(message.guild.id, newRole.id, "modRole");
               const successEmbed = client.embeds.success(command.option.modrole, `Set the server moderator role to: <@&${newRole.id}>.`)
               editMsg.edit({ embeds: [successEmbed] });
             } else {
@@ -135,7 +135,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               const editMsg = await message.reply({ embeds: [pendingEmbed] });
-              await client.db.settings.delete(message.guild.id, "adminRole");
+              client.db.settings.delete(message.guild.id, "adminRole");
 
               const successEmbed = client.embeds.success(command.option.adminrole, `Removed the server administrator role.`)
 
@@ -149,7 +149,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               const editMsg = await message.reply({ embeds: [pendingEmbed] });
-              await client.db.settings.set(message.guild.id, newRole.id, "adminRole");
+              client.db.settings.set(message.guild.id, newRole.id, "adminRole");
               const successEmbed = client.embeds.success(command.option.adminrole, `Set the server administrator role to: <@&${newRole.id}>.`);
               editMsg.edit({ embeds: [successEmbed] });
             } else {
@@ -181,7 +181,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               const editMsg = await message.reply({ embeds: [pendingEmbed] });
-              await client.db.settings.delete(message.guild.id, "logChannel");
+              client.db.settings.delete(message.guild.id, "logChannel");
 
               const successEmbed = client.embeds.success(command.option.logchannel, `Removed the server log channel.`)
 
@@ -205,7 +205,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               const editMsg = await message.reply({ embeds: [pendingEmbed] });
-              await client.db.settings.set(message.guild.id, newChannel.id, "logChannel");
+              client.db.settings.set(message.guild.id, newChannel.id, "logChannel");
               const successEmbed = client.embeds.success(command.option.logchannel, `Set the server log channel to: <#${newChannel.id}>.`);
               editMsg.edit({ embeds: [successEmbed] });
             } else {
@@ -235,7 +235,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               const editMsg = await message.reply({ embeds: [pendingEmbed] });
-              await client.db.settings.delete(message.guild.id, "mutedRole");
+              client.db.settings.delete(message.guild.id, "mutedRole");
               const successEmbed = client.embeds.success(command.option.mutedrole, `Removed the server muted role.`);
 
               return editMsg.edit({ embeds: [successEmbed] });
@@ -259,7 +259,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               const editMsg = await message.reply({ embeds: [pendingEmbed] });
-              await client.db.settings.set(message.guild.id, newRole.id, "mutedRole");
+              client.db.settings.set(message.guild.id, newRole.id, "mutedRole");
               const successEmbed = client.embeds.success(command.option.mutedrole, `Set the server muted role to: <@&${newRole.id}>.`)
               editMsg.edit({ embeds: [successEmbed] });
             } else {
@@ -289,7 +289,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
                   return editMsg.edit({ embeds: [embed] });
                 }
 
-                await client.db.settings.set(message.guild.id, true, "welcomeSystem");
+                client.db.settings.set(message.guild.id, true, "welcomeSystem");
                 const successEmbed = client.embeds.success(command.option.welcome, `Turned the welcome system on.`)
                 editMsg.edit({ embeds: [successEmbed] });
 
@@ -299,7 +299,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
                   return editMsg.edit({ embeds: [embed] });
                 }
 
-                await client.db.settings.set(message.guild.id, false, "welcomeSystem");
+                client.db.settings.set(message.guild.id, false, "welcomeSystem");
                 const successEmbed = client.embeds.success(command.option.welcome, `Turned the welcome system off.`)
                 editMsg.edit({ embeds: [successEmbed] });
               }
@@ -337,7 +337,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               const editMsg = await message.reply({ embeds: [pendingEmbed] });
-              await client.db.settings.delete(message.guild.id, "welcomeRole");
+              client.db.settings.delete(message.guild.id, "welcomeRole");
               const successEmbed = client.embeds.success(command.option.welcomerole, `Removed the server welcome role.`);
 
               return editMsg.edit({ embeds: [successEmbed] });
@@ -361,7 +361,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               const editMsg = await message.reply({ embeds: [pendingEmbed] });
-              await client.db.settings.set(message.guild.id, newRole.id, "welcomeRole");
+              client.db.settings.set(message.guild.id, newRole.id, "welcomeRole");
               const successEmbed = client.embeds.success(command.option.welcomerole, `Set the server welcome role to: <@&${newRole.id}>.`);
               editMsg.edit({ embeds: [successEmbed] });
             } else {
@@ -396,7 +396,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               const editMsg = await message.reply({ embeds: [pendingEmbed] });
-              await client.db.settings.delete(message.guild.id, "welcomeChannel");
+              client.db.settings.delete(message.guild.id, "welcomeChannel");
 
               const successEmbed = client.embeds.success(command.option.welcomechannel, `Removed the server welcome channel.`);
 
@@ -421,7 +421,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               const editMsg = await message.reply({ embeds: [pendingEmbed] });
-              await client.db.settings.set(message.guild.id, newChannel.id, "welcomeChannel");
+              client.db.settings.set(message.guild.id, newChannel.id, "welcomeChannel");
               const successEmbed = client.embeds.success(command.option.welcomechannel, `Set the server welcome channel to: <#${newChannel.id}>.`);
               editMsg.edit({ embeds: [successEmbed] });
             } else {
@@ -457,7 +457,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               }
 
               const editMsg = await message.reply({ embeds: [pendingEmbed] });
-              await client.db.settings.delete(message.guild.id, "welcomeMsg");
+              client.db.settings.delete(message.guild.id, "welcomeMsg");
 
               const successEmbed = client.embeds.success(command.option.welcomemsg, `Removed the server welcome message.`)
 
@@ -465,7 +465,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             }
 
             const editMsg = await message.reply({ embeds: [pendingEmbed] });
-            await client.db.settings.set(message.guild.id, msg, "welcomeMsg");
+            client.db.settings.set(message.guild.id, msg, "welcomeMsg");
             const successEmbed = client.embeds.success(command.option.welcomemsg, `Set the server welcome message to:\n\n${code}${msg}${code}`);
             editMsg.edit({ embeds: [successEmbed] });
 

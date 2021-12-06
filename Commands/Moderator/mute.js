@@ -105,14 +105,14 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
     if (thirdArg) {
       if (fourthArg) {
-        timeObj = await client.functions.getTime(thirdArg);
+        timeObj = client.functions.getTime(thirdArg);
         if (!timeObj.passed) {
           reason = args.slice(1).join(" ");
         } else {
           reason = args.slice(2).join(" ");
         }
       } else {
-        timeObj = await client.functions.getTime(thirdArg);
+        timeObj = client.functions.getTime(thirdArg);
         if (!timeObj.passed) reason = args.slice(1).join(" ");
       }
     }

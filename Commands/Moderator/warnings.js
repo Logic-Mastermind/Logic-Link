@@ -16,8 +16,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     if (secArg.toLowerCase() == "me") member = message.member;
 
     if (member) {
-      var warnings = client.db.userInfo.get(`${member.id}-${member.guild.id}`, "warnings");
-      warnings = new Discord.Collection(warnings);
+      const warnings = client.functions.filterCases(settings.cases, member.id, true);
 
       const fields = [];
       if (warnings.size < 1) {
@@ -25,25 +24,18 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         return message.reply({ embeds: [embed] });
       }
 
-      for await (const [key, val] of warnings.entries()) {
-        fields.push({
-          name: `Case \`${key}\``,
-          value: `${client.util.moderator} Moderator: <@${val.moderator}>\n${client.util.message} Warning: ${val.reason}\n${client.util.clock} Timestamp: <t:${val.timestamp}:R>`,
-          inline: false
-        });
-      }
-
       if (thirdArg) {
         switch(thirdArg) {
           case "c":
           case "clear":
           {
-            const userWarns = client.db.userInfo.get(`${member.id}-${message.guild.id}`).warnings;
-            const filteredCases = await settings.cases.filter((v) => v.user !== member.id);
+            const removedCases = new Discord.Collection();
+            for (const [id, c] of settings.cases.entries()) {
+              if (c.user == member.id) continue;
+              removedCases.set(id, c);
+            }
 
-            client.db.userInfo.set(`${member.id}-${member.guild.id}`, new Discord.Collection(), "warnings");
-            client.db.settings.set(message.guild.id, filteredCases, "cases");
-
+            client.db.settings.set(message.guild.id, removedCases, "cases");
             const embed = client.embeds.success(command, `Cleared ${userWarns.size} warning${userWarns.size == 1 ? `` : `s`} from <@${member.id}>.`);
             message.reply({ embeds: [embed] });
             return;
@@ -51,10 +43,26 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         }
       }
 
+      for await (const [key, val] of warnings.entries()) {
+        fields.push({
+          name: `Case \`${key}\``,
+          value: `${client.util.moderator} Moderator: <@${val.moderator}>\n${client.util.members} User: <@${val.user}>\n${client.util.message} Reason: ${val.reason.substring(0, 15).replaceAll("\n", "") + "..."}\n${client.util.clock} Timestamp: <t:${val.timestamp}:R>\n${client.util.application} Action: ${val.type}`,
+          inline: true
+        });
+
+        if ((key % 2) == 0) {
+          fields.push({
+            name: "\u200b",
+            value: "\u200b",
+            inline: true
+          });
+        }
+      }
+
       const buttonLeft = client.buttons.emoji("User_Warnings:Left", client.util.arrowLeft, "SECONDARY");
       const buttonRight = client.buttons.emoji("User_Warnings:Right", client.util.arrowRight, "SECONDARY");
 
-      if (warnings.size <= 5) {
+      if (fields.size <= 6) {
         buttonLeft.setDisabled();
         buttonRight.setDisabled();
       } else {
@@ -63,7 +71,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
       var pages = [];
       var paginationMsg = null;
-      var chunks = await client.functions.divideChunk(fields, 5);
+      var chunks = await client.functions.divideChunk(fields, 6);
 
       for await (const [key, div] of Object.entries(chunks)) {
         var desc = "";
@@ -80,7 +88,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       pages.shift();
 
       if (pages.length >= 1) {
-        client.functions.paginate(paginationMsg, pages);
+        client.functions.paginate(paginationMsg, pages, (m) => m.id == message.author.id);
       }
     } else {
       const embed = client.embeds.noMember(command, secArg);

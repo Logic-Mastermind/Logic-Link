@@ -4,17 +4,17 @@ const Chalk = require("chalk");
 const Lod = require("lodash");
 const FS = require("fs");
 
-const buttons = require("./Config/buttons.js");
-const commands = require("./Config/commands.js");
-const config = require("./Config/config.js");
-const embeds = require("./Config/embeds.js");
-const functions = require("./Config/functions.js");
-const prompts = require("./Config/prompts.js");
-const database = require("./Config/database.js");
-const logger = require("./Config/logger.js");
-const util = require("./Config/util.js");
-const schemas = require("./Config/schemas.js");
-const discordFn = require("./Config/discord.js");
+const buttons = require("./Modules/buttons.js");
+const commands = require("./Structures/commands.js");
+const config = require("./Structures/config.js");
+const embeds = require("./Modules/embeds.js");
+const functions = require("./Modules/functions.js");
+const prompts = require("./Modules/prompts.js");
+const database = require("./Structures/database.js");
+const logger = require("./Modules/logger.js");
+const util = require("./Structures/util.js");
+const schemas = require("./Modules/schemas.js");
+const discordFn = require("./Modules/discord.js");
 const clear = require("clear-module");
 const os = require("os");
 
@@ -54,6 +54,7 @@ client.server = require('./server')();
 
 client.commands = new Discord.Collection();
 client.category = new Discord.Collection();
+client.cooldown = new Enmap();
 
 client.ready = false;
 client.readySince = null;

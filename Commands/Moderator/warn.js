@@ -19,9 +19,9 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     if (secArg.toLowerCase() == "me") member = message.member;
 
     if (member) {
-      if (warning.length > 1000) {
-        const embed = client.embeds.error(command, `This warning is over the 1000 character limit.`);
-        return message.reply(embed);
+      if (warning.length > 512) {
+        const embed = client.embeds.error(command, `This warning is over the 512 character limit.`);
+        return message.reply({ embeds: [embed] });
       }
 
       var caseData = {
@@ -33,12 +33,12 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       }
 
       client.functions.createCase(caseData, settings, message.guild);
-      const warnings = client.db.userInfo.get(`${member.id}-${message.guild.id}`).warnings;
+      const filteredCases = client.functions.filterCases(settings.cases, member.id, true);
       
       const warnedEmbed = client.embeds.moderated("warn", message.guild, warning);
       if (!member.user.bot) member.user.send({ embeds: [warnedEmbed] });
 
-      const embed = client.embeds.success(command, `Logged a warning for <@${member.id}>, they now have ${warnings.size} warning${warnings.size == 1 ? `` : `s`}.`);
+      const embed = client.embeds.success(command, `Logged a warning for <@${member.id}>, they now have ${filteredCases.size} warning${filteredCases.size == 1 ? `` : `s`}.`);
       message.reply({ embeds: [embed] });
 
     } else {

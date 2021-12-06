@@ -23,15 +23,37 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     if (member) cases = settings.cases.filter(c => c.user == member.id);
 
     if (case1) {
-      fields.push({
-        name: `Case \`${case1.id}\``,
-        value: `${client.util.moderator} Moderator: <@${case1.moderator}>\n${client.util.members} User: <@${case1.user}>\n${client.util.message} Reason: ${case1.reason}\n${client.util.clock} Timestamp: <t:${case1.timestamp}:R>\n${client.util.application} Action: ${case1.type}`,
-        inline: false
-      });
+      fields = [
+        {
+          name: `Case \`${case1.id}\``,
+          value: `${client.util.moderator} Moderator: <@${case1.moderator}>\n${client.util.members} User: <@${case1.user}>\n${client.util.clock} Timestamp: <t:${case1.timestamp}:R>\n${client.util.application} Action: ${case1.type}\n\u200b`,
+          inline: false
+        },
+        {
+          name: `Reason`,
+          value: case1.reason,
+          inline: false
+        }
+      ];
 
       const desc = `Viewing information for moderation case \`${case1.id}\`.`;
       const embed = client.embeds.blue(command, desc, fields);
       return message.reply({ embeds: [embed] });
+    }
+
+    if (secArg) {
+      if (!isNaN(secArg)) {
+        const embed = client.embeds.notValid(command, secArg, "case ID");
+        return message.reply({ embeds: [embed] });
+
+      } else {
+        if (secArg.toLowerCase() == "clear") {
+          client.db.settings.set(message.guild.id, new Map(), "cases");
+
+          const embed = client.embeds.success(command, `Cleared all moderation cases for this server.`);
+          return message.reply({ embeds: [embed] });
+        }
+      }
     }
 
     if (cases) {
@@ -43,12 +65,20 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       for await (const [key, val] of cases.entries()) {
         fields.push({
           name: `Case \`${key}\``,
-          value: `${client.util.moderator} Moderator: <@${val.moderator}>\n${client.util.members} User: <@${val.user}>\n${client.util.message} Reason: ${val.reason}\n${client.util.clock} Timestamp: <t:${val.timestamp}:R>\n${client.util.application} Action: ${val.type}`,
-          inline: false
+          value: `${client.util.moderator} Moderator: <@${val.moderator}>\n${client.util.members} User: <@${val.user}>\n${client.util.message} Reason: ${val.reason.substring(0, 15).replaceAll("\n", "") + "..."}\n${client.util.clock} Timestamp: <t:${val.timestamp}:R>\n${client.util.application} Action: ${val.type}`,
+          inline: true
         });
+
+        if ((key % 2) == 0) {
+          fields.push({
+            name: "\u200b",
+            value: "\u200b",
+            inline: true
+          });
+        }
       }
 
-      const chunks = await client.functions.divideChunk(fields, 5);
+      const chunks = await client.functions.divideChunk(fields, 6);
       for await (const [key, div] of Object.entries(chunks)) {
         var desc = "";
         if (key == 0) {
@@ -62,7 +92,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       const buttonLeft = client.buttons.emoji("Server_Cases:Left", client.util.arrowLeft, "SECONDARY");
       const buttonRight = client.buttons.emoji("Server_Cases:Right", client.util.arrowRight, "SECONDARY");
 
-      if (cases.size <= 5) {
+      if (fields.size <= 6) {
         buttonLeft.setDisabled();
         buttonRight.setDisabled();
       } else {
@@ -73,21 +103,9 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       const paginationMsg = await message.channel.send({ embeds: [pages[0]], components: [row] });
       pages.shift();
 
-      if (pages.length >= 1) client.functions.paginate(paginationMsg, pages);
+      const filter = (m) => m.id == message.author.id;
+      if (pages.length >= 1) client.functions.paginate(paginationMsg, pages, filter);
       return;
-    }
-
-    if (isNaN(secArg)) {
-      cases = client.db.userInfo.get(`${member.id}-${message.guild.id}`);
-
-    } else {
-      var caseId = settings.cases.get(Number(secArg));
-      if (caseId) {
-
-      } else {
-        const embed = client.embeds.notValid(command, secArg, "case ID");
-        message.reply({ embeds: [embed] });
-      }
     }
   } catch (error) {
     client.functions.sendErrorMsg(error, message, command, extra.logId);

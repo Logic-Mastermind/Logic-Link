@@ -18,7 +18,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
     if (secArg) {
       if (secArg == "clr" || secArg == "clear") {
-        await client.logger.clear();
+        client.logger.clear();
         const embed = client.embeds.success(command, `Cleared the bot logs successfully.`);
         return message.reply({ embeds: [embed] });
 
@@ -47,13 +47,13 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         return message.reply({ embeds: [embed] });
 
       } else if (!isNaN(secArg)) {
-        var logData = await client.db.logs.get(secArg);
+        var logData = client.db.logs.get(secArg);
         if (!logData.content) {
           const embed = client.embeds.error(command, `A log with the ID: \`${secArg}\` was not found.`);
           return message.reply({ embeds: [embed] });
         }
 
-        const embed = client.embeds.blue(command, `Showing info for the log with ID: \`${secArg}\`.\n\n${client.util.category} Type: \`${logData.type}\`\n${client.util.clock} Date: <t:${Math.round(logData.timestamp / 1000)}:R>\n${client.util.message} Content: ${logData.content}${logData.details ? `\n\n**Log Details**\n${client.util.reply}${logData.details.join(`\n${client.util.reply}`)}` : ``}`);
+        const embed = client.embeds.blue(command, `Showing info for the log with ID: \`${secArg}\`.\n\n${client.util.category} Type: \`${logData.type}\`\n${logData.user ? `${client.util.moderator} User: <@${logData.user}>\n` : ``}${client.util.clock} Date: <t:${Math.round(logData.timestamp / 1000)}:R>\n${client.util.message} Content: ${logData.content}${logData.details ? `\n\n**Log Details**\n${client.util.reply}${logData.details.join(`\n${client.util.reply}`)}` : ``}`);
         return message.reply({ embeds: [embed] });
 
       } else {
@@ -65,7 +65,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
           log = args.join(" ");
         }
 
-        const logId = await client.logger[action](log);
+        const logId = client.logger[action](log);
         const embed = client.embeds.success(command, `Created a${action == "error" ? `n` : ``} ${action} with ID: \`${logId}\`.`, [{
           name: "Content",
           value: log,
@@ -113,7 +113,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     const msg = await message.reply({ embeds: [pages[0]], components: [actionRow] });
     pages = await pages.slice(1);
 
-    if (pages[0]) client.functions.paginate(msg, pages);
+    if (pages[0]) client.functions.paginate(msg, pages, (m) => m.id == message.author.id);
   } catch (error) {
     client.functions.sendErrorMsg(error, message, command, extra.logId);
   }

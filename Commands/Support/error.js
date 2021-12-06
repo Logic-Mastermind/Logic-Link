@@ -11,7 +11,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const responses = {};
 
   try {
-    var error = await client.db.errors.get(secArg);
+    var error = client.db.errors.get(secArg);
 
     if (error) {
       if (error.info) {

@@ -25,7 +25,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         return message.reply({ embeds: [embed] });
       }
 
-      await client.db.blacklists.delete(user.id);
+      client.db.blacklists.delete(user.id);
       const embed = client.embeds.success(command, `Un-blacklisted <@${user.id}> from Logic Link.`, [{ name: "Reason", value: reason, inline: true }]);
       message.reply({ embeds: [embed] });
       

@@ -1,7 +1,7 @@
 const Discord = require("discord.js");
 const Fetch = require("node-fetch");
 const Enmap = require("enmap");
-const applicationScheme = require("../Config/application.js");
+const applicationScheme = require("../Structures/application.js");
 
 module.exports = async (client) => {
   client.application.commands.scheme = applicationScheme;
@@ -20,7 +20,7 @@ module.exports = async (client) => {
       const guild = client.guilds.cache.get(val.guildId);
       const member = guild.members.cache.get(val.muted);
 
-      const mutedRoleId = await client.db.settings.get(guild.id, "mutedRole");
+      const mutedRoleId = client.db.settings.get(guild.id, "mutedRole");
       const mutedRole = guild.roles.cache.get(mutedRoleId);
       const timeLeft = val.end - Date.now();
       const clientMember = guild.me;

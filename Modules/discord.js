@@ -53,5 +53,13 @@ module.exports = {
   splitMessage: (string) => {
     if (!string) return [null];
     return string.match(/[\s\S]{1,1990}/g);
+  },
+  bulkDeleteMessages: async (channel, num) => {
+    const msgs = await channel.messages.fetch({ limit: num });
+    for await (const [id, msg] of msgs.entries()) {
+      if (msg.pinned) msgs.delete(id);
+    }
+
+    return await channel.bulkDelete(msgs, true);
   }
 }

@@ -11,7 +11,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const responses = {};
 
   try {
-    var time = await client.functions.getTime(secArg);
+    var time = client.functions.getTime(secArg);
     var task = args.slice(1).join(" ");
     var now = Math.round(Date.now() / 1000);
 

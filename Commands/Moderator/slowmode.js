@@ -21,16 +21,21 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     var arg = thirdArg;
 
     var channel = message.mentions.channels.first();
-    var time = await client.functions.getTime(args.slice(1).join(" "));
+    var time = client.functions.getTime(args.slice(1).join(" "));
 
     if (!channel) channel = await client.functions.findChannel(secArg, message.guild);
     if (!channel && !thirdArg) {
       arg = secArg;
       channel = message.channel;
-      time = await client.functions.getTime(secArg);
+      time = client.functions.getTime(secArg);
     }
 
     if (channel) {
+      if (!channel.isText()) {
+        const embed = client.embeds.error(command, `<#${channel}> is not a text channel.`);
+        return message.reply({ embeds: [embed] });
+      }
+
       var seconds = Math.round(time.duration / 1000);
       if (arg == "off" || arg == "reset") {
         reset = true;

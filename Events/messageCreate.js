@@ -18,11 +18,6 @@ module.exports = async (client, message) => {
     var userInfo = client.db.userInfo.get(`${message.author.id}-${message.guild.id}`);
     var prefix = guildPrefix;
 
-    if (blacklistInfo.blacklisted) {
-      const embed = client.embeds.error(command, `You are currently blacklisted from using Logic Link.`, [{ name: "Reason", value: blacklistInfo.blacklisted, inline: false }]);
-      return message.reply({ embeds: [embed] });
-    }
-
     if (userInfo.inPrompt == message.channel.id) return;
     if (message.author.id == client.util.devId) {
       if (message.content.startsWith(".")) prefix = ".";
@@ -56,10 +51,60 @@ module.exports = async (client, message) => {
     var cmd = client.commands.get(command.commandName);
     if (!cmd) return;
 
+    var userCooldown = client.cooldown.get(message.author.id);
+    if (!userCooldown) {
+      userCooldown = new Discord.Collection();
+      userCooldown.set(message.author.id, {}, "cmdSpam");
+    }
+
+    const spamData = userCooldown.cmdSpam;
+    const SPAM_LIMIT = 5000;
+    const SPAM_COUNT = 3;
+
+    if (spamData) {
+      const lastMsgDiff = message.createdTimestamp - spamData.lastMsgTimestamp;
+
+      if (lastMsgDiff > SPAM_LIMIT) {
+        // When a message is sent after the cooldown ends.
+        clearTimeout(spamData.timer);
+        client.cooldown.set(message.author.id, {
+          msgCount: 1,
+          lastMsgTimestamp: message.createdTimestamp,
+          timer: setTimeout(() => {
+            client.cooldown.delete(message.author.id, "cmdSpam");
+          }, SPAM_LIMIT)
+        }, "cmdSpam");
+      } else {
+        // When a message is sent before the cooldown ends.
+        ++spamData.msgCount;
+
+        if (spamData.msgCount == SPAM_COUNT) {
+          return message.react("867955785978761266");
+        } else {
+          client.cooldown.set(message.author.id, spamData, "cmdSpam");
+        }
+      }
+    } else {
+      const timeout = setTimeout(() => {
+        client.cooldown.delete(message.author.id, "cmdSpam");
+      }, SPAM_LIMIT);
+
+      client.cooldown.set(message.author.id, {
+        msgCount: 1,
+        lastMsgTimestamp: message.createdTimestamp,
+        timer: timeout
+      }, "cmdSpam");
+    }
+
+    if (blacklistInfo.blacklisted) {
+      const embed = client.embeds.error(command, `You are currently blacklisted from using Logic Link.`, [{ name: "Reason", value: blacklistInfo.blacklisted, inline: false }]);
+      return message.reply({ embeds: [embed] });
+    }
+
     const settings = await client.functions.getSettings(message.guild);
     const tsettings = await client.functions.getTicketData(message.guild);
     const devMode = client.db.devSettings.get(client.util.devId, "devMode");
-    const logId = await client.logger.log(`Command ${command.commandName} ran by ${message.author.id}`, message.author);
+    const logId = client.logger.log(`Command ${command.commandName} ran by ${message.author.id}`, message.author);
     
     const permissionWhitelist = ["delete", "lock", "hide", "unhide", "unlock"];
     const checkBotPerms = ["addrole", "addroles", "hide", "hoist", "lock", "removerole", "removeroles", "unhide", "unhoist", "unlock", "announce", "ban", "kick", "purge", "slowmode", "nickname", "softban", "tempban", "unban", "unmute"];
@@ -72,7 +117,7 @@ module.exports = async (client, message) => {
       if (command.required == "dev") {
         if (message.author.id !== client.util.devId) {
           if (!command.permissions.includes("ALL")) {
-            await client.logger.updateLog(`User lacked permissions.`, logId);
+            client.logger.updateLog(`User lacked permissions.`, logId);
             const embed = client.embeds.permission(command);
             return message.reply({ embeds: [embed] });
           }
@@ -82,16 +127,10 @@ module.exports = async (client, message) => {
         if (message.author.id == client.util.devId) return null;
         if (command.permissions.includes("ALL") || !command.permissions[0]) return null;
 
-        if (message.guild.id !== client.util.supportServer) {
-          await client.logger.updateLog(`User not in support server.`, logId);
-          const embed = client.embeds.red(command, `This command is only available in the Logic Link's support server.\nUse the \`${guildPrefix}invite\` command to join it.`);
-          return message.reply({ embeds: [embed] });
-
-        } else {
-          await client.logger.updateLog(`User lacked permissions.`, logId);
-          const embed = client.embeds.permission(command);
-          return message.reply({ embeds: [embed] });
-        }
+        client.logger.updateLog(`User lacked permissions.`, logId);
+        const embed = client.embeds.permission(command);
+        return message.reply({ embeds: [embed] });
+        
       } else if (command.required == "ticket") {
         if (command.permissions.includes("ALL")) return null;
       }
@@ -106,17 +145,17 @@ module.exports = async (client, message) => {
         if (command.required == "mod") {
           if (hasModRole) return null;
           
-          await client.logger.updateLog(`User lacked permissions.`, logId);
+          client.logger.updateLog(`User lacked permissions.`, logId);
           const embed = client.embeds.permission(command);
           return message.reply({ embeds: [embed] });
 
         } else if (command.required == "admin") {
-          await client.logger.updateLog(`User lacked permissions.`, logId);
+          client.logger.updateLog(`User lacked permissions.`, logId);
           const embed = client.embeds.permission(command);
           return message.reply({ embeds: [embed] });
 
         } else if (command.required == "ticket") {
-          await client.logger.updateLog(`User lacked permissions.`, logId);
+          client.logger.updateLog(`User lacked permissions.`, logId);
           const embed = client.embeds.permission(command);
           return message.reply({ embeds: [embed] });
         }
@@ -126,21 +165,20 @@ module.exports = async (client, message) => {
     const filtered = await filterPermissions();
     if (filtered) return;
 
-    if (message.author.id !== client.util.devId) {
-      const locked = client.db.devlock.get(command.commandName, "locked");
-      const lockedGuild = client.guilds.cache.get(client.db.devlock.get(command.commandName, "guild"));
-      const lockedReason = client.db.devlock.get(command.commandName, "reason");
-      const userCooldown = client.db.cooldown.get(message.author.id);
+    const locked = client.db.devlock.get(command.commandName, "locked");
+    const lockedGuild = client.guilds.cache.get(client.db.devlock.get(command.commandName, "guild"));
+    const lockedReason = client.db.devlock.get(command.commandName, "reason");
 
+    if (message.author.id !== client.util.devId) {
       if (locked == true && lockedGuild) {
         if (message.guild.id == lockedGuild.id) {
-          await client.logger.updateLog(`Command was locked in the guild.`, logId);
+          client.logger.updateLog(`Command was locked in the guild.`, logId);
           const embed = client.embeds.blue(`Developer Lock`, `The \`${command.commandName}\` command has been locked until further notice.${lockedReason ? `\n\n**Developer Note**\n${lockedReason}` : `\nNo further information was provied.`}`);
 
           return message.reply({ embeds: [embed] });
         }
       } else if (locked == true && (!lockedGuild)) {
-        await client.logger.updateLog(`Command was locked.`, logId);
+        client.logger.updateLog(`Command was locked.`, logId);
         const embed = client.embeds.blue(`Developer Lock`, `The \`${command.commandName}\` command has been locked until further notice.${lockedReason ? `\n\n**Developer Note**\n${lockedReason}` : `\nNo further information was provided.`}`);
 
         return message.reply({ embeds: [embed] });
@@ -148,12 +186,12 @@ module.exports = async (client, message) => {
 
       if (userCooldown) {
         if (command.commandName in userCooldown) {
-          const lastUsed = client.db.cooldown.get(message.author.id, command.commandName);
+          const lastUsed = client.cooldown.get(message.author.id, command.commandName) || 0;
           const expiration = lastUsed + (command.cooldown * 1000);
           const timeLeft = expiration - now;
 
           if (now < expiration) {
-            await client.logger.updateLog(`User was on cooldown for that command.`, logId);
+            client.logger.updateLog(`User was on cooldown for that command.`, logId);
             const embed = client.embeds.error(command, `You are on cooldown for the \`${command.commandName}\` command.`, [{
               name: "Time Left",
               value: `\`${ms(timeLeft, { long: true })}\``,
@@ -171,7 +209,7 @@ module.exports = async (client, message) => {
         const denied = await filterPermissions();
         if (denied) return;
 
-        await client.logger.updateLog(`User did not pass enough arguments.`, logId);
+        client.logger.updateLog(`User did not pass enough arguments.`, logId);
         const embed = await client.embeds.noArgs(command, message.guild);
         return message.reply({ embeds: [embed] });
       }
@@ -179,7 +217,7 @@ module.exports = async (client, message) => {
 
     if (checkBotPerms.includes(command.commandName)) {
       if (!clientMember.permissions.has(command.permissions)) {
-        await client.logger.updateLog(`Bot lacked permissions.`, logId);
+        client.logger.updateLog(`Bot lacked permissions.`, logId);
         const embed = client.embeds.botPermission(command);
         return message.reply({ embeds: [embed] });
       }
@@ -199,9 +237,9 @@ module.exports = async (client, message) => {
       isDev: message.author.id == client.util.devId,
       hasSupport: hasSupportRole
     }
-
-    await client.logger.updateLog(`All checks were passed.`, logId);
-    await client.db.cooldown.set(message.author.id, now, command.commandName);
+    
+    client.logger.updateLog(`All checks were passed.`, logId);
+    client.cooldown.set(message.author.id, now, command.commandName);
     cmd.run(client, message, args, command, settings, tsettings, extra);
   } catch (error) {
     client.functions.sendError(error, message, command);

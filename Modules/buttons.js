@@ -73,9 +73,19 @@ module.exports = class Buttons {
     return button;
   }
 
-  emoji(id, emoji, style) {
+  red(text, id, disabled) {
     const button = new Discord.MessageButton();
-    button.setLabel("");
+    button.setLabel(text);
+    button.setStyle("DANGER");
+    button.setCustomId(id);
+    if (disabled) button.setDisabled(true);
+    
+    return button;
+  }
+
+  emoji(id, emoji, style, label) {
+    const button = new Discord.MessageButton();
+    button.setLabel(label || "");
     button.setEmoji(emoji)
     button.setStyle(style);
     button.setCustomId(id);

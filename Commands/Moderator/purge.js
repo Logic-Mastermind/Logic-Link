@@ -40,21 +40,21 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
       for (var i = 1; i <= times; ++i) {
         if (i !== times) {
-          await loops.push(100);
+          loops.push(100);
           continue;
         } else {
-          await loops.push(remainder);
+          loops.push(remainder);
         }
       }
     }
 
     for await (const num of loops) {
-      const collected = await message.channel.bulkDelete(num, true);
-      totalSize += collected.size;
+      const collected = await Discord.bulkDeleteMessages(message.channel, num);
+      totalSize += collected ? collected.size : collected instanceof Discord.Message ? 1 : 0;
     }
 
     if (totalSize !== 0) {
-      const embed = client.embeds.success(command, `Purged \`${totalSize}\` messages from this channel.`);
+      const embed = client.embeds.success(command, `Purged \`${totalSize}\` message${totalSize == 1 ? `` : `s`} from this channel.`);
       const msg = await message.channel.send({ embeds: [embed] });
       setTimeout(async () => msg.delete(), 3000);
     } else {

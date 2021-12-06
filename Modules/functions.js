@@ -16,7 +16,7 @@ module.exports = class Functions {
   async sendErrorMsg(error, message, command, logId) {
     const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa" });
 
-    const errorId = await this.getRandomString(10);
+    const errorId = this.getRandomString(10);
     await this.setErrorData(error, errorId);
 
     var invite = null;
@@ -82,7 +82,7 @@ module.exports = class Functions {
     .catch((error) => console.log(error));
   }
 
-  async sendError(error) {
+  sendError(error) {
     const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa"});
 
     const catcher = {
@@ -120,8 +120,8 @@ module.exports = class Functions {
     .catch((error) => console.log(error));
   }
 
-  async getNoArgs(command, guild) {
-    const guildPrefix = await this.client.functions.fetchPrefix(guild);
+  getNoArgs(command, guild) {
+    const guildPrefix = this.fetchPrefix(guild);
     const noArgs = {
       title: `${command.name}`,
       color: `ORANGE`,
@@ -129,7 +129,8 @@ module.exports = class Functions {
       footer1: `Logic Link - Imagine A World`,
       footer2: `https://cdn.discordapp.com/emojis/775848533298905130.png?v=1`
     }
-    return noArgs
+    
+    return noArgs;
   }
   
   async findRole(filter, guild, safe) {
@@ -175,7 +176,7 @@ module.exports = class Functions {
       var nameL = channel.name.toLowerCase();
       var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
-      if (safeFilter && channel.isText()) {
+      if (safeFilter) {
         found = id;
         break;
       }
@@ -357,7 +358,7 @@ module.exports = class Functions {
     return ban;
   }
 
-  async getTime(unsorted) {
+  getTime(unsorted) {
     const endsWithAny = (suffixes, string) => suffixes.some((suffix) => string.endsWith(suffix));
     const timeUnits = {
       total: ["s", "sec", "secs", "second", "seconds", "m", "min", "mins", "minute", "minutes", "h", "hr", "hrs", "hour", "hours", "d", "dy", "dys", "day", "days", "w", "wk", "wks", "week", "weeks", "mn", "mo", "mon", "mth", "mths", "mnth", "mnths", "month", "months", "y", "yr", "yrs", "year", "years"],
@@ -418,19 +419,19 @@ module.exports = class Functions {
       }
     }
 
-    duration = duration ? await ms(duration, { long: true }) : null;
+    duration = duration ? ms(duration, { long: true }) : null;
     digit = duration ? duration.split(" ")[0] : null;
     
     return {
       "passed": passed,
       "digit": digit,
-      "duration": duration ? await ms(duration, { long: true }) : null,
+      "duration": duration ? ms(duration, { long: true }) : null,
       "display": duration,
       "unit": unit
     }
   }
 
-  async getRandomString(length, chars) {
+  getRandomString(length, chars) {
     var randomChars = chars || "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     var result = '';
     for (var i = 0; i < length; i++) {
@@ -440,24 +441,24 @@ module.exports = class Functions {
     return result;
   }
 
-  async getSettings(guild) {
-    const settings = await this.client.db.settings.get(guild.id);
+  getSettings(guild) {
+    const settings = this.client.db.settings.get(guild.id);
     const settingsObj = settings;
 
-    settingsObj.modRoleObj = await guild.roles.cache.get(settingsObj.modRole);
-    settingsObj.adminRoleObj = await guild.roles.cache.get(settingsObj.adminRole);
-    settingsObj.logChannelObj = await guild.channels.cache.get(settingsObj.logChannel);
-    settingsObj.welcomeChannelObj = await guild.channels.cache.get(settingsObj.welcomeChannel);
-    settingsObj.welcomeRoleObj = await guild.roles.cache.get(settingsObj.welcomeRole);
-    settingsObj.mutedRoleObj = await guild.roles.cache.get(settingsObj.mutedRole);
+    settingsObj.modRoleObj = guild.roles.cache.get(settingsObj.modRole);
+    settingsObj.adminRoleObj = guild.roles.cache.get(settingsObj.adminRole);
+    settingsObj.logChannelObj = guild.channels.cache.get(settingsObj.logChannel);
+    settingsObj.welcomeChannelObj = guild.channels.cache.get(settingsObj.welcomeChannel);
+    settingsObj.welcomeRoleObj = guild.roles.cache.get(settingsObj.welcomeRole);
+    settingsObj.mutedRoleObj = guild.roles.cache.get(settingsObj.mutedRole);
     settingsObj.cases = new Discord.Collection(settings.cases);
 
     return settingsObj;
   }
 
-  async getTicketData(guild) {
-    const settings = await this.client.db.tsettings.get(guild.id);
-    const panels = await this.client.db.panels.get(guild.id, "panels");
+  getTicketData(guild) {
+    const settings = this.client.db.tsettings.get(guild.id);
+    const panels = this.client.db.panels.get(guild.id, "panels");
     const panelMap = new Discord.Collection(panels);
 
     return {
@@ -466,19 +467,19 @@ module.exports = class Functions {
     }
   }
 
-  async getRandomInt(min, max) {
+  getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min) + min);
   }
 
-  async findCommand(filter) {
+  findCommand(filter) {
     var command = null;
     var client = this.client;
     var alias = client.command.aliases[filter];
     if (alias) filter = alias;
     
-    for await (const [name, info] of Object.entries(client.command.general)) {
+    for (const [name, info] of Object.entries(client.command.general)) {
       if (command) break;
       if (filter == info.commandName || info.aliases.includes(filter)) {
         command = info;
@@ -486,7 +487,7 @@ module.exports = class Functions {
       }
     }
 
-    for await (const [name, info] of Object.entries(client.command.administrator)) {
+    for (const [name, info] of Object.entries(client.command.administrator)) {
       if (command) break;
       if (filter == info.commandName || info.aliases.includes(filter)) {
         command = info;
@@ -494,7 +495,7 @@ module.exports = class Functions {
       }
     }
 
-    for await (const [name, info] of Object.entries(client.command.moderator)) {
+    for (const [name, info] of Object.entries(client.command.moderator)) {
       if (command) break;
       if (filter == info.commandName || info.aliases.includes(filter)) {
         command = info;
@@ -502,7 +503,7 @@ module.exports = class Functions {
       }
     }
 
-    for await (const [name, info] of Object.entries(client.command.developer)) {
+    for (const [name, info] of Object.entries(client.command.developer)) {
       if (command) break;
       if (filter == info.commandName || info.aliases.includes(filter)) {
         command = info;
@@ -510,7 +511,7 @@ module.exports = class Functions {
       }
     }
 
-    for await (const [name, info] of Object.entries(client.command.support)) {
+    for (const [name, info] of Object.entries(client.command.support)) {
       if (command) break;
       if (filter == info.commandName || info.aliases.includes(filter)) {
         command = info;
@@ -518,7 +519,7 @@ module.exports = class Functions {
       }
     }
 
-    for await (const [name, info] of Object.entries(client.command.ticket)) {
+    for (const [name, info] of Object.entries(client.command.ticket)) {
       if (command) break;
       
       if (filter == info.commandName || info.aliases.includes(filter)) {
@@ -530,9 +531,9 @@ module.exports = class Functions {
     return command;
   }
 
-  async findOption(command, filter) {
+  findOption(command, filter) {
     var option = null;
-    for await (const [name, info] of Object.entries(command.option)) {
+    for (const [name, info] of Object.entries(command.option)) {
       if (filter == info.commandName || info.aliases.includes(filter)) {
         option = info;
         break;
@@ -542,24 +543,23 @@ module.exports = class Functions {
     return option;
   }
 
-  async paginate(message = {}, pages, filter = () => true, timeout = 60000) {
+  async paginate(message = {}, pages, pFilter = () => true, timeout = 60000) {
     if (!message.components[0].components[1]) throw new Error("Message does not have 2 button components");
 
     const client = this.client;
     const original = message.embeds[0];
-    const collector = await message.createMessageComponentCollector({ filter, idle: timeout });
+    const collector = message.createMessageComponentCollector({ filter: () => true, idle: timeout });
 
     const row = message.components[0];
     const button1 = row.components[0];
     const button2 = row.components[1];
 
     pages.unshift(original);
-
     var total = pages.length;
     var page = 1;
 
     collector.on("collect", async (int) => {
-      if (!filter(int)) {
+      if (!pFilter(int.user)) {
         const embed = client.embeds.notComponent();
         return int.reply({ embeds: [embed], ephemeral: true });
       }
@@ -594,11 +594,11 @@ module.exports = class Functions {
       button2.setDisabled();
 
       const row1 = client.buttons.actionRow([button1, button2]);
-      message.edit({ embeds: [original], components: [row] });
+      message.edit({ embeds: [original], components: [row1] });
     });
   }
 
-  async getArgs(args) {
+  getArgs(args) {
     return {
       secArg: args[0],
       thirdArg: args[1],
@@ -613,20 +613,29 @@ module.exports = class Functions {
     const key = `${data.user}-${guild.id}`;
     data.id = caseId;
 
-    if (data.type == "WARN") {
-      var warnings = client.db.userInfo.get(key).warnings;
-      
-      warnings.set(caseId, data);
-      client.db.userInfo.set(key, warnings, `warnings`);
-    }
-
     var cases = settings.cases.set(caseId, data);
     client.db.settings.set(guild.id, cases, "cases");
   }
 
-  async divideChunk(array, chunk) {
+  filterCases(cases, user, warns) {
+    user = user.id || user;
+    const filtered = new Discord.Collection();
+    
+    for (const [id, c] of cases.entries()) {
+      if (c.user !== user) continue;
+      if (warns) {
+        if (c.type !== "WARN") continue;
+      }
+
+      filtered.set(id, c);
+    }
+
+    return filtered;
+  }
+
+  divideChunk(array, chunk) {
     var i = null;
-    var length = array.length
+    var length = array.length;
     var newArray = [];
 
     for (i = 0; i < length; i += chunk) {
@@ -642,28 +651,28 @@ module.exports = class Functions {
     return `/home/runner/Logic-Link/Commands/Ticket/${cmd.subCategory}/${cmd.commandName}.js`
   }
 
-  async log(content, option) {
+  log(content, option) {
     if (option) {
       if (this.client.util.chalkOptions.includes(option)) {
         console.log(Chalk[option](content))
       } else {
-        return "Invalid Option"
+        return "Invalid Option";
       }
     } else {
-      console.log(content)
+      console.log(content);
     }
   }
 
-  async hasPermission(member, command, guild) {
+  hasPermission(member, command, guild) {
     const isDev = member.id == this.client.util.devId;
     const devCmd = command.required == "dev";
-    const perms = devCmd ? isDev : await command.permissions.some(p => member.permissions.has(p));
+    const perms = devCmd ? isDev : command.permissions.some(p => member.permissions.has(p));
     const isOwner = guild.ownerId == member.id;
 
     return perms || isOwner;
   }
 
-  async upperFirstAll(array) {
+  upperFirstAll(array) {
     var newArray = [];
     for (var word of array) {
       newArray.push(word.charAt(0).toUpperCase() + word.slice(1));
@@ -707,9 +716,8 @@ module.exports = class Functions {
     return memUnit
   }
 
-  async fetchPrefix(guild = {}) {
-    const prefix = await this.client.db.settings.get(guild.id, "prefix") || null;
-    return prefix;
+  fetchPrefix(guild = {}) {
+    return this.client.db.settings.get(guild.id, "prefix") || null;
   }
 
   async tryCatch(callback, params) {
@@ -725,15 +733,15 @@ module.exports = class Functions {
     }
   }
 
-  async getBadges(user) {
-    const flags = await user.flags;
+  getBadges(user) {
+    const flags = user.flags;
     const noBadges = ["No Badges"];
     const replaced = [];
 
     if (!flags) return noBadges;
     if (flags.bitfield == 0) return noBadges;
 
-    for await (const flag of flags.toArray()) {
+    for (const flag of flags.toArray()) {
       if (flag == "DISCORD_EMPLOYEE") replaced.push(this.client.util.discordStaff);
       if (flag == "PARTNERED_SERVER_OWNER") replaced.push(this.client.util.partnered);
       if (flag == "HYPESQUAD_EVENTS") replaced.push(this.client.util.hypesquad);
@@ -752,7 +760,7 @@ module.exports = class Functions {
     return replaced;
   }
 
-  async getPermissions(member) {
+  getPermissions(member) {
     const unsPerms = member.permissions ? member.permissions.toArray() : [null];
     const client = this.client;
     const newPerms = [];
@@ -769,10 +777,10 @@ module.exports = class Functions {
       }
 
       if (this.client.util.keyPerms.includes(perm)) {
-        perm = await perm.replaceAll("_", " ");
-        perm = await perm.toLowerCase();
+        perm = perm.replaceAll("_", " ");
+        perm = perm.toLowerCase();
 
-        var permSplit = await client.functions.upperFirstAll(perm.split(" "));
+        var permSplit = client.functions.upperFirstAll(perm.split(" "));
         perm = permSplit.join(" ");
         newPerms.push(perm);
       }
@@ -782,13 +790,13 @@ module.exports = class Functions {
     return newPerms
   }
 
-  async getPermOverwrites(channel) {
+  getPermOverwrites(channel) {
     if (channel.type.endsWith("THREAD")) channel = channel.guild.channels.cache.get(channel.parentId);
     const overwrites = channel.permissionOverwrites.cache;
     const everyone = channel.guild.roles.everyone;
     const compact = [];
 
-    for await (const [key, perm] of overwrites.entries()) {
+    for (const [key, perm] of overwrites.entries()) {
       if (key == everyone.id) continue;
       const mention = perm.type == "role" ? `<@&${key}>` : perm.type == "member" ? `<@${key}>` : `null`;
       compact.push(mention);
@@ -825,7 +833,7 @@ module.exports = class Functions {
       const id = this.client.user.id;
       const token = this.client.token;
 
-      const route = guildId ? `/applications/${id}/guilds/${guildId}/commands` : `/applications/${id}/commands`;
+      const route = `/applications/${id}/${guildId ? `guilds/${guildId}/` : ``}commands`;
       const rest = new REST({ version: "9" }).setToken(token);
       await rest.put(route, { body: data });
       return true;
@@ -907,7 +915,7 @@ module.exports = class Functions {
     return emoji.split(":")[2].split(">")[0];
   }
 
-  async upperFirst(string) {
+  upperFirst(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 

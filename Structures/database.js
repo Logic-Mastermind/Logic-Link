@@ -19,7 +19,7 @@ module.exports = {
       welcomeSystem: false,
       mutedRoleConfig: false,
       panelSetup: false,
-      cases: new Map()
+      cases: new Discord.Collection()
     }
   }),
   first: new Enmap({
@@ -46,7 +46,7 @@ module.exports = {
     autoFetch: true,
     dataDir: "./Data/",
     autoEnsure: {
-      panels: new Map()
+      panels: new Discord.Collection()
     }
   }),
   timeouts: new Enmap({
@@ -93,11 +93,6 @@ module.exports = {
       lockedAt: null
     }
   }),
-  cooldown: new Enmap({
-    name: "cooldown",
-    fetchAll: false,
-    dataDir: "./Data/",
-  }),
   devSettings: new Enmap({
     name: "devSettings",
     fetchAll: false,
@@ -132,8 +127,9 @@ module.exports = {
     autoFetch: true,
     dataDir: "./Data/",
     autoEnsure: {
-      warnings: new Map(),
-      inPrompt: null
+      inPrompt: null,
+      ticketCooldowns: {},
+      ticketButtonCoooldown: null
     }
   }),
   blacklists: new Enmap({

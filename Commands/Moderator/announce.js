@@ -53,7 +53,11 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         return message.reply({ embeds: [embed] });
       }
 
-      announcement = await client.functions.upperFirst(announcement);
+      if (!channel.isText()) {
+        const embed = client.embeds.error(command, `<#${channel.id}> is not a text channel.`);
+        return message.reply({ embeds: [embed] });
+      }
+
       const announceEmbed = client.embeds.custom("Announcement", announcement, [`Announced by ${message.author.tag}`, message.author.displayAvatarURL()]);
       const messageOptions = { embeds: [announceEmbed] };
 

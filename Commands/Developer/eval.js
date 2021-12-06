@@ -6,6 +6,7 @@ const YouTube = require("ytdl-core-discord");
 const Chalk = require("chalk");
 const Mongoose = require("mongoose");
 const Enmap = require("enmap");
+const Roblox = require("noblox.js");
 const FS = require("fs");
 const ms = require("ms");
 

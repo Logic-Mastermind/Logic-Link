@@ -9,6 +9,7 @@ module.exports = async (client, member) => {
   const code = `\`\`\``;
 
   try {
+    if (member.user.bot) return;
     var guild = member.guild;
     var role = settings.welcomeRoleObj;
     var channel = settings.welcomeChannelObj;

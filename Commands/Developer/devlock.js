@@ -55,7 +55,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       message.reply({ embeds: [embed] });
     } else {
       if (secArg == "view") {
-        const fetched = await client.db.devlock.fetchEverything();
+        const fetched = client.db.devlock.fetchEverything();
         const cmds = [];
 
         for (const [key, val] of fetched.entries()) {

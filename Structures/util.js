@@ -16,6 +16,7 @@ module.exports = {
   errorMsgDefault: `An error has occured whilst running this command.\nIf this issue persists, please contact the bot developer or support server.\n\u200b`,
   unexpectedError: `An unexpected error has occured.                      \u200b`,
   devLocked: `Locked to bot developer.`,
+  trashcan: `<:IconDeleteTrashcan:868118760702234674>`,
   stage: `<:StagePublic:868113751637917726>`,
   arrowLeft: `890992483901767700`,
   dash: `<:greendash:903084370066300928>`,

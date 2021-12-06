@@ -17,7 +17,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     if (!secArg) {
       const fields = [];
       tsettings.panels.forEach((v, k) => {
-        if (v.id <= "2") {
+        if (v.id <= 2) {
           fields.push({
             name: `${client.util.panel} Panel: \`${v.id}\``,
             value: `${client.util.text} Name: \`${v.name}\`\n${client.util.moderator} Created By: <@${v.createdBy}>\n${client.util.clock} Created At: <t:${Math.round(v.createdAt / 1000)}:R>\n${client.util.ticket} Active Tickets: \`${v.tickets.size}\``,
@@ -34,14 +34,16 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         }
       }
 
-      const embed = client.embeds.blue(command, `${client.util.welcomeBotInfo}\n\n**Panels**\nBelow shows a list of ticket panels.\nTo view information about a specific panel, run: \`${guildPrefix}panel <id>\`.${panelCount >= 1 ? `\nTo view a list of all panels, run \`${guildPrefix}panels all\`.` : ``}\nThis server has ${panelCount == 0 ? `no` : `\`${panelCount}\``} panel${panelCount == 1 ? `` : `s`}.\n\n${code}Panels${code}${(panelCount == 0 && (message.member.permissions.has("ADMINISTRATOR") || message.member.roles.cache.has(settings.adminRole))) ? `\n${client.util.warn} This server does not have any panels. Run \`${guildPrefix}panels new\` to create one.` : ``}\u200b`, fields);
+      const embed = client.embeds.blue(command, `${client.util.welcomeBotInfo}\n\n**Panels**\nBelow shows a list of ticket panels.\nTo view a list of further commands, run \`${guildPrefix}panels help\`.\nThis server has ${panelCount == 0 ? `no` : `\`${panelCount}\``} panel${panelCount == 1 ? `` : `s`}.\n\n${code}Panels${code}${(panelCount == 0 && (message.member.permissions.has("ADMINISTRATOR") || message.member.roles.cache.has(settings.adminRole))) ? `\n${client.util.warn} This server does not have any panels. Run \`${guildPrefix}panels new\` to create one.` : ``}\u200b`, fields);
       message.reply({ embeds: [embed] });
 
     } else {
       if (!isNaN(secArg)) {
-        if (panelIds.includes(secArg)) {
+        var id = Number(secArg);
+
+        if (panelIds.includes(id)) {
           if (!thirdArg) {
-            const panelInfo = tsettings.panels.get(secArg);
+            const panelInfo = tsettings.panels.get(id);
             var opened = message.guild.channels.cache.get(panelInfo.opened);
             var closed = message.guild.channels.cache.get(panelInfo.closed);
             
@@ -73,7 +75,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         case "modify":
         {
           if (thirdArg) {
-            if (panelIds.includes(thirdArg)) {
+            var id = Number(thirdArg);
+            if (panelIds.includes(id)) {
               const embed = client.embeds.blue(command.option.modify, `What panel option would you like to modify?\nSelect the option(s) that you would like to modify from the menu below.`);
 
               const select = await client.buttons.selectMenu("Select options...", [
@@ -90,7 +93,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
               
               const row = client.buttons.actionRow([select]);
               const msg = await message.reply({ embeds: [embed], components: [row] });
-              client.prompts.modifyPanel(command, message, msg, thirdArg, tsettings);
+              client.prompts.modifyPanel(command, message, msg, id, tsettings);
             } else {
               const embed = client.embeds.error(command.option.modify, `\`${thirdArg}\` is not a valid panel ID.`);
               message.reply({ embeds: [embed] });
@@ -106,8 +109,10 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         case "delete":
         {
           if (thirdArg) {
-            if (panelIds.includes(thirdArg)) {
-              const panelInfo = tsettings.panels.get(thirdArg);
+            var id = Number(thirdArg);
+
+            if (panelIds.includes(id)) {
+              const panelInfo = tsettings.panels.get(id);
               const confirmBtn = client.buttons.confirm("Panel_Delete:Confirm");
               const cancelBtn = client.buttons.cancel("Panel_Delete:Cancel");
               const row = client.buttons.actionRow([confirmBtn, cancelBtn]);
@@ -163,7 +168,41 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
           const msg = await message.reply({ embeds: [pages[0]], components: [row] });
           pages = await pages.slice(1);
 
-          if (pages[0]) client.functions.paginate(msg, pages);
+          if (pages[0]) client.functions.paginate(msg, pages, (m) => m.id == message.author.id);
+          break;
+        }
+        case "h":
+        case "help":
+        {
+          const options = command.option;
+          const embed = client.embeds.success(options.help, `Showing a list of all available command options.`, [
+            {
+              name: `\`${guildPrefix}${options.new.usage}\``,
+              value: options.new.description,
+              inline: false
+            },
+            {
+              name: `\`${guildPrefix}${options.modify.usage}\``,
+              value: options.modify.description,
+              inline: false
+            },
+            {
+              name: `\`${guildPrefix}${options.delete.usage}\``,
+              value: options.delete.description,
+              inline: false
+            },
+            {
+              name: `\`${guildPrefix}${options.all.usage}\``,
+              value: options.delete.description,
+              inline: false
+            },
+            {
+              name: `\`${guildPrefix}panels <id>\``,
+              value: "Shows panel information for the selected panel.",
+              inline: false
+            }
+          ]);
+          message.reply({ embeds: [embed] });
           break;
         }
         default:

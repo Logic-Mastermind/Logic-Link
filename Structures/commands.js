@@ -44,7 +44,7 @@ module.exports = {
     },
     serverinfo: {
       name: "Server Info",
-      description: "Provides info about your server.",
+      description: "Provides info about this server.",
       permissions: ["ALL"],
       clientPerms: [],
       cooldown: 6,
@@ -86,7 +86,7 @@ module.exports = {
     },
     invite: {
       name: "Bot Invite",
-      description: "Provides the invite link that you can use to add Logic Link to your server.",
+      description: "Provides the invite link that you can use to add Logic Link to this server.",
       permissions: ["ALL"],
       clientPerms: [],
       cooldown: 1,
@@ -100,7 +100,7 @@ module.exports = {
     },
     membercount: {
       name: "Member Count",
-      description: "Provides the number of members in your server.",
+      description: "Provides the number of members in this server.",
       permissions: ["ALL"],
       clientPerms: [],
       cooldown: 1,
@@ -145,7 +145,7 @@ module.exports = {
       description: "Creates an automatic reminder that direct messages you a task when the time runs out.",
       permissions: ["ALL"],
       clientPerms: [],
-      cooldown: 10,
+      cooldown: 5,
       minArgs: 1,
       options: [],
       aliases: ["remindme"],
@@ -288,7 +288,7 @@ module.exports = {
       option: {
         new: {
           name: "Ticket Panels - New",
-          description: "Creates a new ticket panel for your server.",
+          description: "Creates a new ticket panel for this server.",
           permissions: ["ADMINISTRATOR"],
           clientPerms: [],
           cooldown: 3,
@@ -330,6 +330,36 @@ module.exports = {
           category: "Ticket",
           subCategory: "Administrator",
           commandName: "delete",
+        },
+        all: {
+          name: "Ticket Panels - All",
+          description: "Shows a list of all panels and their configuration.",
+          permissions: ["ADMINISTRATOR"],
+          clientPerms: [],
+          cooldown: 3,
+          minArgs: 0,
+          options: [],
+          aliases: [],
+          usage: "panels all",
+          required: "ticket",
+          category: "Ticket",
+          subCategory: "Administrator",
+          commandName: "all",
+        },
+        help: {
+          name: "Ticket Panels - Help",
+          description: "Shows a list of all command options for the panels command.",
+          permissions: ["ADMINISTRATOR"],
+          clientPerms: [],
+          cooldown: 3,
+          minArgs: 0,
+          options: [],
+          aliases: [],
+          usage: "panels help",
+          required: "ticket",
+          category: "Ticket",
+          subCategory: "Administrator",
+          commandName: "help",
         }
       }
     },
@@ -410,7 +440,7 @@ module.exports = {
     },
     ban: {
       name: "Ban",
-      description: "Permanently removes members from your server, banned users are not able to rejoin unless unbanned.",
+      description: "Permanently removes members from this server, banned users are not able to rejoin unless unbanned.",
       permissions: ["BAN_MEMBERS"],
       clientPerms: ["BAN_MEMBERS"],
       cooldown: 4,
@@ -438,7 +468,7 @@ module.exports = {
     },
     softban: {
       name: "Softban",
-      description: "Bans members from your server without deleting previous messages.",
+      description: "Bans members from this server without deleting previous messages.",
       permissions: ["BAN_MEMBERS"],
       clientPerms: ["BAN_MEMBERS"],
       cooldown: 4,
@@ -452,7 +482,7 @@ module.exports = {
     },
     tempban: {
       name: "Tempban",
-      description: "Temporarily bans members from your server.",
+      description: "Temporarily bans members from this server.",
       permissions: ["BAN_MEMBERS"],
       clientPerms: ["BAN_MEMBERS"],
       cooldown: 4,
@@ -480,7 +510,7 @@ module.exports = {
     },
     kick: {
       name: "Kick",
-      description: "Removes members from your server, kicked users are able to rejoin.",
+      description: "Removes members from this server, kicked users are able to rejoin.",
       permissions: ["KICK_MEMBERS"],
       clientPerms: ["KICK_MEMBERS"],
       cooldown: 1,
@@ -508,7 +538,7 @@ module.exports = {
     },
     nickname: {
       name: "Nickname",
-      description: "Modifies the nickname of members in your server.",
+      description: "Modifies the nickname of members in this server.",
       permissions: ["MANAGE_NICKNAMES"],
       clientPerms: ["MANAGE_NICKNAMES"],
       cooldown: 2,
@@ -636,7 +666,7 @@ module.exports = {
     },
     create: {
       name: "Create",
-      description: "Creates roles and channels in your server.",
+      description: "Creates roles and channels in this server.",
       permissions: ["MANAGE_CHANNELS", "MANAGE_ROLES"],
       clientPerms: ["MANAGE_CHANNELS", "MANAGE_ROLES"],
       cooldown: 2,
@@ -650,7 +680,7 @@ module.exports = {
       option: {
         channel: {
           name: "Create - Channel",
-          description: "Creates text channels in your server.",
+          description: "Creates text channels in this server.",
           permissions: ["MANAGE_CHANNELS"],
           clientPerms: ["MANAGE_CHANNELS"],
           cooldown: 2,
@@ -663,7 +693,7 @@ module.exports = {
         },
         role: {
           name: "Create - Role",
-          description: "Creates roles in your server.",
+          description: "Creates roles in this server.",
           permissions: ["MANAGE_ROLES"],
           clientPerms: ["MANAGE_ROLES"],
           cooldown: 2,
@@ -676,7 +706,7 @@ module.exports = {
         },
         voice: {
           name: "Create - Voice Channel",
-          description: "Creates voice channels in your server.",
+          description: "Creates voice channels in this server.",
           permissions: ["MANAGE_CHANNELS"],
           clientPerms: ["MANAGE_CHANNELS"],
           cooldown: 2,
@@ -691,7 +721,7 @@ module.exports = {
     },
     delete: {
       name: "Delete",
-      description: "Deletes roles and channels in your server.",
+      description: "Deletes roles and channels in this server.",
       permissions: ["MANAGE_CHANNELS", "MANAGE_ROLES"],
       clientPerms: ["MANAGE_CHANNELS", "MANAGE_ROLES"],
       cooldown: 2,
@@ -705,7 +735,7 @@ module.exports = {
       option: {
         channel: {
           name: "Delete - Channel",
-          description: "Deletes channels in your server.",
+          description: "Deletes channels in this server.",
           permissions: ["MANAGE_CHANNELS"],
           clientPerms: ["MANAGE_CHANNELS"],
           cooldown: 2,
@@ -718,7 +748,7 @@ module.exports = {
         },
         role: {
           name: "Delete - Role",
-          description: "Deletes roles in your server.",
+          description: "Deletes roles in this server.",
           permissions: ["MANAGE_ROLES"],
           clientPerms: ["MANAGE_ROLES"],
           cooldown: 2,
@@ -817,7 +847,7 @@ module.exports = {
     },
     settings: {
       name: "Settings",
-      description: "Allows you to view and configure your server settings.",
+      description: "Allows you to view and configure this server settings.",
       permissions: ["ADMINISTRATOR"],
       clientPerms: [],
       cooldown: 2,
@@ -831,7 +861,7 @@ module.exports = {
       option: {
         prefix: {
           name: "Setting - Prefix",
-          description: "Modifies the current prefix for your server.",
+          description: "Modifies the current prefix for this server.",
           permissions: ["ADMINISTRATOR"],
           clientPerms: [],
           cooldown: 1,
@@ -915,7 +945,7 @@ module.exports = {
         },
         welcomerole: {
           name: "Setting - Welcome Role",
-          description: "Changes what role new users recieve once they join your server.",
+          description: "Changes what role new users recieve once they join this server.",
           permissions: ["ADMINISTRATOR"],
           clientPerms: [],
           cooldown: 1,
@@ -927,7 +957,7 @@ module.exports = {
         },
         welcomemsg: {
           name: "Setting - Welcome Message",
-          description: "Modifies the kind message that greets new users in your server.\n\`[user]\`, \`[tag]\`, \`[id]\` and \`[username]\` are replaced with their respective values.",
+          description: "Modifies the kind message that greets new users in this server.\n\`[user]\`, \`[tag]\`, \`[id]\` and \`[username]\` are replaced with their respective values.",
           permissions: ["ADMINISTRATOR"],
           clientPerms: [],
           cooldown: 1,
@@ -1026,7 +1056,7 @@ module.exports = {
     shelp: {
       name: "Support Help",
       description: "Provides information about support team commands.",
-      permissions: ["SUPPORT_TEAM"],
+      permissions: [],
       clientPerms: [],
       cooldown: 2,
       minArgs: 0,

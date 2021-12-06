@@ -3,9 +3,9 @@ const Fetch = require("node-fetch");
 
 module.exports = async (client) => {
   // const clientMember = guild.me;
-  // const settings = await client.functions.getSettings(guild);
-  // const tsettings = await client.functions.getTicketData(guild);
-  // const guildPrefix = await client.functions.fetchPrefix(guild);
+  // const settings = client.functions.getSettings(guild);
+  // const tsettings = client.functions.getTicketData(guild);
+  // const guildPrefix = client.functions.fetchPrefix(guild);
   const code = `\`\`\``;
   const responses = {};
 

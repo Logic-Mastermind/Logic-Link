@@ -23,7 +23,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
       if (user) {
         if (cmd) {
-          await client.db.cooldown.delete(user.id, cmd.commandName);
+          client.cooldown.delete(user.id, cmd.commandName);
 
           const embed = client.embeds.success(command.option.cooldown, `Cleared <@${user.id}>'s cooldown for the \`${cmd.commandName}\` command.`);
           message.reply({ embeds: [embed] });
@@ -33,7 +33,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             return message.reply({ embeds: [embed] });
           }
 
-          await client.db.cooldown.delete(user.id);
+          client.cooldown.delete(user.id);
           const embed = client.embeds.success(command.option.cooldown, `Cleared <@${user.id}>'s cooldown.`);
           message.reply({ embeds: [embed] });
         }
@@ -51,7 +51,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       var guild = await client.functions.findGuild(thirdArg);
 
       if (guild) {
-        await client.db.settings.delete(guild.id, setting || null);
+        client.db.settings.delete(guild.id, setting || null);
         const embed = client.embeds.success(command, `${setting ? `Reset the \`${setting}\` setting` : `Reset settings `} in the \`${guild.name}\` guild.`);
         message.reply({ embeds: [embed] });
 

@@ -23,8 +23,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         joinedAt: `<t:${Math.floor(Date.parse(member.joinedAt) / 1000)}:D>`,
         permissions: (await client.functions.getPermissions(member)).join(", "),
         badges: (await client.functions.getBadges(member.user)).join(" "),
-        profile: await member.user.displayAvatarURL({ dynamic: false, size: 512 }),
-        mention: `<@${member.user.id}>`,
+        profile: member.user.displayAvatarURL({ dynamic: false, size: 512 }),
+        id: member.user.id,
         roleCount: roles.length,
         owner: member.id == message.guild.ownerId
       }
