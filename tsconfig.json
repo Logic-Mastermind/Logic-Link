@@ -1,5 +1,8 @@
 {
   "alwaysStrict": true,
+  "paths": {
+    "*": ["Typings/*.d.ts"]
+  },
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,

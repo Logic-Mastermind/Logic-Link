@@ -1,23 +1,6 @@
 import Discord from "discord.js";
 import client from "../index";
 
-interface buttonData {
-  label: string,
-  style: "PRIMARY" | "SECONDARY" | "SUCCESS" | "DANGER" | "LINK",
-  id: string,
-  emoji?: string,
-  url?: string,
-  disabled?: boolean
-}
-
-interface menuOptions {
-  label: string,
-  description: string,
-  id: string,
-  emoji?: string,
-  def?: boolean
-}
-
 /** A class with methods that return discord.js interaction components. */
 export default class Components {
   client: Discord.Client;
@@ -25,11 +8,10 @@ export default class Components {
   /**
    * Used to set the client property if it still exists.
    * @constructor
-   * @returns {class}
+   * @param {import("discord.js").Client} [client] - The client.
    */
   constructor(client?: Discord.Client) {
     if (client) this.client = client;
-    return this;
   }
   
   /**

@@ -1,42 +1,53 @@
-const { REST } = require('@discordjs/rest');
-const Discord = require("discord.js");
-const Fetch = require("node-fetch");
-const Chalk = require("chalk");
-const ms = require("ms");
+import { REST } from '@discordjs/rest';
+import Discord from "discord.js";
+import Fetch from "node-fetch";
+import Chalk from "chalk";
+import ms from "ms";
 
 const code = "```";
 const footer1 = `Logic Link - Imagine A World`;
 const footer2 = `https://cdn.discordapp.com/emojis/775848533298905130.png?v=1`;
 
+/** A class with utility methods that help standardize strenuous tasks. */
 export default class Functions {
-  constructor(client) {
-    this.client = client;
+  client: Discord.Client;
+
+  /**
+   * Used to set the client property if it still exists.
+   * @constructor
+   * @param {import("discord.js").Client} [client] - The client.
+   */
+  constructor(client?: Discord.Client) {
+    if (client) this.client = client;
   }
 
-  async sendErrorMsg(error, message, command, logId) {
+  /**
+   * A function that sends an error message and logs the error.
+   * @function sendErrorMsg
+   * @param {} error 
+   * @param message 
+   * @param command 
+   * @param logId 
+   */
+  sendErrorMsg(error, message, command, logId) {
     const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa" });
 
     const errorId = this.getRandomString(10);
-    await this.setErrorData(error, errorId);
-
-    var invite = null;
-    if (message && command) {
-      invite = await message.channel.createInvite({}, `Creating invite for evaluation because of an error in the ${command.commandName} command.`).catch(() => {});
-    }
+    this.setErrorData(error, errorId);
 
     const catcher = {
       title: `Bot Error`,
       color: `RED`,
-      description: `An error has occured whilst running the \`${command.commandName}\` command.\n${error ? `${error.name ? `${error.name.includes("Discord") ? `This error originated from an invalidated request to the Discord API which was caused by.` : `This error was caused by a human error from the command file of this command.   \u200b`}` : `This error was caused by a human error from the command file of this command.   \u200b`}` : ``}`,
+      description: `An error has occured whilst running the \`${command.commandName}\` command.\n${error.name.includes("Discord") ? `This error was caused by a Discord API Error which passed through user filtering.` : `This error was caused by a human error from the command file of this command.   \u200b`}`,
       fields: [
         {
           name: `Error Information`,
-          value: `${error.name ? `**Name:** \`${error.name}\`` : ``}${error.message ? `\n**Message:** \`${error.message}\`` : ``}${error.path ? `\n**Path:** \`${error.path}\`` : ``}${error.code ? `\n**Code:** \`${error.code}\`` : ``}${error.method ? `\n**Method:** \`${error.method}\`` : ``}${error.httpStatus ? `\n**HTTP Status:** \`${error.httpStatus}\`‎` : ``}\n\u200b`,
+          value: `**Name:** \`${error.name}\`\n**Message:** \`${error.message}\`${error.path ? `\n**Path:** \`${error.path}\`` : ``}${error.code ? `\n**Code:** \`${error.code}\`` : ``}${error.method ? `\n**Method:** \`${error.method}\`` : ``}${error.httpStatus ? `\n**HTTP Status:** \`${error.httpStatus}\`\u200b` : ``}\n\u200b`,
           inline: false
         },
         {
           name: `Command Information`,
-          value: `${command ? `**Name:** \`${command.name}\`\n` : ``}${message.guild ? `**Guild Name:** \`${message.guild.name}\`\n` : ``}${message.author ? `**Sender:** <@${message.author.id}>\n` : ``}${message.channel ? `**Channel:** <#${message.channel.id}>\n` : ``}`,
+          value: `**Name:** \`${command.name}\`\n**Guild Name:** \`${message.guild.name}\`\n**Sender:** <@${message.author.id}>\n**Channel:** <#${message.channel.id}>\n`,
           inline: false
         }
       ]
@@ -55,7 +66,7 @@ export default class Functions {
 
     const msg = {
       title: command.name,
-      description: this.client.util.errorMsgDefault,
+      description: client.util.errorMsgDefault,
       color: "RED",
       fields: [
         { name: "Error Identification", value: `${code}${errorId}${code}`, inline: false }
@@ -71,12 +82,12 @@ export default class Functions {
     const embed1 = new Discord.MessageEmbed(catcher);
     const embed2 = new Discord.MessageEmbed(stack);
 
-    if (logId) this.client.logger.updateLog(`An unexpected error occured.`, logId);
+    if (logId) client.logger.updateLog(`An unexpected error occured.`, logId);
     message.channel.send({ embeds: [embed] }).catch((error) => console.log(error));
 
     whClient.send({
       username: "Logic Link",
-      avatarURL: this.client.user.displayAvatarURL(),
+      avatarURL: client.user.displayAvatarURL(),
       embeds: [embed1, embed2]
     })
     .catch((error) => console.log(error));
@@ -88,7 +99,7 @@ export default class Functions {
     const catcher = {
       title: `Bot Error`,
       color: `RED`,
-      description: this.client.util.unexpectedError,
+      description: client.util.unexpectedError,
       fields: [
         {
           name: `Error Information`,
@@ -114,7 +125,7 @@ export default class Functions {
 
     whClient.send({
       username: "Logic Link",
-      avatarURL: this.client.user.displayAvatarURL(),
+      avatarURL: client.user.displayAvatarURL(),
       embeds: [embed1, embed2]
     })
     .catch((error) => console.log(error));
@@ -275,13 +286,13 @@ export default class Functions {
 
   async findUser(filter, safe) {
     const filterL = filter.toLowerCase();
-    const clientU = this.client.users.cache;
+    const clientU = client.users.cache;
     if (!clientU) return null;
 
     var user = null;
     var found = false;
 
-    if (!user && !isNaN(filterL)) user = clientU.get(filter) || await this.client.users.fetch(filter);
+    if (!user && !isNaN(filterL)) user = clientU.get(filter) || await client.users.fetch(filter);
     if (!user) user = clientU.find(x => x.username.toLowerCase() == filterL);
     if (!user) user = clientU.find(x => x.tag.toLowerCase() == filterL);
 
@@ -304,7 +315,7 @@ export default class Functions {
 
   async findGuild(filter, safe) {
     const filterL = filter.toLowerCase();
-    const clientG = this.client.guilds.cache;
+    const clientG = client.guilds.cache;
     if (!clientG) return null;
 
     var guild = null;
@@ -332,7 +343,7 @@ export default class Functions {
   async findBan(filter, guild, safe) {
     const filterL = filter.toLowerCase();
     const guildB = await guild.bans.fetch();
-    const clientU = this.client.users.cache;
+    const clientU = client.users.cache;
     if (!guildB) return null;
 
     var ban = null;
@@ -353,7 +364,7 @@ export default class Functions {
       }
     }
 
-    if (found) ban = clientU.get(found) || await this.client.users.fetch(found);
+    if (found) ban = clientU.get(found) || await client.users.fetch(found);
     if (!ban) ban = null;
     return ban;
   }
@@ -442,7 +453,7 @@ export default class Functions {
   }
 
   getSettings(guild) {
-    const settings = this.client.db.settings.get(guild.id);
+    const settings = client.db.settings.get(guild.id);
     const settingsObj = settings;
 
     settingsObj.modRoleObj = guild.roles.cache.get(settingsObj.modRole);
@@ -457,8 +468,8 @@ export default class Functions {
   }
 
   getTicketData(guild) {
-    const settings = this.client.db.tsettings.get(guild.id);
-    const panels = this.client.db.panels.get(guild.id, "panels");
+    const settings = client.db.tsettings.get(guild.id);
+    const panels = client.db.panels.get(guild.id, "panels");
     const panelMap = new Discord.Collection(panels);
 
     return {
@@ -653,7 +664,7 @@ export default class Functions {
 
   log(content, option) {
     if (option) {
-      if (this.client.util.chalkOptions.includes(option)) {
+      if (client.util.chalkOptions.includes(option)) {
         console.log(Chalk[option](content))
       } else {
         return "Invalid Option";
@@ -664,7 +675,7 @@ export default class Functions {
   }
 
   hasPermission(member, command, guild) {
-    const isDev = member.id == this.client.util.devId;
+    const isDev = member.id == client.util.devId;
     const devCmd = command.required == "dev";
     const perms = devCmd ? isDev : command.permissions.some(p => member.permissions.has(p));
     const isOwner = guild.ownerId == member.id;
@@ -681,21 +692,21 @@ export default class Functions {
     return newArray;
   }
 
-  async setErrorData({ name, message, path, code, method, httpStatus } = null, errorId) {
-    var id = errorId || await this.getRandomString(10);
+  setErrorData({ name, message, path, code, method, httpStatus } = null, errorId) {
+    var id = errorId || this.getRandomString(10);
 
-    if (name) await this.client.db.errors.set(id, name, "name");
-    if (message) await this.client.db.errors.set(id, message, "message");
-    if (path) await this.client.db.errors.set(id, path, "path");
-    if (code) await this.client.db.errors.set(id, code, "code");
-    if (method) await this.client.db.errors.set(id, method, "method");
-    if (httpStatus) await this.client.db.errors.set(id, httpStatus, "httpStatus");
+    if (name) client.db.errors.set(id, name, "name");
+    if (message) client.db.errors.set(id, message, "message");
+    if (path) client.db.errors.set(id, path, "path");
+    if (code) client.db.errors.set(id, code, "code");
+    if (method) client.db.errors.set(id, method, "method");
+    if (httpStatus) client.db.errors.set(id, httpStatus, "httpStatus");
 
     if (!name && !message && !path && !code && !method && !httpStatus) {
-      await this.client.db.errors.set(id, null, "info");
+      client.db.errors.set(id, null, "info");
     }
 
-    return await this.client.db.errors.get(id);
+    return client.db.errors.get(id);
   }
 
   async next(channel, obj, embeds, num) {
@@ -717,7 +728,7 @@ export default class Functions {
   }
 
   fetchPrefix(guild = {}) {
-    return this.client.db.settings.get(guild.id, "prefix") || null;
+    return client.db.settings.get(guild.id, "prefix") || null;
   }
 
   async tryCatch(callback, params) {
@@ -742,18 +753,18 @@ export default class Functions {
     if (flags.bitfield == 0) return noBadges;
 
     for (const flag of flags.toArray()) {
-      if (flag == "DISCORD_EMPLOYEE") replaced.push(this.client.util.discordStaff);
-      if (flag == "PARTNERED_SERVER_OWNER") replaced.push(this.client.util.partnered);
-      if (flag == "HYPESQUAD_EVENTS") replaced.push(this.client.util.hypesquad);
-      if (flag == "BUGHUNTER_LEVEL_1") replaced.push(this.client.util.bugHunter);
-      if (flag == "BUGHUNTER_LEVEL_2") replaced.push(this.client.util.bugHunterLvl2);
-      if (flag == "HOUSE_BRILLIANCE") replaced.push(this.client.util.brilliance);
-      if (flag == "HOUSE_BRAVERY") replaced.push(this.client.util.bravery);
-      if (flag == "HOUSE_BALANCE") replaced.push(this.client.util.balance);
-      if (flag == "EARLY_SUPPORTER") replaced.push(this.client.util.earlySupporter);
-      if (flag == "DISCORD_CERTIFIED_MODERATOR") replaced.push(this.client.util.certifiedMod);
-      if (flag == "VERIFIED_BOT") replaced.push(this.client.util.verified);
-      if (flag == "EARLY_VERIFIED_DEVELOPER") replaced.push(this.client.util.hypesquad);
+      if (flag == "DISCORD_EMPLOYEE") replaced.push(client.util.discordStaff);
+      if (flag == "PARTNERED_SERVER_OWNER") replaced.push(client.util.partnered);
+      if (flag == "HYPESQUAD_EVENTS") replaced.push(client.util.hypesquad);
+      if (flag == "BUGHUNTER_LEVEL_1") replaced.push(client.util.bugHunter);
+      if (flag == "BUGHUNTER_LEVEL_2") replaced.push(client.util.bugHunterLvl2);
+      if (flag == "HOUSE_BRILLIANCE") replaced.push(client.util.brilliance);
+      if (flag == "HOUSE_BRAVERY") replaced.push(client.util.bravery);
+      if (flag == "HOUSE_BALANCE") replaced.push(client.util.balance);
+      if (flag == "EARLY_SUPPORTER") replaced.push(client.util.earlySupporter);
+      if (flag == "DISCORD_CERTIFIED_MODERATOR") replaced.push(client.util.certifiedMod);
+      if (flag == "VERIFIED_BOT") replaced.push(client.util.verified);
+      if (flag == "EARLY_VERIFIED_DEVELOPER") replaced.push(client.util.hypesquad);
     }
 
     if (!replaced[0]) return noBadges;
@@ -776,7 +787,7 @@ export default class Functions {
         break;
       }
 
-      if (this.client.util.keyPerms.includes(perm)) {
+      if (client.util.keyPerms.includes(perm)) {
         perm = perm.replaceAll("_", " ");
         perm = perm.toLowerCase();
 
@@ -830,8 +841,8 @@ export default class Functions {
 
   async updateApplicationCommands(data, guildId) {
     try {
-      const id = this.client.user.id;
-      const token = this.client.token;
+      const id = client.user.id;
+      const token = client.token;
 
       const route = `/applications/${id}/${guildId ? `guilds/${guildId}/` : ``}commands`;
       const rest = new REST({ version: "9" }).setToken(token);
@@ -847,8 +858,8 @@ export default class Functions {
   hasPerm(command, target, guild, settings, supRole) {
     const perm = command.required || command;
     const perms = command.permissions || command;
-    const isDev = target.id == this.client.util.devId;
-    const supportRole = target.roles.cache.has(this.client.supportRole);
+    const isDev = target.id == client.util.devId;
+    const supportRole = target.roles.cache.has(client.supportRole);
 
     const client = this.client;
     const devMode = client.db.devSettings.get(client.util.devId, "devMode") ? target.id == client.util.devId : false;
@@ -900,7 +911,7 @@ export default class Functions {
     const ownerId = guild.ownerId;
 
     const isLower = initRole.position <= targRole.position;
-    const isOwner = (initiator.id == ownerId) && (target.id !== this.client.user.id);
+    const isOwner = (initiator.id == ownerId) && (target.id !== client.user.id);
     var lower = false;
 
     if (isLower && !isOwner) lower = true;

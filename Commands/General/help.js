@@ -18,9 +18,9 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     const hasBotSupport = extra.hasBotSupport || extra.isDev;
     const noPanels = tsettings.panels.size == 0;
 
-    const isMod = await modPerms.some(x => message.member.permissions.has(x)) || client.functions.isMod(message.member, message.guild, settings);
+    const isMod = await modPerms.some((x) => message.member.permissions.has(x)) || client.functions.isMod(message.member, message.guild, settings);
 
-    const isAdmin = await adminPerms.some(x => message.member.permissions.has(x)) || client.functions.isAdmin(message.member, message.guild, settings);
+    const isAdmin = await adminPerms.some((x) => message.member.permissions.has(x)) || client.functions.isAdmin(message.member, message.guild, settings);
 
     const tckPerms = isAdmin || hasSupportRole;
     const noPanel = noPanels && isAdmin;
@@ -32,8 +32,8 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
     const supView = `${hasBotSupport ? client.util.support : client.util.error} Support Commands`;
     const devView = `${extra.isDev ? client.util.integration : client.util.error} Developer Commands`;
 
-    const admin = `${isAdmin ? client.util.settings : client.util.error} Administrator Commands`;
-    const support = `${tckPerms ? client.util.panel : client.util.error} Support Commands`;
+    const tckAdmin = `${isAdmin ? client.util.settings : client.util.error} Administrator Commands`;
+    const tckSupport = `${tckPerms ? client.util.panel : client.util.error} Support Commands`;
 
     const cmdArray = [
       { name: genView, value: `${code}${guildPrefix}help general${code}\u200b`, inline: true },

@@ -13,60 +13,17 @@ const question = "<:IconSupport:868117797429997578>";
 const error = "<:MessageFail:868113159737720912>";
 const warn = "<:Warn:868113114221121586>";
 
-type colors = "RED" | "GREEN" | "BLUE" | "ORANGE" | "DEFAULT";
-type RGB = [number, number, number];
-
-interface fieldData {
-  name: string,
-  value: string,
-  inline?: boolean
-}
-
-interface embedData {
-  title?: string,
-  description: string,
-  color?: colors | number | RGB,
-  footer?: string[],
-  timestamp?: number | null | Date,
-  image?: string,
-  thumbnail?: string,
-  fields?: fieldData[]
-}
-
-interface commandData {
-  name: string,
-  description: string,
-  permissions: string[],
-  clientPerms: string[],
-  cooldown: number,
-  minArgs: number,
-  options: string[],
-  aliases: string[],
-  usage: string,
-  category: string,
-  commandName: string
-}
-
-interface itemInfoData {
-  [key: string]: any
-}
-
-interface guildData {
-  name: string,
-  id: string
-}
-
+/** A class with methods that return discord.js MessageEmbeds */
 export default class Embeds {
   client: Discord.Client;
 
   /**
    * Used to set the client property if it still exists.
    * @constructor
-   * @returns {class}
+   * @param {import("discord.js").Client} [client] - The client.
    */
-  constructor(client: Discord.Client) {
-    this.client = client;
-    return this;
+  constructor(client?: Discord.Client) {
+    if (client) this.client = client;
   }
 
   /**
@@ -206,7 +163,7 @@ export default class Embeds {
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    if (fields?[0]) embed.addFields(fields);
+    if (fields.length != 0) embed.addFields(fields);
     return embed;
   }
 
@@ -228,7 +185,7 @@ export default class Embeds {
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    if (fields?[0]) embed.addFields(fields);
+    if (fields.length != 0) embed.addFields(fields);
     return embed;
   }
 
@@ -250,7 +207,7 @@ export default class Embeds {
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    if (fields?[0]) embed.addFields(fields);
+    if (fields.length != 0) embed.addFields(fields);
     return embed;
   }
 
@@ -272,7 +229,7 @@ export default class Embeds {
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    if (fields?[0]) embed.addFields(fields);
+    if (fields.length != 0) embed.addFields(fields);
     return embed;
   }
 
@@ -294,7 +251,7 @@ export default class Embeds {
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    if (fields?[0]) embed.addFields(fields);
+    if (fields.length != 0) embed.addFields(fields);
     return embed;
   }
 
@@ -316,7 +273,7 @@ export default class Embeds {
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    if (fields?[0]) embed.addFields(fields);
+    if (fields.length != 0) embed.addFields(fields);
     return embed;
   }
 
@@ -338,7 +295,7 @@ export default class Embeds {
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    if (fields?[0]) embed.addFields(fields);
+    if (fields.length != 0) embed.addFields(fields);
     return embed;
   }
 
@@ -360,7 +317,7 @@ export default class Embeds {
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
-    if (fields?[0]) embed.addFields(fields);
+    if (fields.length != 0) embed.addFields(fields);
     return embed;
   }
 
@@ -537,7 +494,18 @@ export default class Embeds {
     return embed;
   }
 
-  helpCategory(name, title, prefix, supView, noPanel) {
+  /**
+   * 
+   * @param {string} name - The name of the category.
+   * @param {string} prefix - The prefix of the guild.
+   * @param {Object} info - Info for the embed.
+   * @param {string} info.main - The main title of the field.
+   * @param {string} [info.supView] - The title of the ticket support field.
+   * @param {string} [info.basicView] - The title of the ticket basic field.
+   * @param {string} [info.noPanel] - A string which represents whether panels exist in the guild.
+   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   */
+  helpCategory(name: string, prefix: string, info: categoryData): Discord.MessageEmbed {
     const category = client.category.get(name);
     const lowerName = name.toLowerCase();
 
@@ -547,15 +515,15 @@ export default class Embeds {
 
     if (name == "Ticket") {
       cmdArray.push({ name: basic, value: `${code}\n${category.Basic.join("\n")}${code}`, inline: true });
-      cmdArray.push({ name: supView, value: `${code}\n${category.Support.join("\n")}${code}`, inline: true });
-      cmdArray.push({ name: title, value: `${code}\n${category.Administrator.join("\n")}${code}`, inline: true });
+      cmdArray.push({ name: info.supView, value: `${code}\n${category.Support.join("\n")}${code}`, inline: true });
+      cmdArray.push({ name: info.main, value: `${code}\n${category.Administrator.join("\n")}${code}`, inline: true });
     } else {
-      cmdArray.push({ name: title, value: `${code}\n${category.join("\n")}${code}`, inline: true });
+      cmdArray.push({ name: info.main, value: `${code}\n${category.join("\n")}${code}`, inline: true });
       cmdArray.push({ name: client.util.whitespace, value: `\u200b`, inline: true });
       cmdArray.push({ name: client.util.whitespace, value: `\u200b`, inline: true });
     }
 
-    const helpEmbed = this.blue(`Help - ${name}`, `${description}\n\n**Command List**\nBelow shows a list of all ${lowerName} commands.\nTo get more details about a particular command, run: \`${prefix}help [command]\`.\nIf you would like a detailed guide on the help menu, run \`${prefix}help guide\`.\n\n${code}${name} Commands${code}\u200b${noPanel ? `\n${client.util.warn} This server does not have any panels. Run \`${prefix}panels new\` to create one.\n` : ``}`, cmdArray);
+    const helpEmbed = this.blue(`Help - ${name}`, `${description}\n\n**Command List**\nBelow shows a list of all ${lowerName} commands.\nTo get more details about a particular command, run: \`${prefix}help [command]\`.\nIf you would like a detailed guide on the help menu, run \`${prefix}help guide\`.\n\n${code}${name} Commands${code}\u200b${info.noPanel}`, cmdArray);
 
     return helpEmbed;
   }
@@ -641,25 +609,33 @@ export default class Embeds {
     return embed;
   }
 
-  async errorInfo(command, message, error) {
+  /**
+   * Creates a discord.js MessageEmbed, configures error info and sends a webhook error message.
+   * @function errorInfo
+   * @param {commandData|string} command - The command this function is executing from.
+   * @param {messageData} message - The message that invoked the error.
+   * @param {errorData} error - The error that was thrown.
+   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   */
+  errorInfo(command: commandData, message: messageData, error: errorData): Discord.MessageEmbed {
     const errorId = client.functions.getRandomString(10);
-    error ? await client.functions.setErrorData(error, errorId) : console.log("Recieved Invalid Error");
+    client.functions.setErrorData(error, errorId);
     
     const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa" });
 
     const catcher = {
       title: `Bot Error`,
       color: `RED`,
-      description: `An error has occured whilst running the \`${command.commandName}\` command.\n${error ? `${error.name ? `${error.name.includes("Discord") ? `This error was caused by a Discord API Error which passed through user filtering.` : `This error was caused by a human error from the command file of this command.   \u200b`}` : `This error was caused by a human error from the command file of this command.   \u200b`}` : ``}`,
+      description: `An error has occured whilst running the \`${command.commandName}\` command.\n${error.name.includes("Discord") ? `This error was caused by a Discord API Error which passed through user filtering.` : `This error was caused by a human error from the command file of this command.   \u200b`}`,
       fields: [
         {
           name: `Error Information`,
-          value: `${error.name ? `**Name:** \`${error.name}\`` : ``}${error.message ? `\n**Message:** \`${error.message}\`` : ``}${error.path ? `\n**Path:** \`${error.path}\`` : ``}${error.code ? `\n**Code:** \`${error.code}\`` : ``}${error.method ? `\n**Method:** \`${error.method}\`` : ``}${error.httpStatus ? `\n**HTTP Status:** \`${error.httpStatus}\`‎` : ``}\n\u200b`,
+          value: `**Name:** \`${error.name}\`\n**Message:** \`${error.message}\`${error.path ? `\n**Path:** \`${error.path}\`` : ``}${error.code ? `\n**Code:** \`${error.code}\`` : ``}${error.method ? `\n**Method:** \`${error.method}\`` : ``}${error.httpStatus ? `\n**HTTP Status:** \`${error.httpStatus}\`\u200b` : ``}\n\u200b`,
           inline: false
         },
         {
           name: `Command Information`,
-          value: `${command ? `**Name:** \`${command.name}\`\n` : ``}${message.guild ? `**Guild Name:** \`${message.guild.name}\`\n` : ``}${message.author ? `**Sender:** <@${message.author.id}>\n` : ``}${message.channel ? `**Channel:** <#${message.channel.id}>\n` : ``}`,
+          value: `**Name:** \`${command.name}\`\n**Guild Name:** \`${message.guild.name}\`\n**Sender:** <@${message.author.id}>\n**Channel:** <#${message.channel.id}>\n`,
           inline: false
         }
       ]
