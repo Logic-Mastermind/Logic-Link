@@ -1,29 +1,30 @@
-const Discord = require("discord.js");
-const Enmap = require("enmap");
-const Chalk = require("chalk");
-const Lod = require("lodash");
-const FS = require("fs");
+import Discord from "discord.js";
+import Enmap from "enmap";
+import Lod from "lodash";
+import FS from "fs";
 
-const buttons = require("./Modules/buttons.js");
-const commands = require("./Structures/commands.js");
-const config = require("./Structures/config.js");
-const embeds = require("./Modules/embeds.js");
-const functions = require("./Modules/functions.js");
-const prompts = require("./Modules/prompts.js");
-const database = require("./Structures/database.js");
-const logger = require("./Modules/logger.js");
-const util = require("./Structures/util.js");
-const schemas = require("./Modules/schemas.js");
-const discordFn = require("./Modules/discord.js");
-const clear = require("clear-module");
-const os = require("os");
+import Client from "./Structures/Client"
+import buttons from "./Modules/Components";
+import commands from "./Structures/Commands";
+import config from "./Structures/Config";
+import embeds from "./Modules/Embeds";
+import functions from "./Modules/Functions";
+import prompts from "./Modules/Prompts";
+import database from "./Structures/Database";
+import logger from "./Modules/Logger";
+import util from "./Structures/Util";
+import schemas from "./Modules/Schemas";
+import discord from "./Modules/Discord";
+import clear from "clear-module";
+import server from "./server";
+import os from "os";
 
-for (const [key, opt] of Object.entries(discordFn)) {
+for (const [key, opt] of Object.entries(discord)) {
   Discord[key] = opt;
 }
 
-const client = new Discord.Client({
-  intents: util.intents,
+const client: any = new Client({
+  intents: [] /*util.intents*/,
   restGlobalRateLimit: 50,
   presence: {
     status: "online",
@@ -50,7 +51,7 @@ client.functions = new functions(client);
 client.logger = new logger(client);
 client.prompts = new prompts(client);
 client.schemas = new schemas(client);
-client.server = require('./server')();
+client.server = server();
 
 client.commands = new Discord.Collection();
 client.category = new Discord.Collection();
@@ -79,7 +80,7 @@ for (const category of client.command.categories) {
           let cmd = require(`./Commands/Ticket/${category}/${file}`);
           let name = file.split(".")[0];
           
-          client.functions.log(`CMD: ${Chalk["bold"](name)}`);
+          client.functions.log(`CMD: ${name}`, "bold");
           client.commands.set(name, cmd);
           cmds["Ticket"][category].push(name);
         });
@@ -96,7 +97,7 @@ for (const category of client.command.categories) {
       let cmd = require(`./Commands/${category}/${file}`);
       let name = file.split(".")[0];
       
-      client.functions.log(`CMD: ${Chalk["bold"](name)}`);
+      client.functions.log(`CMD: ${name}`, "bold");
       client.commands.set(name, cmd);
       cmds[category].push(name);
     });
@@ -126,4 +127,4 @@ process.on("unhandledException", async (error) => {
 });
 
 client.login(config.token);
-module.exports = client;
+export default client;

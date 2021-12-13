@@ -184,14 +184,16 @@ module.exports = async (client, interaction) => {
           noteCollector.stop("cancel")
           const embed = client.embeds.warn("Ticket - Note", `This prompt has been cancelled.`);
           int.update({ embeds: [embed], components: [], ephemeral: true });
+          client.removeListener("interactionCreate", handleOnCancel);
         }
 
-        client.once("interactionCreate", handleOnCancel);
+        client.on("interactionCreate", handleOnCancel);
         noteCollector.on("end", async (_col, reason) => {
           if (reason !== "user") return;
           
           const embed = client.embeds.inactivity("Ticket - Note");
           await interaction.editReply({ embeds: [embed], components: [], ephemeral: true });
+          client.removeListener("interactionCreate", handleOnCancel);
         });
 
       } else if (intId.startsWith("Ticket_Delete:")) {
@@ -199,7 +201,7 @@ module.exports = async (client, interaction) => {
         const panel = tsettings.panels.get(Number(ids[0]));
         const ticket = panel.tickets.get(Number(ids[1]));
 
-        const embed = client.embeds.pending("Ticket Delete", `This ticket will be deleted in a few seconds...`);
+        const embed = client.embeds.pending("Ticket - Delete", `This ticket will be deleted in a few seconds...`);
         await interaction.reply({ embeds: [embed] });
         client.schemas.deleteTicket(guild, panel, ticket);
 

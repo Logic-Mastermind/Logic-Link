@@ -1,7 +1,8 @@
-const Enmap = require("enmap");
-const Discord = require("discord.js");
+// @ts-nocheck
+import Enmap from "enmap";
+import Discord from "discord.js";
 
-module.exports = {
+const Database = {
   settings: new Enmap({
     name: "settings",
     fetchAll: false,
@@ -143,3 +144,5 @@ module.exports = {
     }
   })
 }
+
+export default Database;

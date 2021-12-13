@@ -1,4 +1,4 @@
-module.exports = class Logger {
+export default class Logger {
   constructor(client) {
     this.client = client;
   }

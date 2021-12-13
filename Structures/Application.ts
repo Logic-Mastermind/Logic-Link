@@ -1,79 +1,80 @@
-const commands = require("./commands.js");
-const gen = commands.general;
-const tck = commands.ticket;
-const mod = commands.moderator;
-const adm = commands.administrator;
-const sup = commands.support;
-const dev = commands.dev;
-const reason = "The reason for this action.";
+import Commands from "./Commands.js";
+const reason: string = "The reason for this action.";
 
-const CommandTypes = {
-  CHAT_INPUT: 1,
-  USER: 2,
-  MESSAGE: 3
+const gen = Commands.general;
+const tck = Commands.ticket;
+const mod = Commands.moderator;
+const adm = Commands.administrator;
+const sup = Commands.support;
+const dev = Commands.developer;
+
+enum AppTypes {
+  CHAT_INPUT = 1,
+  USER = 2,
+  MESSAGE = 3
 }
 
-const OptionTypes = {
-  SUB_COMMAND: 1,
-  SUB_COMMAND_GROUP: 2,
-  STRING: 3,
-  INTEGER: 4,
-  BOOLEAN: 5,
-  USER: 6,
-  CHANNEL: 7,
-  ROLE: 8,
-  MENTIONABLE: 9,
-  NUMBER: 10
+enum OptionTypes {
+  SUB_COMMAND = 1,
+  SUB_COMMAND_GROUP = 2,
+  STRING = 3,
+  INTEGER = 4,
+  BOOLEAN = 5,
+  USER = 6,
+  CHANNEL = 7,
+  ROLE = 8,
+  MENTIONABLE = 9,
+  NUMBER = 10
 }
 
-module.exports = [
+const Application = [
   {
     name: "addrole",
-    type: 1,
+    type: AppTypes.CHAT_INPUT,
     description: adm.addrole.description,
     options: [
       {
         name: "user",
         description: "The user to give the role to.",
-        type: 6,
+        type: OptionTypes.USER,
         required: true
       },
       {
         name: "role",
         description: "The role to be added to the user.",
-        type: 8,
+        type: OptionTypes.ROLE,
         required: true
       }
     ]
   },
   {
     name: "addroles",
-    type: 1,
+    type: AppTypes.CHAT_INPUT,
     description: adm.addroles.description,
     options: [
       {
         name: "user",
         description: "The user to give the roles to.",
-        type: 6,
+        type: OptionTypes.USER,
         required: true
       },
       {
         name: "roles",
         description: "Mention roles to add to the user.",
-        type: 3,
+        type: OptionTypes.STRING,
         required: true
       }
     ]
   },
   {
     name: "create",
-    type: 1,
+    type: AppTypes.CHAT_INPUT,
     description: adm.create.description,
     options: [
       {
         name: "type",
         description: "The type of item to create.",
-        type: 3,
+        type: OptionTypes.STRING,
         required: true,
         choices: [
           {
@@ -101,25 +102,31 @@ module.exports = [
       {
         name: "name",
         description: "The name of the role or channel.",
-        type: 3,
+        type: OptionTypes.STRING,
         required: false
       }
     ]
   },
   {
     name: "delete",
-    type: 1,
+    type: AppTypes.CHAT_INPUT,
     description: adm.delete.description,
     options: [
       {
         name: "role",
         description: adm.delete.option.role.description,
-        type: 1,
+        type: OptionTypes.SUB_COMMAND,
         options: [
           {
             name: "role",
             description: "The role to delete from this server.",
-            type: 8,
+            type: OptionTypes.ROLE,
+            required: true
+          },
+          {
+            name: "channel",
+            description: "The channel to delete from this server.",
+            type: OptionTypes.CHANNEL,
             required: true
           }
         ]
@@ -127,12 +134,12 @@ module.exports = [
       {
         name: "channel",
         description: adm.delete.option.channel.description,
-        type: 1,
+        type: AppTypes.CHAT_INPUT,
         options: [
           {
             name: "channel",
             description: "The channel to delete from this server.",
-            type: 7,
+            type: OptionTypes.CHANNEL,
             required: true
           }
         ]
@@ -141,107 +148,107 @@ module.exports = [
   },
   {
     name: "hide",
-    type: 1,
+    type: AppTypes.CHAT_INPUT,
     description: adm.hide.description,
     options: [
       {
         name: "channel",
         description: "The channel to hide from regular members.",
-        type: 7,
+        type: OptionTypes.CHANNEL,
         required: true
       },
       {
         name: "reason",
         description: reason,
-        type: 3,
+        type: OptionTypes.STRING,
         required: false
       }
     ]
   },
   {
     name: "hoist",
-    type: 1,
+    type: AppTypes.CHAT_INPUT,
     description: adm.hoist.description,
     options: [
       {
         name: "role",
         description: "The role to hoist.",
-        type: 8,
+        type: OptionTypes.ROLE,
         required: true
       }
     ]
   },
   {
     name: "lock",
-    type: 1,
+    type: AppTypes.CHAT_INPUT,
     description: adm.lock.description,
     options: [
       {
         name: "channel",
         description: "The channel to lock from regular members.",
-        type: 7,
+        type: OptionTypes.CHANNEL,
         required: true
       },
       {
         name: "reason",
         description: reason,
-        type: 3,
+        type: OptionTypes.STRING,
         required: false
       }
     ]
   },
   {
     name: "lockdown",
-    type: 1,
+    type: AppTypes.CHAT_INPUT,
     description: adm.lockdown.description,
   },
   {
     name: "removerole",
-    type: 1,
+    type: AppTypes.CHAT_INPUT,
     description: adm.removerole.description,
     options: [
       {
         name: "user",
         description: "The user to remove the role from.",
-        type: 6,
+        type: OptionTypes.USER,
         required: true
       },
       {
         name: "role",
         description: "The role to be removed from the user.",
-        type: 8,
+        type: OptionTypes.ROLE,
         required: true
       }
     ]
   },
   {
     name: "removeroles",
-    type: 1,
+    type: AppTypes.CHAT_INPUT,
     description: adm.removeroles.description,
     options: [
       {
         name: "user",
         description: "The user to remove the roles from.",
-        type: 6,
+        type: OptionTypes.USER,
         required: true
       },
       {
         name: "roles",
         description: "Mention roles to from from the user.",
-        type: 3,
+        type: OptionTypes.STRING,
         required: true
       }
     ]
   },
   {
     name: "settings",
-    type: 1,
+    type: AppTypes.CHAT_INPUT,
     description: adm.settings.description,
     options: [
       {
         name: "setting",
         description: "The server setting to view or modify.",
-        type: 3,
+        type: OptionTypes.STRING,
         required: false,
         choices: [
           {
@@ -285,60 +292,62 @@ module.exports = [
       {
         name: "new",
         description: "The new server setting.",
-        type: 3,
+        type: OptionTypes.STRING,
         required: false
       }
     ]
   },
   {
     name: "unhide",
-    type: 1,
+    type: AppTypes.CHAT_INPUT,
     description: adm.unhide.description,
     options: [
       {
         name: "channel",
         description: "The channel to unlock.",
-        type: 7,
+        type: OptionTypes.CHANNEL,
         required: true
       },
       {
         name: "reason",
         description: reason,
-        type: 3,
+        type: OptionTypes.STRING,
         required: false
       }
     ]
   },
   {
     name: "unhoist",
-    type: 1,
+    type: AppTypes.CHAT_INPUT,
     description: adm.unhoist.description,
     options: [
       {
         name: "role",
         description: "The role to unhoist.",
-        type: 8,
+        type: OptionTypes.ROLE,
         required: true
       }
     ]
   },
   {
     name: "unlock",
-    type: 1,
+    type: AppTypes.CHAT_INPUT,
     description: adm.unlock.description,
     options: [
       {
         name: "channel",
         description: "The channel to unlock.",
-        type: 7,
+        type: OptionTypes.CHANNEL,
         required: true
       },
       {
         name: "reason",
         description: reason,
-        type: 3,
+        type: OptionTypes.STRING,
         required: false
       }
     ]
   },
 ]
+
+export default Application;

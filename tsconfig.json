@@ -1,0 +1,13 @@
+{
+  "alwaysStrict": true,
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "target": "es6",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+
+    
+    "experimentalDecorators": true
+  }
+}

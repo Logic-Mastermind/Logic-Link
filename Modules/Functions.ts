@@ -8,7 +8,7 @@ const code = "```";
 const footer1 = `Logic Link - Imagine A World`;
 const footer2 = `https://cdn.discordapp.com/emojis/775848533298905130.png?v=1`;
 
-module.exports = class Functions {
+export default class Functions {
   constructor(client) {
     this.client = client;
   }

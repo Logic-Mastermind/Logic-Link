@@ -1,4 +1,4 @@
-module.exports = {
+const Util = {
   defaultPrefix: ">",
   errorChannel: "845056542251286558",
   entryChannel: "843557479858307102",
@@ -7,9 +7,6 @@ module.exports = {
   serverId: "836760447297650729",
   footer1: `Logic Link - Imagine A World`,
   footer2: `https://cdn.discordapp.com/emojis/775848533298905130.png?v=1`,
-  channel: `This channel does not exist.\n\n**Detailed Info**\n`,
-  role: `This role does not exist.\n\n**Detailed Info**\n`,
-  user: `This user does not exist.\n\n**Detailed Info**\n`,
   reason: `No reason was provided.`,
   welcomeBotInfo: "Welcome to Logic Link, a powerful utility/moderation bot with advanced customization and automation options.",
   botInfo: "Logic Link is a powerful utility/moderation bot with advanced customization and automation options.",
@@ -146,3 +143,5 @@ module.exports = {
   cancelAliases: ["cancel", "cancel.", "cancel,"],
   whitespace: `\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b`,
 }
+
+export default Util;

@@ -3,7 +3,7 @@ const Fetch = require("node-fetch");
 const Chalk = require("chalk");
 const FS = require("fs");
 
-module.exports = class Schemas {
+export default class Schemas {
   constructor(client) {
     this.client = client;
   }
@@ -216,6 +216,10 @@ module.exports = class Schemas {
       type: 1
     });
 
+    if (channel.parentId !== panel.closed) {
+      channel.setParent(panel.closed);
+    }
+
     panel.tickets.set(count, {
       id: count,
       state: "CLOSED",
@@ -244,6 +248,10 @@ module.exports = class Schemas {
       reason: "Updating ticket permissions",
       type: 1
     });
+
+    if (channel.parentId !== panel.opened) {
+      channel.setParent(panel.opened);
+    }
 
     panel.tickets.set(count, {
       id: count,

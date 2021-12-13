@@ -1,8 +1,8 @@
-const app = require("express")();
-const fetch = require("node-fetch");
+const app = import("express")();
+const fetch = import("node-fetch");
 app.get('/', (req, res) => res.send('Server is up.'));
 
-module.exports = (start) => {
+export default function server() {
   const server = app.listen(3000);
   setInterval(() => {
     fetch(`https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`)

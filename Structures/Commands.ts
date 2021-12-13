@@ -1,5 +1,6 @@
-module.exports = {
+const Commands = {
   general: {
+    description: "Basic info / utility commands available to all users.",
     avatar: {
       name: "Avatar",
       description: "Displays the profile avatar of any user.",
@@ -10,7 +11,6 @@ module.exports = {
       options: [],
       aliases: ["av"],
       usage: "avatar [user]",
-      required: "none",
       category: "General",
       commandName: "avatar"
     },
@@ -24,7 +24,6 @@ module.exports = {
       options: [],
       aliases: ["binfo"],
       usage: "botinfo",
-      required: "none",
       category: "General",
       commandName: "botinfo"
     },
@@ -38,7 +37,6 @@ module.exports = {
       options: [],
       aliases: ["cmd", "cmds", "commands"],
       usage: "help [command name]",
-      required: "none",
       category: "General",
       commandName: "help"
     },
@@ -52,7 +50,6 @@ module.exports = {
       options: [],
       aliases: ["sinfo"],
       usage: "serverinfo",
-      required: "none",
       category: "General",
       commandName: "serverinfo"
     },
@@ -66,7 +63,6 @@ module.exports = {
       options: [],
       aliases: ["rinfo"],
       usage: "roleinfo <role>",
-      required: "none",
       category: "General",
       commandName: "roleinfo"
     },
@@ -80,7 +76,6 @@ module.exports = {
       options: [],
       aliases: ["cinfo"],
       usage: "channelinfo <channel>",
-      required: "none",
       category: "General",
       commandName: "channelinfo"
     },
@@ -94,7 +89,6 @@ module.exports = {
       options: [],
       aliases: ["inv", "links"],
       usage: "invite",
-      required: "none",
       category: "General",
       commandName: "invite"
     },
@@ -108,7 +102,6 @@ module.exports = {
       options: [],
       aliases: ["mcount", "mc"],
       usage: "membercount",
-      required: "none",
       category: "General",
       commandName: "membercount"
     },
@@ -122,7 +115,6 @@ module.exports = {
       options: ["new"],
       aliases: ["paste"],
       usage: "pastebin <option>",
-      required: "none",
       category: "General",
       commandName: "pastebin"
     },
@@ -136,7 +128,6 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "ping",
-      required: "none",
       category: "General",
       commandName: "ping"
     },
@@ -150,7 +141,6 @@ module.exports = {
       options: [],
       aliases: ["remindme"],
       usage: "remind [duration] <task>",
-      required: "none",
       category: "General",
       commandName: "remind"
     },
@@ -164,7 +154,6 @@ module.exports = {
       options: [],
       aliases: ["up-time", "upt"],
       usage: "uptime",
-      required: "none",
       category: "General",
       commandName: "uptime"
     },
@@ -178,7 +167,6 @@ module.exports = {
       options: ["connect", "disconnect", "play", "pause"],
       aliases: ["vc"],
       usage: "voice <option>",
-      required: "none",
       category: "General",
       commandName: "voice",
       option: {
@@ -192,7 +180,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "voice connect",
-          required: "none",
           category: "General",
           commandName: "connect"
         },
@@ -206,7 +193,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "voice disconnect",
-          required: "none",
           category: "General",
           commandName: "disconnect"
         },
@@ -220,7 +206,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "voice play <search query>",
-          required: "none",
           category: "General",
           commandName: "play"
         },
@@ -234,7 +219,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "voice pause",
-          required: "none",
           category: "General",
           commandName: "pause"
         }
@@ -250,12 +234,12 @@ module.exports = {
       options: [],
       aliases: ["who-is", "userinfo", "uinfo", "who"],
       usage: "whois [user]",
-      required: "none",
       category: "General",
       commandName: "whois"
     }
   },
   ticket: {
+    description: "Next generation ticket systems and commands great for de-cluttering channels.",
     thelp: {
       name: "Ticket Help",
       description: "Provides information about ticket commands.",
@@ -266,7 +250,6 @@ module.exports = {
       options: [],
       aliases: ["tickethelp"],
       usage: "thelp [command]",
-      required: "ticket",
       category: "Ticket",
       subCategory: "Basic",
       commandName: "thelp"
@@ -281,7 +264,6 @@ module.exports = {
       options: ["new", "modify", "delete"],
       aliases: ["panel", "tpanels"],
       usage: "panels [new | modify | delete]",
-      required: "ticket",
       category: "Ticket",
       subCategory: "Administrator",
       commandName: "panels",
@@ -296,7 +278,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "panels new",
-          required: "ticket",
           category: "Ticket",
           subCategory: "Administrator",
           commandName: "new",
@@ -311,7 +292,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "panels modify <panel id>",
-          required: "ticket",
           category: "Ticket",
           subCategory: "Administrator",
           commandName: "modify",
@@ -326,7 +306,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "panels delete <panel id>",
-          required: "ticket",
           category: "Ticket",
           subCategory: "Administrator",
           commandName: "delete",
@@ -341,7 +320,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "panels all",
-          required: "ticket",
           category: "Ticket",
           subCategory: "Administrator",
           commandName: "all",
@@ -356,7 +334,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "panels help",
-          required: "ticket",
           category: "Ticket",
           subCategory: "Administrator",
           commandName: "help",
@@ -373,13 +350,13 @@ module.exports = {
       options: [],
       aliases: ["ticketsettings", "tset"],
       usage: "tsettings [setting] [option parameter]",
-      required: "ticket",
       category: "Ticket",
       subCategory: "Administrator",
       commandName: "tsettings"
     }
   },
   moderator: {
+    description: "Advanced moderation commands useful for stopping raids and attacks.",
     announce: {
       name: "Announce",
       description: "Sends an announcement to a channel.",
@@ -390,7 +367,6 @@ module.exports = {
       options: ["everyone", "here", "role"],
       aliases: ["announcement", "anounce"],
       usage: "announce [option] <channel> <announcement>",
-      required: "mod",
       category: "Moderator",
       commandName: "announce",
       option: {
@@ -404,7 +380,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "announce everyone <channel> <announcement>",
-          required: "admin",
           category: "Moderator",
           commandName: "everyone"
         },
@@ -418,7 +393,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "announce here <channel> <announcement>",
-          required: "admin",
           category: "Moderator",
           commandName: "here"
         },
@@ -432,7 +406,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "announce role <role> <channel> <announcement>",
-          required: "admin",
           category: "Moderator",
           commandName: "role"
         }
@@ -448,7 +421,6 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "ban <user> [reason]",
-      required: "mod",
       category: "Moderator",
       commandName: "ban",
     },
@@ -462,7 +434,6 @@ module.exports = {
       options: [],
       aliases: ["cases"],
       usage: "case <id>",
-      required: "mod",
       category: "Moderator",
       commandName: "case",
     },
@@ -476,7 +447,6 @@ module.exports = {
       options: [],
       aliases: ["sban"],
       usage: "softban <user> [reason]",
-      required: "mod",
       category: "Moderator",
       commandName: "softban"
     },
@@ -490,7 +460,6 @@ module.exports = {
       options: [],
       aliases: ["tban"],
       usage: "tban <user> <duration> [reason]",
-      required: "mod",
       category: "Moderator",
       commandName: "tempban"
     },
@@ -504,7 +473,6 @@ module.exports = {
       options: [],
       aliases: ["emb"],
       usage: "embed ~<title>~ <description>",
-      required: "mod",
       category: "Moderator",
       commandName: "embed"
     },
@@ -518,7 +486,6 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "kick <user> [reason]",
-      required: "mod",
       category: "Moderator",
       commandName: "kick"
     },
@@ -532,7 +499,6 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "mute <user> [duration] [reason]",
-      required: "mod",
       category: "Moderator",
       commandName: "mute"
     },
@@ -546,7 +512,6 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "nickname <user> <new nickname | reset>",
-      required: "mod",
       category: "Moderator",
       commandName: "nickname"
     },
@@ -560,7 +525,6 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "purge <number>",
-      required: "mod",
       category: "Moderator",
       commandName: "purge"
     },
@@ -574,7 +538,6 @@ module.exports = {
       options: [],
       aliases: ["slow", "smode"],
       usage: "slowmode [channel] <number | off>",
-      required: "mod",
       category: "Moderator",
       commandName: "slowmode"
     },
@@ -588,7 +551,6 @@ module.exports = {
       options: [],
       aliases: ["un-ban"],
       usage: "unban <user> [reason]",
-      required: "mod",
       category: "Moderator",
       commandName: "unban"
     },
@@ -602,7 +564,6 @@ module.exports = {
       options: [],
       aliases: ["un-mute"],
       usage: "unmute <user> [reason]",
-      required: "mod",
       category: "Moderator",
       commandName: "unmute"
     },
@@ -616,7 +577,6 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "warn <user> [warning]",
-      required: "mod",
       category: "Moderator",
       commandName: "warn"
     },
@@ -630,12 +590,12 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "warnings <member>",
-      required: "mod",
       category: "Moderator",
       commandName: "warnings"
     }
   },
   administrator: {
+    description: "Easy to use admin / utility commands that can get the job done quickly.",
     addrole: {
       name: "Add Role",
       description: "Adds a specific role to a user.",
@@ -646,7 +606,6 @@ module.exports = {
       options: [],
       aliases: ["giverole", "ar", "adr"],
       usage: "addrole <user> <role>",
-      required: "admin",
       category: "Administrator",
       commandName: "addrole",
     },
@@ -660,7 +619,6 @@ module.exports = {
       options: [],
       aliases: ["giveroles", "ars", "adrs"],
       usage: "addroles <user> <roles>",
-      required: "admin",
       category: "Administrator",
       commandName: "addroles",
     },
@@ -674,7 +632,6 @@ module.exports = {
       options: ["channel", "role", "voice"],
       aliases: ["crt"],
       usage: "create <option> <name>",
-      required: "admin",
       category: "Administrator",
       commandName: "create",
       option: {
@@ -687,7 +644,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "create channel <name>",
-          required: "admin",
           category: "Administrator",
           commandName: "channel"
         },
@@ -700,7 +656,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "create role <name>",
-          required: "admin",
           category: "Administrator",
           commandName: "role"
         },
@@ -713,7 +668,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "create voice <name>",
-          required: "admin",
           category: "Administrator",
           commandName: "voice"
         }
@@ -729,7 +683,6 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "delete <role | channel>",
-      required: "admin",
       category: "Administrator",
       commandName: "delete",
       option: {
@@ -742,7 +695,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "delete <channel>",
-          required: "admin",
           category: "Administrator",
           commandName: "channel"
         },
@@ -755,7 +707,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "delete <role>",
-          required: "admin",
           category: "Administrator",
           commandName: "role"
         }
@@ -771,7 +722,6 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "hide [channel] [reason]",
-      required: "admin",
       category: "Administrator",
       commandName: "hide"
     },
@@ -785,7 +735,6 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "hoist <role>",
-      required: "admin",
       category: "Administrator",
       commandName: "hoist"
     },
@@ -799,7 +748,6 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "lock [channel] [reason]",
-      required: "admin",
       category: "Administrator",
       commandName: "lock"
     },
@@ -813,7 +761,6 @@ module.exports = {
       options: [],
       aliases: ["ld"],
       usage: "lockdown [off]",
-      required: "admin",
       category: "Administrator",
       commandName: "lockdown"
     },
@@ -827,7 +774,6 @@ module.exports = {
       options: [],
       aliases: ["takerole", "rr"],
       usage: "removerole <user> <role>",
-      required: "admin",
       category: "Administrator",
       commandName: "removerole",
     },
@@ -841,7 +787,6 @@ module.exports = {
       options: [],
       aliases: ["takeroles", "rrs"],
       usage: "removeroles <user> <roles>",
-      required: "admin",
       category: "Administrator",
       commandName: "removeroles",
     },
@@ -855,7 +800,6 @@ module.exports = {
       options: ["prefix", "adminrole", "modrole", "logchannel", "welcome", "welcomechannel", "welcomerole"],
       aliases: ["setting", "set"],
       usage: "settings [option] [option parameter]",
-      required: "admin",
       category: "Administrator",
       commandName: "settings",
       option: {
@@ -867,7 +811,6 @@ module.exports = {
           cooldown: 1,
           aliases: ["pre"],
           usage: "settings prefix <new prefix>",
-          required: "admin",
           category: "Administrator",
           commandName: "prefix"
         },
@@ -879,7 +822,6 @@ module.exports = {
           cooldown: 1,
           aliases: ["adm", "admin", "administrator", "administratorrole"],
           usage: "settings adminrole <role>",
-          required: "admin",
           category: "Administrator",
           commandName: "adminrole"
         },
@@ -891,7 +833,6 @@ module.exports = {
           cooldown: 1,
           aliases: ["mod", "moderator", "moderatorrole"],
           usage: "settings modrole <role>",
-          required: "admin",
           category: "Administrator",
           commandName: "modrole"
         },
@@ -903,7 +844,6 @@ module.exports = {
           cooldown: 1,
           aliases: ["log", "logchan"],
           usage: "settings logchannel <channel>",
-          required: "admin",
           category: "Administrator",
           commandName: "logchannel"
         },
@@ -915,7 +855,6 @@ module.exports = {
           cooldown: 1,
           aliases: ["muted"],
           usage: "settings mutedrole <role>",
-          required: "admin",
           category: "Administrator",
           commandName: "mutedrole"
         },
@@ -927,7 +866,6 @@ module.exports = {
           cooldown: 1,
           aliases: ["welc", "welcomesystem"],
           usage: "settings welcome <on | off>",
-          required: "admin",
           category: "Administrator",
           commandName: "welcome"
         },
@@ -939,7 +877,6 @@ module.exports = {
           cooldown: 1,
           aliases: ["welcomechan", "welcchan", "wc", "welc"],
           usage: "settings welcomechannel <channel>",
-          required: "admin",
           category: "Administrator",
           commandName: "welcomechannel"
         },
@@ -951,7 +888,6 @@ module.exports = {
           cooldown: 1,
           aliases: ["welcrole", "wr", "welcr"],
           usage: "settings welcomerole <role>",
-          required: "admin",
           category: "Administrator",
           commandName: "welcomerole"
         },
@@ -963,7 +899,6 @@ module.exports = {
           cooldown: 1,
           aliases: ["welcmsg", "wm", "welcm"],
           usage: "settings welcomemsg <msg>",
-          required: "admin",
           category: "Administrator",
           commandName: "welcomemsg"
         },
@@ -975,7 +910,6 @@ module.exports = {
           cooldown: 1,
           aliases: ["rst"],
           usage: "settings reset",
-          required: "admin",
           category: "Administrator",
           commandName: "reset"
         },
@@ -991,7 +925,6 @@ module.exports = {
       options: [],
       aliases: ["un-hoist"],
       usage: "unhoist <role>",
-      required: "admin",
       category: "Administrator",
       commandName: "unhoist"
     },
@@ -1005,7 +938,6 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "unhide [channel] [reason]",
-      required: "admin",
       category: "Administrator",
       commandName: "unhide"
     },
@@ -1019,12 +951,12 @@ module.exports = {
       options: [],
       aliases: ["un-lock"],
       usage: "unlock [channel] [reason]",
-      required: "admin",
       category: "Administrator",
       commandName: "unlock"
     }
   },
   support: {
+    description: "Helpful commands for our support team used to diagnose issues.",
     bug: {
       name: "Bug Report",
       description: "Submits a bug report to the support server.",
@@ -1035,7 +967,6 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "bug new",
-      required: "support",
       category: "Support",
       commandName: "bug"
     },
@@ -1049,7 +980,6 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "error <id>",
-      required: "support",
       category: "Support",
       commandName: "error"
     },
@@ -1063,12 +993,12 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "shelp [command]",
-      required: "support",
       category: "Support",
       commandName: "shelp"
     }
   },
   developer: {
+    description: "Secret development commands used to debug problems and fix bugs.",
     blacklist: {
       name: "Blacklist",
       description: "Disallows certain users from using commands.",
@@ -1079,7 +1009,6 @@ module.exports = {
       options: ["view"],
       aliases: [],
       usage: "blacklist <user> [reason]",
-      required: "dev",
       category: "Developer",
       commandName: "blacklist",
       option: {
@@ -1093,7 +1022,6 @@ module.exports = {
           options: ["view"],
           aliases: [],
           usage: "blacklist <user> [reason]",
-          required: "dev",
           category: "Developer",
           commandName: "blacklist",
         }
@@ -1109,7 +1037,6 @@ module.exports = {
       options: ["view"],
       aliases: ["dlock", "dl", "developerlock"],
       usage: "devlock <command> [guild] [option | reason]",
-      required: "dev",
       category: "Developer",
       commandName: "devlock",
       option: {
@@ -1123,7 +1050,6 @@ module.exports = {
           options: [],
           aliases: ["check"],
           usage: "devlock view",
-          required: "dev",
           category: "Developer",
           commandName: "view",
         }
@@ -1139,7 +1065,6 @@ module.exports = {
       options: [],
       aliases: ["devld"],
       usage: "devlockdown [guild] <reason>",
-      required: "dev",
       category: "Developer",
       commandName: "devlockdown"
     },
@@ -1153,7 +1078,6 @@ module.exports = {
       options: [],
       aliases: ["dhelp"],
       usage: "devhelp [option]",
-      required: "dev",
       category: "Developer",
       commandName: "devhelp"
     },
@@ -1167,7 +1091,6 @@ module.exports = {
       options: [],
       aliases: ["dmode", "devm"],
       usage: "devmode <on | off>",
-      required: "dev",
       category: "Developer",
       commandName: "devmode"
     },
@@ -1181,7 +1104,6 @@ module.exports = {
       options: ["silent", "async"],
       aliases: ["e"],
       usage: "eval [option] <code>",
-      required: "dev",
       category: "Developer",
       commandName: "eval",
       option: {
@@ -1195,7 +1117,6 @@ module.exports = {
           options: [],
           aliases: ["s"],
           usage: "eval silent <code>",
-          required: "dev",
           category: "Developer",
           commandName: "silent",
         },
@@ -1209,7 +1130,6 @@ module.exports = {
           options: [],
           aliases: ["a"],
           usage: "eval async <code>",
-          required: "dev",
           category: "Developer",
           commandName: "async",
         }
@@ -1225,7 +1145,6 @@ module.exports = {
       options: ["add", "remove", "persistent"],
       aliases: [],
       usage: "logs <option>",
-      required: "dev",
       category: "Developer",
       commandName: "logs"
     },
@@ -1239,7 +1158,6 @@ module.exports = {
       options: [],
       aliases: ["rld"],
       usage: "reload <command name>",
-      required: "dev",
       category: "Developer",
       commandName: "reload"
     },
@@ -1253,7 +1171,6 @@ module.exports = {
       options: ["cooldown", "settings"],
       aliases: ["rst"],
       usage: "reset <option> <option parameter>",
-      required: "dev",
       category: "Developer",
       commandName: "reset",
       option: {
@@ -1267,7 +1184,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "reset cooldown <user> [command]",
-          required: "dev",
           category: "Developer",
           commandName: "cooldown",
         },
@@ -1281,7 +1197,6 @@ module.exports = {
           options: [],
           aliases: [],
           usage: "reset settings <guild> [setting]",
-          required: "dev",
           category: "Developer",
           commandName: "settings",
         }
@@ -1297,7 +1212,6 @@ module.exports = {
       options: [],
       aliases: ["rstart", "rst"],
       usage: "restart",
-      required: "dev",
       category: "Developer",
       commandName: "restart"
     },
@@ -1311,7 +1225,6 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "shutdown",
-      required: "dev",
       category: "Developer",
       commandName: "shutdown"
     },
@@ -1325,7 +1238,6 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "test",
-      required: "dev",
       category: "Developer",
       commandName: "test"
     },
@@ -1339,7 +1251,6 @@ module.exports = {
       options: [],
       aliases: [],
       usage: "unblacklist <user>",
-      required: "dev",
       category: "Developer",
       commandName: "unblacklist",
     },
@@ -1437,3 +1348,5 @@ module.exports = {
     "cases": "case"
   }
 }
+
+export default Commands;
