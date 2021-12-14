@@ -1,5 +1,5 @@
+import Types from "../Typings/types";
 import Discord from "discord.js";
-import Functions from "./Functions";
 import client from "../index";
 import ms from "ms";
 
@@ -14,25 +14,17 @@ const error = "<:MessageFail:868113159737720912>";
 const warn = "<:Warn:868113114221121586>";
 
 /** A class with methods that return discord.js MessageEmbeds */
-export default class Embeds {
+export class Embeds {
   client: Discord.Client;
 
   /**
    * Used to set the client property if it still exists.
    * @constructor
-   * @param {import("discord.js").Client} [client] - The client.
+   * @param {Discord.Client} [client] - The client.
    */
   constructor(client?: Discord.Client) {
     if (client) this.client = client;
   }
-
-  /**
-   * Represents valid options for embed field data.
-   * @typedef {Object} fieldData
-   * @property {string} name - The name of the field.
-   * @property {string} value - The description of the field.
-   * @property {boolean} [inline] - Whether or not the field should be inline.
-   */
 
   /**
    * Creates a new discord.js MessageEmbed and sets properties if they are defined.
@@ -45,10 +37,10 @@ export default class Embeds {
    * @param {number|null|Date} [data.timestamp] - The timestamp of the embed.
    * @param {string} [data.image] - The image of the embed.
    * @param {string} [data.thumbnail] - The thumbnail of the embed.
-   * @param {fieldData[]} [data.fields] - The fields for the embed.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @param {Types.fieldData[]} [data.fields] - The fields for the embed.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  new(data: embedData): Discord.MessageEmbed {
+  new(data: Types.embedData): Discord.MessageEmbed {
     const { title, description, color, footer, timestamp, image, thumbnail, fields } = data;
     const embed = new MessageEmbed();
     embed.setDescription(description);
@@ -66,23 +58,13 @@ export default class Embeds {
   }
 
   /**
-   * Represents a command object from the '../Structures/Command' file.
-   * @typedef {Object} command
-   * @property {string} name - The name of the command.
-   * @property {string} [description] - The description of the command.
-   * @property {Array} [permissions] - The permissions required to use the command.
-   * @property {Array} [clientPerms] - The permissions that the client requires to use the command.
-   * @property {string} [category] - The category that the command is in.
-   */
-
-  /**
    * Creates a new discord.js MessageEmbed and replaces values if specified.
    * @function permission
-   * @param {command|string|string[]} cmd - The command which the permission came from.
+   * @param {Types.commandData|string|string[]} cmd - The command which the permission came from.
    * @param {string} [msg] - A custom message that is displayed in the embed.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  permission(cmd: commandData | string | string[], msg?: string): Discord.MessageEmbed {
+  permission(cmd: Types.commandData | string | string[], msg?: string): Discord.MessageEmbed {
     var permissions: string[];
     if (typeof cmd == "object" && !Array.isArray(cmd)) permissions = cmd.permissions;
     else if (typeof cmd == "string") permissions = [cmd];
@@ -103,11 +85,11 @@ export default class Embeds {
   /**
    * Creates a pre-defined discord.js MessageEmbed and replaces some values.
    * @function botPermission
-   * @param {command|string|string[]} cmd - The command which the permission came from.
+   * @param {Types.commandData|command|string|string[]} cmd - The command which the permission came from.
    * @param {string} [msg] - A custom message that is displayed in the embed.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  botPermission(cmd: commandData | string | string[], msg?: string): Discord.MessageEmbed {
+  botPermission(cmd: Types.commandData | string | string[], msg?: string): Discord.MessageEmbed {
     var permissions: string[];
     if (typeof cmd == "object" && !Array.isArray(cmd)) permissions = cmd.permissions;
     else if (typeof cmd == "string") permissions = [cmd];
@@ -130,9 +112,9 @@ export default class Embeds {
    * @function pending
    * @param {command|string} command - The command this function is executing from.
    * @param {string} [msg] - A custom message that is displayed in the embed.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  pending(command: commandData | string, msg?: string): Discord.MessageEmbed {
+  pending(command: Types.commandData | string, msg?: string): Discord.MessageEmbed {
     const title = typeof command == "object" ? command.name : command;
     const embed = new MessageEmbed();
 
@@ -150,10 +132,10 @@ export default class Embeds {
    * @function success
    * @param {command|string} command - The command this function is executing from.
    * @param {string} [description] - The description of the embed.
-   * @param {fieldData[]} [fields] - The embed's fields.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @param {Types.fieldData[]} [fields] - The embed's fields.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  success(command: commandData | string, description: string, fields?: fieldData[]): Discord.MessageEmbed {
+  success(command: Types.commandData | string, description: string, fields?: Types.fieldData[]): Discord.MessageEmbed {
     const title = typeof command == "object" ? command.name : command;
     const embed = new MessageEmbed();
 
@@ -172,10 +154,10 @@ export default class Embeds {
    * @function green
    * @param {command|string} command - The command this function is executing from.
    * @param {string} [description] - The description of the embed.
-   * @param {fieldData[]} [fields] - The embed's fields.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @param {Types.fieldData[]} [fields] - The embed's fields.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  green(command: commandData | string, description: string, fields?: fieldData[]): Discord.MessageEmbed {
+  green(command: Types.commandData | string, description: string, fields?: Types.fieldData[]): Discord.MessageEmbed {
     const title = typeof command == "object" ? command.name : command;
     const embed = new MessageEmbed();
 
@@ -194,10 +176,10 @@ export default class Embeds {
    * @function warn
    * @param {command|string} command - The command this function is executing from.
    * @param {string} [description] - The description of the embed.
-   * @param {fieldData[]} [fields] - The embed's fields.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @param {Types.fieldData[]} [fields] - The embed's fields.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  warn(command: commandData | string, description: string, fields?: fieldData[]): Discord.MessageEmbed {
+  warn(command: Types.commandData | string, description: string, fields?: Types.fieldData[]): Discord.MessageEmbed {
     const title = typeof command == "object" ? command.name : command;
     const embed = new MessageEmbed();
 
@@ -216,10 +198,10 @@ export default class Embeds {
    * @function orange
    * @param {command|string} command - The command this function is executing from.
    * @param {string} [description] - The description of the embed.
-   * @param {fieldData[]} [fields] - The embed's fields.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @param {Types.fieldData[]} [fields] - The embed's fields.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  orange(command: commandData | string, description: string, fields?: fieldData[]): Discord.MessageEmbed {
+  orange(command: Types.commandData | string, description: string, fields?: Types.fieldData[]): Discord.MessageEmbed {
     const title = typeof command == "object" ? command.name : command;
     const embed = new MessageEmbed();
 
@@ -238,10 +220,10 @@ export default class Embeds {
    * @function error
    * @param {command|string} command - The command this function is executing from.
    * @param {string} [description] - The description of the embed.
-   * @param {fieldData[]} [fields] - The embed's fields.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @param {Types.fieldData[]} [fields] - The embed's fields.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  error(command: commandData | string, description: string, fields?: fieldData[]): Discord.MessageEmbed {
+  error(command: Types.commandData | string, description: string, fields?: Types.fieldData[]): Discord.MessageEmbed {
     const title = typeof command == "object" ? command.name : command;
     const embed = new MessageEmbed();
 
@@ -260,10 +242,10 @@ export default class Embeds {
    * @function red
    * @param {command|string} command - The command this function is executing from.
    * @param {string} [description] - The description of the embed.
-   * @param {fieldData[]} [fields] - The embed's fields.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @param {Types.fieldData[]} [fields] - The embed's fields.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  red(command: commandData | string, description: string, fields?: fieldData[]): Discord.MessageEmbed {
+  red(command: Types.commandData | string, description: string, fields?: Types.fieldData[]): Discord.MessageEmbed {
     const title = typeof command == "object" ? command.name : command;
     const embed = new MessageEmbed();
 
@@ -282,10 +264,10 @@ export default class Embeds {
    * @function question
    * @param {command|string} command - The command this function is executing from.
    * @param {string} [description] - The description of the embed.
-   * @param {fieldData[]} [fields] - The embed's fields.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @param {Types.fieldData[]} [fields] - The embed's fields.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  question(command: commandData | string, description: string, fields?: fieldData[]): Discord.MessageEmbed {
+  question(command: Types.commandData | string, description: string, fields?: Types.fieldData[]): Discord.MessageEmbed {
     const title = typeof command == "object" ? command.name : command;
     const embed = new MessageEmbed();
 
@@ -304,10 +286,10 @@ export default class Embeds {
    * @function blue
    * @param {command|string} command - The command this function is executing from.
    * @param {string} [description] - The description of the embed.
-   * @param {fieldData[]} [fields] - The embed's fields.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @param {Types.fieldData[]} [fields] - The embed's fields.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  blue(command: commandData | string, description: string, fields?: fieldData[]): Discord.MessageEmbed {
+  blue(command: Types.commandData | string, description: string, fields?: Types.fieldData[]): Discord.MessageEmbed {
     const title = typeof command == "object" ? command.name : command;
     const embed = new MessageEmbed();
 
@@ -327,9 +309,9 @@ export default class Embeds {
    * @param {command} command - The command this function is executing from.
    * @param {string} [description] - The description of the setting.
    * @param {string} [prefix] - The prefix of the guild.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  settingsNoArgs(command: commandData, description: string, prefix: string): Discord.MessageEmbed {
+  settingsNoArgs(command: Types.commandData, description: string, prefix: string): Discord.MessageEmbed {
     const title = typeof command == "object" ? command.name : command;
     const embed = new MessageEmbed();
 
@@ -349,9 +331,9 @@ export default class Embeds {
    * Creates a pre-defined discord.js MessageEmbed and replaces some values.
    * @function inactivity
    * @param {command|string} command - The command this function is executing from.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  inactivity(command: commandData | string): Discord.MessageEmbed {
+  inactivity(command: Types.commandData | string): Discord.MessageEmbed {
     const title = typeof command == "object" ? command.name : command;
     const embed = new MessageEmbed();
 
@@ -367,7 +349,7 @@ export default class Embeds {
   /**
    * Creates a pre-defined discord.js MessageEmbed.
    * @function notComponent
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
   notComponent() {
     const embed = new MessageEmbed();
@@ -385,9 +367,9 @@ export default class Embeds {
    * @function helpMenu
    * @param {command} command - The command this function is executing from.
    * @param {string} prefix - The prefix of the guild.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  helpMenu(command: commandData, prefix: string): Discord.MessageEmbed {
+  helpMenu(command: Types.commandData, prefix: string): Discord.MessageEmbed {
     const fields = [
       { name: `Permissions`, value: `${command.permissions.includes("ALL") ? `${client.util.noPerms}` : `${command.category == "Developer" ? `Locked to bot developer.` : `\`${command.permissions.join(" | ")}\``}`}`, inline: true },
       { name: `Bot Permissions`, value: `${command.clientPerms ? command.clientPerms[0] ? `\`${command.clientPerms.join(" | ")}\`` : client.util.noPerms : client.util.noPerms}`, inline: true },
@@ -414,9 +396,9 @@ export default class Embeds {
    * @param {command|string} command - The command this function is executing from.
    * @param {string|string[]} item - The type(s) of items that are invalid.
    * @param {string|string[]} arg - The provided argument(s) that are invalid.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  invalidItem(command: commandData | string, item: string | string[], args: string | string[]): Discord.MessageEmbed {
+  invalidItem(command: Types.commandData | string, item: string | string[], args: string | string[]): Discord.MessageEmbed {
     const title = typeof command == "object" ? command.name : command;
     const embed = new MessageEmbed();
     
@@ -451,9 +433,9 @@ export default class Embeds {
    * @param {command|string} command - The command this function is executing from.
    * @param {string} content - The main content of the embed.
    * @param {...string} [fields] - Information for the fields of the embed.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  detailed(command: commandData | string, content: string, ...fields?: string[]): Discord.MessageEmbed {
+  detailed(command: Types.commandData | string, content: string, ...fields?: string[]): Discord.MessageEmbed {
     const title = typeof command == "object" ? command.name : command;
     const embed = new MessageEmbed();
 
@@ -471,12 +453,12 @@ export default class Embeds {
    * Creates a discord.js MessageEmbed based on the arguments provided.
    * @function moderated
    * @param {string} action - The moderation action that took place.
-   * @param {guildData|string} guild - The guild or guild name that the action took place.
+   * @param {Discord.Guild|string} guild - The guild or guild name that the action took place.
    * @param {string} reason - The reason for the action.
    * @param {number} [duration] - The duration for the action.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  moderated(action: string, guild: guildData | string, reason: string, duration?: number): Discord.MessageEmbed {
+  moderated(action: string, guild: Discord.Guild | string, reason: string, duration?: number): Discord.MessageEmbed {
     var guildName = typeof guild == "object" ? guild.name : guild;
     var parsed: string;
 
@@ -503,7 +485,7 @@ export default class Embeds {
    * @param {string} [info.supView] - The title of the ticket support field.
    * @param {string} [info.basicView] - The title of the ticket basic field.
    * @param {string} [info.noPanel] - A string which represents whether panels exist in the guild.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
   helpCategory(name: string, prefix: string, info: categoryData): Discord.MessageEmbed {
     const category = client.category.get(name);
@@ -534,9 +516,9 @@ export default class Embeds {
    * @param {command|string} command - The command this function is executing from.
    * @param {string} item - The type of item.
    * @param {Object} data - Data for the item.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  itemInfo(command: commandData | string, item: string, data: itemInfoData): Discord.MessageEmbed {
+  itemInfo(command: Types.commandData | string, item: string, data: Types.optional): Discord.MessageEmbed {
     const title = typeof command == "object" ? command.name : command;
     const embed = new MessageEmbed();
 
@@ -612,12 +594,12 @@ export default class Embeds {
   /**
    * Creates a discord.js MessageEmbed, configures error info and sends a webhook error message.
    * @function errorInfo
-   * @param {commandData|string} command - The command this function is executing from.
-   * @param {messageData} message - The message that invoked the error.
-   * @param {errorData} error - The error that was thrown.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @param {Types.commandData|string} command - The command this function is executing from.
+   * @param {Discord.Message} message - The message that invoked the error.
+   * @param {Types.errorData} error - The error that was thrown.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  errorInfo(command: commandData, message: messageData, error: errorData): Discord.MessageEmbed {
+  errorInfo(command: Types.commandData, message: Discord.Message, error: Types.errorData): Discord.MessageEmbed {
     const errorId = client.functions.getRandomString(10);
     client.functions.setErrorData(error, errorId);
     
@@ -683,10 +665,10 @@ export default class Embeds {
    * Creates a discord.js MessageEmbed and replaces info fields using the data given.
    * @function itemInfo
    * @param {command} command - The command that usage error info is being requested.
-   * @param {guildData|string} guild - The guild that this function is executing from.
-   * @returns {import("discord.js").MessageEmbed} The embed that was created.
+   * @param {Discord.Guild|string} guild - The guild that this function is executing from.
+   * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  noArgs(command: commandData, guild: guildData | string): Discord.MessageEmbed {
+  noArgs(command: Types.commandData, guild: Discord.Guild | string): Discord.MessageEmbed {
     const guildId = typeof guild == "object" ? guild.id : guild;
     const prefix = client.functions.fetchPrefix(guildId);
 

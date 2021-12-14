@@ -1,3 +1,4 @@
+import Types from "../Typings/types";
 import { REST } from '@discordjs/rest';
 import Discord from "discord.js";
 import Fetch from "node-fetch";
@@ -15,7 +16,7 @@ export default class Functions {
   /**
    * Used to set the client property if it still exists.
    * @constructor
-   * @param {import("discord.js").Client} [client] - The client.
+   * @param {Discord.Client} [client] - The client.
    */
   constructor(client?: Discord.Client) {
     if (client) this.client = client;
@@ -24,12 +25,13 @@ export default class Functions {
   /**
    * A function that sends an error message and logs the error.
    * @function sendErrorMsg
-   * @param {} error 
-   * @param message 
-   * @param command 
-   * @param logId 
+   * @param {Error} error - The error that was emitted.
+   * @param {Discord.Message} message - The command message that caused the error.
+   * @param {Types.commandData} command - The command that the function is executing from.
+   * @param {string} [logId] - The logId that the command action recieved.
+   * @returns {void}
    */
-  sendErrorMsg(error, message, command, logId) {
+  sendErrorMsg(error: Error, message: Discord.Message, command: Types.commandData, logId?: string): void {
     const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa" });
 
     const errorId = this.getRandomString(10);
@@ -93,7 +95,13 @@ export default class Functions {
     .catch((error) => console.log(error));
   }
 
-  sendError(error) {
+  /**
+   * A function that logs unexpected errors.
+   * @function sendError
+   * @param {Error} error - The error that was emitted.
+   * @returns {void}
+   */
+  sendError(error: Error): void {
     const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa"});
 
     const catcher = {
@@ -131,31 +139,42 @@ export default class Functions {
     .catch((error) => console.log(error));
   }
 
-  getNoArgs(command, guild) {
-    const guildPrefix = this.fetchPrefix(guild);
-    const noArgs = {
+  /**
+   * A function that returns an object of noArgs info for a specific command.
+   * @function getNoArgs
+   * @param {Types.commandData} command - The command.
+   * @param {Discord.Guild|string} prefix - The prefix, if a guild is provided, a prefix is fetched from the database.
+   * @returns {Types.embedData}
+   */
+  getNoArgs(command: Types.commandData, prefix: Discord.Guild | string): Types.embedData {
+    return {
       title: `${command.name}`,
       color: `ORANGE`,
-      description: `${command.description}\n\n**Usage**\n${code}${guildPrefix}${command.usage}${code}\n**Options**\n${command.options[0] ? `\`${guildPrefix}${command.commandName} ${command.options.join(`\n${guildPrefix}${command.commandName} `)}\`` : `No command options found.`}\n\n**Usage Error**\nYou are missing required parameters needed to carry out this command.\nTo get more information, run: \`${guildPrefix}help ${command.commandName}\`.`,
-      footer1: `Logic Link - Imagine A World`,
-      footer2: `https://cdn.discordapp.com/emojis/775848533298905130.png?v=1`
+      description: `${command.description}\n\n**Usage**\n${code}${typeof prefix == "string" ? prefix : this.fetchPrefix(prefix)}${command.usage}${code}\n**Options**\n${command.options[0] ? `\`${guildPrefix}${command.commandName} ${command.options.join(`\n${guildPrefix}${command.commandName} `)}\`` : `No command options found.`}\n\n**Usage Error**\nYou are missing required parameters needed to carry out this command.\nTo get more information, run: \`${guildPrefix}help ${command.commandName}\`.`,
+      footer: [`Logic Link - Imagine A World`, `https://cdn.discordapp.com/emojis/775848533298905130.png?v=1`]
     }
-    
-    return noArgs;
   }
   
-  async findRole(filter, guild, safe) {
+  /**
+   * Searches through all of the roles in a guild and finds one that matches the filter string.
+   * @function findRole
+   * @param {string} filter - The string to filter roles against.
+   * @param {Discord.Guild|Discord.Collection} guild - The guild to get roles from, or a collection of roles.
+   * @param {boolean} safe - Whether or not to check if role names start with the filter opposed to it being included.
+   * @returns {Discord.Role|null} The role, if it was found.
+   */
+  findRole(filter: string, guild: Discord.Guild, safe: boolean): Discord.Role | null {
     const filterL = filter.toLowerCase();
-    const guildR = guild.roles.cache;
-    if (!guildR) return null;
+    const roles = guild instanceof Discord.Guild ? guild.roles.cache : guild;
+    if (!roles) return null;
 
     var role = null;
     var found = false;
 
-    if (!role) role = guildR.get(filter);
-    if (!role) role = guildR.find(x => x.name.toLowerCase() == filterL);
+    role = roles.get(filter);
+    if (!role) role = roles.find(x => x.name.toLowerCase() == filterL);
 
-    for await (const [id, role] of guildR.entries()) {
+    for (const [id, role] of roles.entries()) {
       if (filter.length < 3) break;
       var nameL = role.name.toLowerCase();
       var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
@@ -166,7 +185,7 @@ export default class Functions {
       }
     }
 
-    if (found) role = guildR.get(found);
+    if (found) role = roles.get(found);
     if (!role) role = null;
     return role;
   }

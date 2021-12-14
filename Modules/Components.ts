@@ -1,14 +1,15 @@
+import Types from "../Typings/types";
 import Discord from "discord.js";
 import client from "../index";
 
 /** A class with methods that return discord.js interaction components. */
-export default class Components {
+export class Components {
   client: Discord.Client;
 
   /**
-   * Used to set the client property if it still exists.
+   * Used to set the client property if it exists.
    * @constructor
-   * @param {import("discord.js").Client} [client] - The client.
+   * @param {Discord.Client} [client] - The client.
    */
   constructor(client?: Discord.Client) {
     if (client) this.client = client;
@@ -24,9 +25,9 @@ export default class Components {
    * @param {string} [data.emoji] - The emoji to be added to the button.
    * @param {string} [data.url] - The url of the emoji.
    * @param {boolean} [data.disabled] - Whether the button should be disabled.
-   * @returns {import("discord.js").MessageButton} The button that was created.
+   * @returns {Discord.MessageButton} The button that was created.
    */
-  button(data: buttonData): Discord.MessageButton {
+  button(data: Types.buttonData): Discord.MessageButton {
     const { label, style, id, emoji, url, disabled } = data;
     const button = new Discord.MessageButton();
 
@@ -44,12 +45,12 @@ export default class Components {
   /**
    * Creates a new discord.js MessageActionRow and sets the components.
    * @function actionRow
-   * @param {... instanceof import("discord.js").BaseMessageComponent}
-   * @returns {import("discord.js").MessageActionRow} The action row containing the components.
+   * @param {any[]} components - The components that should be added.
+   * @returns {Discord.MessageActionRow} The action row containing the components.
    */
-  actionRow(...components): Discord.MessageActionRow {
+  actionRow(components: any[]): Discord.MessageActionRow {
     components = Array.from(components);
-    if (components.every(c => c instanceof Discord.BaseMessageComponent)) {
+    if (!components.every(c => c instanceof Discord.BaseMessageComponent)) {
       throw new Error("One or more arguments is not a valid message component.");
     }
 
@@ -61,16 +62,20 @@ export default class Components {
 
   /**
    * Creates a new discord.js MessageActionRow and sets the components.
-   * @function actionRow
-   * @param {... instanceof import("discord.js").BaseMessageComponent}
-   * @returns {import("discord.js").MessageActionRow} The select menu that was created.
+   * @function selectMenu
+   * @param {string} placeholder - The placeholder for the selectMenu.
+   * @param {Types.menuItemData[]} items - An array of items in the select menu.
+   * @param {string} id - The customId of the select menu.
+   * @param {number} [min] - The minimum number of selections.
+   * @param {number} [max] - The maximum number of selections.
+   * @returns {Discord.MessageSelectMenu} The select menu that was created.
    */
-  selectMenu(placeholder: string, options: menuOptions[], id: string, min?: number, max?: number) {
-    const optionsArray = [];
+  selectMenu(placeholder: string, items: menuOptions[], id: string, min?: number, max?: number): Discord.MessageSelectMenu {
+    const itemsArray = [];
 
-    for (const option of options) {
-      const { label, description, id, emoji, def } = option;
-      optionsArray.push({
+    for (const item of items) {
+      const { label, description, id, emoji, def } = item;
+      itemsArray.push({
         label,
         description,
         id,
@@ -80,7 +85,7 @@ export default class Components {
     }
 
     const menu = new Discord.MessageSelectMenu();
-    menu.addOptions(optionsArray);
+    menu.addOptions(itemsArray);
     menu.setCustomId(id);
     menu.setPlaceholder(placeholder);
     

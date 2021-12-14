@@ -1,5 +1,7 @@
-const app = import("express")();
-const fetch = import("node-fetch");
+import express from "express";
+import fetch from "node-fetch";
+
+const app = express();
 app.get('/', (req, res) => res.send('Server is up.'));
 
 export default function server() {

@@ -1,11 +1,11 @@
 import Discord from "discord.js";
 
-const DiscordFunctions = {
+export const DiscordFunctions = {
   /**
    * A function that takes an input 'msg' and splits it every 1990 characters.
    * @function splitMessage
    * @param {string} msg - The string to be split.
-   * @returns {Array} An array of the split messages
+   * @returns {RegExpMatchArray} An array of the split messages
    */
   splitMessage: (msg: string): RegExpMatchArray => {
     return msg.match(/[\s\S]{1,1990}/g);
@@ -14,7 +14,7 @@ const DiscordFunctions = {
   /**
    * Bulk deletes messages in a channel while ignoring pinned messages.
    * @function bulkDeleteMessages
-   * @param {extends import("discord.js").BaseGuildTextChannel} channel - The channel to bulk delete messages in.
+   * @param {Discord.BaseGuildTextChannel} channel - The channel to bulk delete messages in.
    * @param {number} num - The number of messages to purge.
    * @returns {Promise} A promise containing a collection of messages that were deleted.
    */
@@ -27,5 +27,3 @@ const DiscordFunctions = {
     return await channel.bulkDelete(msgs, true);
   }
 }
-
-export default DiscordFunctions;
