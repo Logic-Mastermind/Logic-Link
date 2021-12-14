@@ -2,6 +2,7 @@ import Types from "../Typings/types";
 import { REST } from '@discordjs/rest';
 import Discord from "discord.js";
 import Fetch from "node-fetch";
+import client from "../index";
 import Chalk from "chalk";
 import ms from "ms";
 
@@ -31,7 +32,7 @@ export default class Functions {
    * @param {string} [logId] - The logId that the command action recieved.
    * @returns {void}
    */
-  sendErrorMsg(error: Error, message: Discord.Message, command: Types.commandData, logId?: string): void {
+  sendErrorMsg(error: Types.errorData, message: Discord.Message, command: Types.commandData, logId?: string): void {
     const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa" });
 
     const errorId = this.getRandomString(10);
@@ -101,7 +102,7 @@ export default class Functions {
    * @param {Error} error - The error that was emitted.
    * @returns {void}
    */
-  sendError(error: Error): void {
+  sendError(error: Types.errorData): void {
     const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa"});
 
     const catcher = {
@@ -147,10 +148,12 @@ export default class Functions {
    * @returns {Types.embedData}
    */
   getNoArgs(command: Types.commandData, prefix: Discord.Guild | string): Types.embedData {
+    var guildPrefix = typeof prefix == "string" ? prefix : this.fetchPrefix(prefix);
+
     return {
       title: `${command.name}`,
       color: `ORANGE`,
-      description: `${command.description}\n\n**Usage**\n${code}${typeof prefix == "string" ? prefix : this.fetchPrefix(prefix)}${command.usage}${code}\n**Options**\n${command.options[0] ? `\`${guildPrefix}${command.commandName} ${command.options.join(`\n${guildPrefix}${command.commandName} `)}\`` : `No command options found.`}\n\n**Usage Error**\nYou are missing required parameters needed to carry out this command.\nTo get more information, run: \`${guildPrefix}help ${command.commandName}\`.`,
+      description: `${command.description}\n\n**Usage**\n${code}${guildPrefix}${command.usage}${code}\n**Options**\n${command.options[0] ? `\`${guildPrefix}${command.commandName} ${command.options.join(`\n${guildPrefix}${command.commandName} `)}\`` : `No command options found.`}\n\n**Usage Error**\nYou are missing required parameters needed to carry out this command.\nTo get more information, run: \`${guildPrefix}help ${command.commandName}\`.`,
       footer: [`Logic Link - Imagine A World`, `https://cdn.discordapp.com/emojis/775848533298905130.png?v=1`]
     }
   }
@@ -168,8 +171,8 @@ export default class Functions {
     const roles = guild instanceof Discord.Guild ? guild.roles.cache : guild;
     if (!roles) return null;
 
-    var role = null;
-    var found = false;
+    var role: Discord.Role;
+    var found: string;
 
     role = roles.get(filter);
     if (!role) role = roles.find(x => x.name.toLowerCase() == filterL);
@@ -461,7 +464,7 @@ export default class Functions {
     }
   }
 
-  getRandomString(length, chars) {
+  getRandomString(length, chars?) {
     var randomChars = chars || "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     var result = '';
     for (var i = 0; i < length; i++) {

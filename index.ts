@@ -23,7 +23,7 @@ for (const [key, opt] of Object.entries(discord)) {
   Discord[key] = opt;
 }
 
-const client: any = new Client({
+const client = new Client({
   intents: [] /*util.intents*/,
   restGlobalRateLimit: 50,
   presence: {
