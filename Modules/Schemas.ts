@@ -4,7 +4,7 @@ const Chalk = require("chalk");
 const FS = require("fs");
 
 export default class Schemas {
-  constructor(client) {
+  constructor(client?) {
     this.client = client;
   }
   

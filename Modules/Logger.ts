@@ -1,5 +1,5 @@
 export default class Logger {
-  constructor(client) {
+  constructor(client?) {
     this.client = client;
   }
 

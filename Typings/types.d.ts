@@ -1,4 +1,4 @@
-namespace Types {
+declare namespace Types {
   type embedColors = "RED" | "GREEN" | "BLUE" | "ORANGE" | "DEFAULT";
   type RGBOptions = [number, number, number];
 
@@ -68,9 +68,9 @@ namespace Types {
     httpStatus?: number | string
   }
 
-  export interface optional {
+  export interface empty {
     [key: string]: any
   }
 }
 
-export default APIComponents;
+export default Types;

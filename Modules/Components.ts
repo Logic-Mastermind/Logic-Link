@@ -3,7 +3,7 @@ import Discord from "discord.js";
 import client from "../index";
 
 /** A class with methods that return discord.js interaction components. */
-export class Components {
+export default class Components {
   client: Discord.Client;
 
   /**

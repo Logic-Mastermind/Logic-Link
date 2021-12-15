@@ -14,7 +14,7 @@ const error = "<:MessageFail:868113159737720912>";
 const warn = "<:Warn:868113114221121586>";
 
 /** A class with methods that return discord.js MessageEmbeds */
-export class Embeds {
+export default class Embeds {
   client: Discord.Client;
 
   /**
@@ -435,7 +435,7 @@ export class Embeds {
    * @param {...string} [fields] - Information for the fields of the embed.
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  detailed(command: Types.commandData | string, content: string, ...fields?: string[]): Discord.MessageEmbed {
+  detailed(command: Types.commandData | string, content: string, ...fields: string[]): Discord.MessageEmbed {
     const title = typeof command == "object" ? command.name : command;
     const embed = new MessageEmbed();
 
@@ -487,7 +487,7 @@ export class Embeds {
    * @param {string} [info.noPanel] - A string which represents whether panels exist in the guild.
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  helpCategory(name: string, prefix: string, info: categoryData): Discord.MessageEmbed {
+  helpCategory(name: string, prefix: string, info: Types.categoryData): Discord.MessageEmbed {
     const category = client.category.get(name);
     const lowerName = name.toLowerCase();
 
@@ -518,7 +518,7 @@ export class Embeds {
    * @param {Object} data - Data for the item.
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  itemInfo(command: Types.commandData | string, item: string, data: Types.optional): Discord.MessageEmbed {
+  itemInfo(command: Types.commandData | string, item: string, data: Types.empty): Discord.MessageEmbed {
     const title = typeof command == "object" ? command.name : command;
     const embed = new MessageEmbed();
 
@@ -655,6 +655,7 @@ export class Embeds {
     whClient.send({
       username: "Logic Link",
       avatarURL: client.user.displayAvatarURL(),
+      // @ts-ignore
       embeds: [embed1, embed2]
     })
     .catch((error) => console.log(error));
@@ -686,7 +687,7 @@ export class Embeds {
       },
       {
         name: "Options",
-        value: `${command.options.size == 0 ? `${client.util.noOption}\n\u200b` : `\`${prefix}${command.commandName} ${command.options.join(`\`\n${preix}${command.commandName} `)}\``}`,
+        value: `${command.options.size == 0 ? `${client.util.noOption}\n\u200b` : `\`${prefix}${command.commandName} ${command.options.join(`\`\n${prefix}${command.commandName} `)}\``}`,
         inline: false
       }
     ]);

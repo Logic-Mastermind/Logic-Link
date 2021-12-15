@@ -91,6 +91,7 @@ export default class Functions {
     whClient.send({
       username: "Logic Link",
       avatarURL: client.user.displayAvatarURL(),
+      // @ts-ignore
       embeds: [embed1, embed2]
     })
     .catch((error) => console.log(error));
@@ -198,8 +199,8 @@ export default class Functions {
     const guildC = guild.channels.cache;
     if (!guildC) return null;
 
-    var channel = null;
-    var found = false;
+    var channel: Discord.BaseGuildTextChannel;
+    var found: string;
 
     if (!channel) channel = guildC.get(filter);
     if (!channel) channel = guildC.find(x => x.name.toLowerCase() == filterL);
@@ -225,8 +226,8 @@ export default class Functions {
     const guildC = guild.channels.cache;
     if (!guildC) return null;
 
-    var channel = null;
-    var found = false;
+    var channel: Discord.BaseGuildTextChannel;
+    var found: string;
 
     if (!channel) channel = guildC.get(filter);
     if (!channel) channel = guildC.find(x => x.name.toLowerCase() == filterL);
@@ -925,6 +926,32 @@ export default class Functions {
     }
 
     return hasPerm || devMode;
+  }
+
+  /**
+   * A function that takes an input 'msg' and splits it every 1990 characters.
+   * @function splitMessage
+   * @param {string} msg - The string to be split.
+   * @returns {RegExpMatchArray} An array of the split messages
+   */
+  splitMessage(msg: string): RegExpMatchArray  {
+    return msg.match(/[\s\S]{1,1990}/g);
+  }
+
+  /**
+   * Bulk deletes messages in a channel while ignoring pinned messages.
+   * @function bulkDeleteMessages
+   * @param {Discord.BaseGuildTextChannel} channel - The channel to bulk delete messages in.
+   * @param {number} num - The number of messages to purge.
+   * @returns {Promise} A promise containing a collection of messages that were deleted.
+   */
+  async bulkDeleteMessages(channel, num): Promise<Discord.Collection<string, Discord.Message>> {
+    const msgs = await channel.messages.fetch({ limit: num });
+    for await (const [id, msg] of msgs.entries()) {
+      if (msg.pinned) msgs.delete(id);
+    }
+
+    return await channel.bulkDelete(msgs, true);
   }
 
   hierarchy(initiator, target, guild) {

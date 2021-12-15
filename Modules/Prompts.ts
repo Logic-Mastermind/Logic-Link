@@ -2,7 +2,7 @@ const Discord = require("discord.js");
 const code = "```";
 
 export default class Prompts {
-  constructor(client) {
+  constructor(client?) {
     this.client = client;
   }
 
