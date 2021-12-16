@@ -1,3 +1,5 @@
+import Discord from "discord.js";
+
 declare namespace Types {
   type embedColors = "RED" | "GREEN" | "BLUE" | "ORANGE" | "DEFAULT";
   type RGBOptions = [number, number, number];
@@ -56,6 +58,11 @@ declare namespace Types {
     usage: string,
     category: string,
     commandName: string
+  }
+
+  export interface itemFilterOptions {
+    safe?: boolean,
+    filter?: Function
   }
 
   export interface errorData {

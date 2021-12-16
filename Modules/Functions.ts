@@ -113,7 +113,7 @@ export default class Functions {
       fields: [
         {
           name: `Error Information`,
-          value: `${error.name ? `**Name:** \`${error.name}\`` : ``}${error.message ? `\n**Message:** \`${error.message}\`` : ``}${error.path ? `\n**Path:** \`${error.path}\`` : ``}${error.code ? `\n**Code:** \`${error.code}\`` : ``}${error.method ? `\n**Method:** \`${error.method}\`` : ``}${error.httpStatus ? `\n**HTTP Status:** \`${error.httpStatus}\`‎` : ``}\n\u200b`,
+          value: `**Name:** \`${error.name}\`\n**Message:** \`${error.message}\`${error.path ? `\n**Path:** \`${error.path}\`` : ``}${error.code ? `\n**Code:** \`${error.code}\`` : ``}${error.method ? `\n**Method:** \`${error.method}\`` : ``}${error.httpStatus ? `\n**HTTP Status:** \`${error.httpStatus}\`\u200b` : ``}\n\u200b`,
           inline: false
         }
       ]
@@ -162,232 +162,262 @@ export default class Functions {
   /**
    * Searches through all of the roles in a guild and finds one that matches the filter string.
    * @function findRole
-   * @param {string} filter - The string to filter roles against.
+   * @param {string} filter - The string to filter against.
    * @param {Discord.Guild|Discord.Collection} guild - The guild to get roles from, or a collection of roles.
-   * @param {boolean} safe - Whether or not to check if role names start with the filter opposed to it being included.
+   * @param {Object} [options] - Options for filtering.
+   * @param {boolean} [options.safe] - Whether or not to check if role names start or are included in the filter.
+   * @param {Function} [options.searchFilter] - A filter to test against all matched roles.
    * @returns {Discord.Role|null} The role, if it was found.
    */
-  findRole(filter: string, guild: Discord.Guild, safe: boolean): Discord.Role | null {
+  findRole(filter: string, guild: Discord.Guild | Discord.Collection, options?: Types.itemFilterOptions): Discord.Role | null {
     const filterL = filter.toLowerCase();
-    const roles = guild instanceof Discord.Guild ? guild.roles.cache : guild;
-    if (!roles) return null;
+    const collection = guild instanceof Discord.Guild ? guild.roles.cache : guild;
+    const { safe, searchFilter } = options;
+    if (!collection) throw new Error("Invalid collection recieved");
 
     var role: Discord.Role;
     var found: string;
 
-    role = roles.get(filter);
-    if (!role) role = roles.find(x => x.name.toLowerCase() == filterL);
+    role = collection.get(filter);
+    if (!role) role = collection.find(x => x.name.toLowerCase() == filterL);
 
-    for (const [id, role] of roles.entries()) {
-      if (filter.length < 3) break;
-      var nameL = role.name.toLowerCase();
-      var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
+    if (!role) {
+      for (const [id, role] of collection.entries()) {
+        if (filter.length < 3) break;
+        let nameL = role.name.toLowerCase();
+        let safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
-      if (safeFilter && filter.length >= 3) {
-        found = id;
-        break;
+        if (searchFilter) {
+          if (!searchFilter(item)) continue;
+        }
+
+        if (safeFilter && filter.length >= 3) {
+          found = id;
+          break;
+        }
       }
     }
 
-    if (found) role = roles.get(found);
+    if (found) role = collection.get(found);
     if (!role) role = null;
     return role;
   }
 
-  async findChannel(filter, guild, safe) {
+  /**
+   * Searches through all of the channels in a guild and finds one that matches the filter string.
+   * @function findChannel
+   * @param {string} filter - The string to filter against.
+   * @param {Discord.Guild|Discord.Collection} guild - The guild to get channels from, or a collection of channels.
+   * @param {Object} [options] - Options for filtering.
+   * @param {boolean} [options.safe] - Whether or not to check if channel names start or are included in the filter.
+   * @param {Function} [options.searchFilter] - A filter to test against all matched channels.
+   * @returns {Discord.GuildChannel|null} The channel, if it was found.
+   */
+  findChannel(filter: string, guild: Discord.Guild | Discord.Collection, options?: Types.itemFilterOptions): Discord.GuildChannel | null {
     const filterL = filter.toLowerCase();
-    const guildC = guild.channels.cache;
-    if (!guildC) return null;
+    const collection = guild instanceof Discord.Guild ? guild.channels.cache : guild;
+    const { safe, searchFilter } = options;
+    if (!collection) throw new Error("Invalid collection recieved");
 
-    var channel: Discord.BaseGuildTextChannel;
+    var channel: Discord.GuildChannel;
     var found: string;
 
-    if (!channel) channel = guildC.get(filter);
-    if (!channel) channel = guildC.find(x => x.name.toLowerCase() == filterL);
+    channel = collection.get(filter);
+    if (!channel) channel = collection.find(x => x.name.toLowerCase() == filterL);
 
-    for await (const [id, channel] of guildC.entries()) {
-      if (filter.length < 3) break;
-      var nameL = channel.name.toLowerCase();
-      var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
+    if (!channel) {
+      for (let [id, item] of collection.entries()) {
+        if (filter.length < 3) break;
+        let nameL = item.name.toLowerCase();
+        let safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
-      if (safeFilter) {
-        found = id;
-        break;
+        if (searchFilter) {
+          if (!searchFilter(item)) continue;
+        }
+
+        if (safeFilter) {
+          found = id;
+          break;
+        }
       }
     }
 
-    if (found) channel = guildC.get(found);
+    if (found) channel = collection.get(found);
     if (!channel) channel = null;
     return channel;
   }
 
-  async findCategory(filter, guild, safe) {
+  /**
+   * Searches through all of the members in a guild and finds one that matches the filter string.
+   * @function findMember
+   * @param {string} filter - The string to filter against.
+   * @param {Discord.Guild|Discord.Collection} guild - The guild to get members from, or a collection of members.
+   * @param {Object} [options] - Options for filtering.
+   * @param {boolean} [options.safe] - Whether or not to check if member names start or are included in the filter.
+   * @param {Function} [options.searchFilter] - A filter to test against all matched members.
+   * @returns {Discord.GuildMember|null} The member, if they was found.
+   */
+   findMember(filter: string, guild: Discord.Guild | Discord.Collection, options?: Types.itemFilterOptions): Discord.Member | null {
     const filterL = filter.toLowerCase();
-    const guildC = guild.channels.cache;
-    if (!guildC) return null;
+    const collection = guild instanceof Discord.Guild ? guild.members.cache : guild;
+    const { safe, searchFilter } = options;
+    if (!collection) throw new Error("Invalid collection recieved");
 
-    var channel: Discord.BaseGuildTextChannel;
+    var member: Discord.GuildMember;
     var found: string;
 
-    if (!channel) channel = guildC.get(filter);
-    if (!channel) channel = guildC.find(x => x.name.toLowerCase() == filterL);
+    member = collection.get(filter);
+    if (!member) member = collection.find(x => x.displayName.toLowerCase() == filterL || x.user.username.toLowerCase() == filterL || x.user.tag.toLowerCase() == filterL);
 
-    for await (const [id, channel] of guildC.entries()) {
-      if (filter.length < 3) break;
-      if (channel.type !== "GUILD_CATEGORY") continue;
+    if (!member) {
+      for (let [id, item] of collection.entries()) {
+        if (filter.length < 3) break;
+        let nameL = item.displayName.toLowerCase();
+        let safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
-      var nameL = channel.name.toLowerCase();
-      var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
+        if (searchFilter) {
+          if (!searchFilter(item)) continue;
+        }
 
-      if (safeFilter && filter.length >= 3) {
-        found = id;
-        break;
+        if (safeFilter) {
+          found = id;
+          break;
+        }
       }
     }
 
-    if (found) channel = guildC.get(found);
-    if (!channel) return null;
-
-    if (channel.type !== "GUILD_CATEGORY") return null;
-    return channel;
-  }
-
-  async findMember(filter, guild, safe) {
-    const filterL = filter.toLowerCase();
-    const guildM = guild.members.cache;
-    if (!guildM) return null;
-
-    var member = null;
-    var found = false;
-
-    if (!member) member = guildM.get(filter);
-    if (!member) member = guildM.find(x => x.displayName.toLowerCase() == filterL);
-    if (!member) member = guildM.find(x => x.user.tag.toLowerCase() == filterL);
-
-    for await (const [id, member] of guildM.entries()) {
-      if (filter.length < 3) break;
-      var nameL = member.displayName.toLowerCase();
-      var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
-
-      if (safeFilter && filter.length >= 3) {
-        found = id;
-        break;
-      }
-    }
-
-    if (found) member = guildM.get(found);
+    if (found) member = collection.get(found);
     if (!member) member = null;
     return member;
   }
 
-  async findMemberRoles(filter, member, safe) {
+  /**
+   * Searches through all cached users and finds one that matches the filter string.
+   * @function findUser
+   * @param {string} filter - The string to filter against.
+   * @param {Object} [options] - Options for filtering.
+   * @param {boolean} [options.safe] - Whether or not to check if user names start or are included in the filter.
+   * @param {Function} [options.searchFilter] - A filter to test against all matched users.
+   * @returns {Discord.GuildMember|null} The user, if they was found.
+   */
+   async findUser(filter: string, options?: Types.itemFilterOptions): Promise<Discord.User | null> {
     const filterL = filter.toLowerCase();
-    const memberR = member.roles.cache;
-    if (!memberR) return null;
+    const collection = client.users.cache;
+    const { safe, searchFilter } = options;
 
-    var role = null;
-    var found = false;
+    var user: Discord.User;
+    var found: string;
 
-    if (!role) role = memberR.get(filter);
-    if (!role) role = memberR.find(x => x.name.toLowerCase() == filterL);
+    user = collection.get(filter);
+    if (!user) user = collection.find(x => x.username.toLowerCase() == filterL || x.tag.toLowerCase() == filterL);
 
-    for await (const [id, role] of memberR.entries()) {
-      if (filter.length < 3) break;
-      var nameL = role.name.toLowerCase();
-      var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
+    if (!user) {
+      for (let [id, item] of collection.entries()) {
+        if (filter.length < 3) break;
+        let nameL = item.username.toLowerCase();
+        let safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
-      if (safeFilter && filter.length >= 3) {
-        found = id;
-        break;
+        if (searchFilter) {
+          if (!searchFilter(item)) continue;
+        }
+
+        if (safeFilter) {
+          found = id;
+          break;
+        }
       }
     }
 
-    if (found) role = memberR.get(found);
-    if (!role) role = null;
-    return role;
-  }
+    if (!found && !user && !isNaN(filter)) {
+      user = await client.users.fetch(filter);
+    } 
 
-  async findUser(filter, safe) {
-    const filterL = filter.toLowerCase();
-    const clientU = client.users.cache;
-    if (!clientU) return null;
-
-    var user = null;
-    var found = false;
-
-    if (!user && !isNaN(filterL)) user = clientU.get(filter) || await client.users.fetch(filter);
-    if (!user) user = clientU.find(x => x.username.toLowerCase() == filterL);
-    if (!user) user = clientU.find(x => x.tag.toLowerCase() == filterL);
-
-    for await (const [id, user] of clientU.entries()) {
-      if (filter.length < 3) break;
-      if (safe) break;
-      var nameL = user.username.toLowerCase();
-      var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
-
-      if (safeFilter && filter.length >= 3) {
-        found = id;
-        break;
-      }
-    }
-
-    if (found) user = clientU.get(found);
+    if (found) user = collection.get(found);
     if (!user) user = null;
     return user;
   }
 
-  async findGuild(filter, safe) {
+  /**
+   * Searches through all cached guilds and finds one that matches the filter string.
+   * @function findGuild
+   * @param {string} filter - The string to filter against.
+   * @param {Object} [options] - Options for filtering.
+   * @param {boolean} [options.safe] - Whether or not to check if guild names start or are included in the filter.
+   * @param {Function} [options.searchFilter] - A filter to test against all matched guilds.
+   * @returns {Discord.GuildMember|null} The guild, if it was found.
+   */
+   findGuild(filter: string, options?: Types.itemFilterOptions): Discord.Guild | null {
     const filterL = filter.toLowerCase();
-    const clientG = client.guilds.cache;
-    if (!clientG) return null;
+    const collection = client.guilds.cache;
+    const { safe, searchFilter } = options;
 
-    var guild = null;
-    var found = false;
+    var guild: Discord.Guild;
+    var found: string;
 
-    if (!guild) guild = clientG.get(filter);
-    if (!guild) guild = clientG.find(x => x.name.toLowerCase() == filterL);
+    guild = collection.get(filter);
+    if (!guild) guild = collection.find(x => x.name.toLowerCase() == filterL);
 
-    for await (const [id, guild] of clientG.entries()) {
-      if (filter.length < 3) break;
-      var nameL = guild.name.toLowerCase();
-      var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
+    if (!guild) {
+      for (let [id, item] of collection.entries()) {
+        if (filter.length < 3) break;
+        let nameL = item.name.toLowerCase();
+        let safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
-      if (safeFilter && filter.length >= 3) {
-        found = id;
-        break;
+        if (searchFilter) {
+          if (!searchFilter(item)) continue;
+        }
+
+        if (safeFilter) {
+          found = id;
+          break;
+        }
       }
     }
 
-    if (found) guild = clientG.get(found);
+    if (found) guild = collection.get(found);
     if (!guild) guild = null;
     return guild;
   }
 
-  async findBan(filter, guild, safe) {
+  /**
+   * Searches through all guild bans and finds one that matches the filter string.
+   * @function findBan
+   * @param {string} filter - The string to filter against.
+   * @param {Discord.Guild|Discord.Collection} - The guild to get bans from, or a collection of bans.
+   * @param {Object} [options] - Options for filtering.
+   * @param {boolean} [options.safe] - Whether or not to check if ban usernames start or are included in the filter.
+   * @param {Function} [options.searchFilter] - A filter to test against all matched bans.
+   * @returns {Discord.GuildMember|null} The ban, if it was found.
+   */
+   async findBan(filter: string, guild: Discord.Guild | Discord.Collection, options?: Types.itemFilterOptions): Discord.GuildBan | null {
     const filterL = filter.toLowerCase();
-    const guildB = await guild.bans.fetch();
-    const clientU = client.users.cache;
-    if (!guildB) return null;
+    const collection = guild instanceof Discord.Guild ? await guild.bans.fetch() : guild;
+    const { safe, searchFilter } = options;
 
-    var ban = null;
-    var found = false;
+    var ban: Discord.Guild;
+    var found: string;
 
-    if (!ban) ban = guildB.get(filter);
-    if (!ban) ban = guildB.find(x => x.user.username.toLowerCase() == filterL);
-    if (!ban) ban = guildB.find(x => x.user.tag.toLowerCase() == filterL);
+    ban = collection.get(filter);
+    if (!ban) ban = collection.find(x => x.user.username.toLowerCase() == filterL || x.user.tag.toLowerCase() == filterL);
 
-    for await (const [id, ban] of guildB.entries()) {
-      if (filter.length < 3) break;
-      var nameL = ban.user.username.toLowerCase();
-      var safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
+    if (!ban) {
+      for (let [id, item] of collection.entries()) {
+        if (filter.length < 3) break;
+        let nameL = item.user.username.toLowerCase();
+        let safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
-      if (safeFilter && filter.length >= 3) {
-        found = id;
-        break;
+        if (searchFilter) {
+          if (!searchFilter(item)) continue;
+        }
+
+        if (safeFilter) {
+          found = id;
+          break;
+        }
       }
     }
 
-    if (found) ban = clientU.get(found) || await client.users.fetch(found);
+    if (found) ban = collection.get(found);
     if (!ban) ban = null;
     return ban;
   }

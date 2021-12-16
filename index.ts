@@ -6,7 +6,6 @@ import server from "./server";
 const client = new Client({
   intents: Util.intents,
   restGlobalRateLimit: 50,
-  readFiles: true,
   presence: {
     status: "online",
     afk: false,
