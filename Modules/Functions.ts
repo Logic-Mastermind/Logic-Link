@@ -226,7 +226,7 @@ export default class Functions {
     if (!channel) channel = collection.find(x => x.name.toLowerCase() == filterL);
 
     if (!channel) {
-      for (let [id, item] of collection.entries()) {
+      for (const [id, item] of collection.entries()) {
         if (filter.length < 3) break;
         let nameL = item.name.toLowerCase();
         let safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
@@ -270,7 +270,7 @@ export default class Functions {
     if (!member) member = collection.find(x => x.displayName.toLowerCase() == filterL || x.user.username.toLowerCase() == filterL || x.user.tag.toLowerCase() == filterL);
 
     if (!member) {
-      for (let [id, item] of collection.entries()) {
+      for (const [id, item] of collection.entries()) {
         if (filter.length < 3) break;
         let nameL = item.displayName.toLowerCase();
         let safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
@@ -312,7 +312,7 @@ export default class Functions {
     if (!user) user = collection.find(x => x.username.toLowerCase() == filterL || x.tag.toLowerCase() == filterL);
 
     if (!user) {
-      for (let [id, item] of collection.entries()) {
+      for (const [id, item] of collection.entries()) {
         if (filter.length < 3) break;
         let nameL = item.username.toLowerCase();
         let safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
@@ -358,7 +358,7 @@ export default class Functions {
     if (!guild) guild = collection.find(x => x.name.toLowerCase() == filterL);
 
     if (!guild) {
-      for (let [id, item] of collection.entries()) {
+      for (const [id, item] of collection.entries()) {
         if (filter.length < 3) break;
         let nameL = item.name.toLowerCase();
         let safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
@@ -401,7 +401,7 @@ export default class Functions {
     if (!ban) ban = collection.find(x => x.user.username.toLowerCase() == filterL || x.user.tag.toLowerCase() == filterL);
 
     if (!ban) {
-      for (let [id, item] of collection.entries()) {
+      for (const [id, item] of collection.entries()) {
         if (filter.length < 3) break;
         let nameL = item.user.username.toLowerCase();
         let safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
@@ -422,7 +422,66 @@ export default class Functions {
     return ban;
   }
 
-  getTime(unsorted) {
+  /**
+   * Searches through all commands and finds one that matches the filter string.
+   * @function findCommand
+   * @param {string} filter - The filter to search with.
+   * @returns {Types.commandData|null} The command, if it was found.
+   */
+   findCommand(filter: string): Types.commandData | null {
+    var command = null;
+    filter = filter.toLowerCase();
+
+    const categories = ["general", "moderator", "ticket", "administrator", "support", "developer"];
+    function filterCommands(cmdData) {
+      if (filter == cmdData.commandName || cmdData.aliases.includes(filter)) {
+        command = cmdData
+        return true;
+
+      } else {
+        return false;
+      }
+    }
+
+    for (const category of categories) {
+      if (command) break;
+
+      for (const [_, data] of Object.entries(client.command[category])) {
+        if (filterCommands(data)) break;
+      }
+    }
+
+    return command;
+  }
+
+  /**
+   * Searches through all options from a command and finds one that matches the filter string.
+   * @function findOption
+   * @param {Types.commandData} command - The command to get options from.
+   * @param {string} filter - The filter to search with.
+   * @returns {Types.commandData|null} The option, if it was found.
+   */
+  findOption(command: Types.commandData, filter: string): Types.commandData | null {
+    var option = null;
+    filter = filter.toLowerCase();
+
+    for (const [_, data] of Object.entries(command.option)) {
+      if (filter == data.commandName || data.aliases.includes(filter)) {
+        option = data;
+        break;
+      }
+    }
+
+    return option;
+  }
+
+  /**
+   * Parses a unit and value from a time string.
+   * @function getTime
+   * @param {string} string - The string to parse.
+   * @returns {Types.timeData} The time object.
+   */
+  getTime(string: string): Types.timeData {
     const endsWithAny = (suffixes, string) => suffixes.some((suffix) => string.endsWith(suffix));
     const timeUnits = {
       total: ["s", "sec", "secs", "second", "seconds", "m", "min", "mins", "minute", "minutes", "h", "hr", "hrs", "hour", "hours", "d", "dy", "dys", "day", "days", "w", "wk", "wks", "week", "weeks", "mn", "mo", "mon", "mth", "mths", "mnth", "mnths", "month", "months", "y", "yr", "yrs", "year", "years"],
@@ -440,39 +499,39 @@ export default class Functions {
     var digit = null;
     var duration = null;
     var unit = null;
-    var hasNum = /\d/.test(unsorted);
+    var hasNum = /\d/.test(string);
 
-    if (endsWithAny(timeUnits.total, unsorted) || (!isNaN(unsorted)) && (!isNaN(unsorted.split("")[0]))) {
+    if (endsWithAny(timeUnits.total, string) || (!isNaN(string)) && (!isNaN(string.split("")[0]))) {
       if (hasNum) {
         passed = true;
-        timeFromUnit = unsorted.match(/[\d.]+/g);
+        timeFromUnit = string.match(/[\d.]+/g);
         digit = timeFromUnit[0];
 
-        if (endsWithAny(timeUnits.minutes, unsorted)) {
+        if (endsWithAny(timeUnits.minutes, string)) {
           duration = timeFromUnit * 60000;
           unit = "minute";
 
-        } else if (endsWithAny(timeUnits.hours, unsorted)) {
+        } else if (endsWithAny(timeUnits.hours, string)) {
           duration = timeFromUnit * 3600000
           unit = "hour"
 
-        } else if (endsWithAny(timeUnits.days, unsorted)) {
+        } else if (endsWithAny(timeUnits.days, string)) {
           duration = timeFromUnit * 86400000
           unit = "day"
 
-        } else if (endsWithAny(timeUnits.weeks, unsorted)) {
+        } else if (endsWithAny(timeUnits.weeks, string)) {
           duration = timeFromUnit * 604800000
           unit = "week"
 
-        } else if (endsWithAny(timeUnits.months, unsorted)) {
+        } else if (endsWithAny(timeUnits.months, string)) {
           duration = timeFromUnit * 2592000000
           unit = "month"
 
-        } else if (endsWithAny(timeUnits.years, unsorted)) {
+        } else if (endsWithAny(timeUnits.years, string)) {
           duration = timeFromUnit * 31536000000
           unit = "year"
 
-        } else if (endsWithAny(timeUnits.seconds, unsorted)) {
+        } else if (endsWithAny(timeUnits.seconds, string)) {
           duration = timeFromUnit * 1000
           unit = "second"
 
@@ -495,9 +554,17 @@ export default class Functions {
     }
   }
 
-  getRandomString(length, chars?) {
-    var randomChars = chars || "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    var result = '';
+  /**
+   * Generates a random string from a character set.
+   * @function getRandomString
+   * @param {number} length - The length of the random string.
+   * @param {string} [chars] - A custom character set to generate from.
+   * @returns {Types.timeData} The time object.
+   */
+  getRandomString(length: number, chars?: string): string {
+    var randomChars = chars || "abcdefghijklmnopqrstuvwxyz0123456789";
+    var result = "";
+
     for (var i = 0; i < length; i++) {
       result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
     }
@@ -505,7 +572,16 @@ export default class Functions {
     return result;
   }
 
-  getSettings(guild) {
+  /**
+   * Returns a guild settings object for a guild.
+   * @function getSettings
+   * @param {Discord.Guild|string} guild - The guild to get settings from.
+   * @returns {Types.guildSettings} The guild settings.
+   */
+  getSettings(guild: Discord.Guild | string): Types.guildSettings {
+    if (!guild instanceof Discord.Guild) guild = client.guilds.cache.get(guild);
+    if (!guild) throw new Error("Invalid guild ID");
+
     const settings = client.db.settings.get(guild.id);
     const settingsObj = settings;
 
@@ -515,104 +591,58 @@ export default class Functions {
     settingsObj.welcomeChannelObj = guild.channels.cache.get(settingsObj.welcomeChannel);
     settingsObj.welcomeRoleObj = guild.roles.cache.get(settingsObj.welcomeRole);
     settingsObj.mutedRoleObj = guild.roles.cache.get(settingsObj.mutedRole);
-    settingsObj.cases = new Discord.Collection(settings.cases);
 
     return settingsObj;
   }
 
-  getTicketData(guild) {
-    const settings = client.db.tsettings.get(guild.id);
-    const panels = client.db.panels.get(guild.id, "panels");
-    const panelMap = new Discord.Collection(panels);
+  /**
+   * Returns a ticket data object for a guild.
+   * @function getTicketData
+   * @param {Discord.Guild|string} guild - The guild to get data from.
+   * @returns {Types.ticketData} The ticket data object.
+   */
+  getTicketData(guild: Discord.Guild | string): Types.ticketData {
+    const guildId = guild instanceof Discord.Guild ? guild.id : guild;
+
+    const settings = client.db.tsettings.get(guildId);
+    const panels = client.db.panels.get(guildId, "panels");
 
     return {
       settings,
-      panels: panelMap
+      panels
     }
   }
 
-  getRandomInt(min, max) {
+  /**
+   * Generates a random integer between two numbers.
+   * @function getRandomInt
+   * @param {number} min - The minimum number floor.
+   * @param {number} max - The maximum number ceiling.
+   * @returns {number} The randomly generates integer.
+   */
+  getRandomInt(min: number, max: number): number {
     min = Math.ceil(min);
     max = Math.floor(max);
+
     return Math.floor(Math.random() * (max - min) + min);
   }
 
-  findCommand(filter) {
-    var command = null;
-    var client = this.client;
-    var alias = client.command.aliases[filter];
-    if (alias) filter = alias;
-    
-    for (const [name, info] of Object.entries(client.command.general)) {
-      if (command) break;
-      if (filter == info.commandName || info.aliases.includes(filter)) {
-        command = info;
-        break;
-      }
-    }
-
-    for (const [name, info] of Object.entries(client.command.administrator)) {
-      if (command) break;
-      if (filter == info.commandName || info.aliases.includes(filter)) {
-        command = info;
-        break;
-      }
-    }
-
-    for (const [name, info] of Object.entries(client.command.moderator)) {
-      if (command) break;
-      if (filter == info.commandName || info.aliases.includes(filter)) {
-        command = info;
-        break;
-      }
-    }
-
-    for (const [name, info] of Object.entries(client.command.developer)) {
-      if (command) break;
-      if (filter == info.commandName || info.aliases.includes(filter)) {
-        command = info;
-        break;
-      }
-    }
-
-    for (const [name, info] of Object.entries(client.command.support)) {
-      if (command) break;
-      if (filter == info.commandName || info.aliases.includes(filter)) {
-        command = info;
-        break;
-      }
-    }
-
-    for (const [name, info] of Object.entries(client.command.ticket)) {
-      if (command) break;
-      
-      if (filter == info.commandName || info.aliases.includes(filter)) {
-        command = info;
-        break;
-      }
-    }
-
-    return command;
-  }
-
-  findOption(command, filter) {
-    var option = null;
-    for (const [name, info] of Object.entries(command.option)) {
-      if (filter == info.commandName || info.aliases.includes(filter)) {
-        option = info;
-        break;
-      }
-    }
-
-    return option;
-  }
-
-  async paginate(message = {}, pages, pFilter = () => true, timeout = 60000) {
+  /**
+   * Creates an interaction collector that paginates a message with the specifies pages.
+   * @function paginate
+   * @param {Discord.Message} message - The message to paginate.
+   * @param {Discord.MessageEmbed[]} pages - The embed pages to paginate with.
+   * @param {Object} [options] - Options for the interaction collector.
+   * @param {Function} [options.filter] - A filter to test against every person who clicks a button.
+   * @param {number} [options.idle] - The idle time that the collector should stop after.
+   * @returns {void}
+   */
+  paginate(message: Discord.Message, pages: Discord.MessageEmbed[], options: Types.paginateOptions): void {
     if (!message.components[0].components[1]) throw new Error("Message does not have 2 button components");
 
-    const client = this.client;
     const original = message.embeds[0];
-    const collector = message.createMessageComponentCollector({ filter: () => true, idle: timeout });
+    const { filter, idle } = options;
+    const collector = message.createMessageComponentCollector({ filter: () => true, idle });
 
     const row = message.components[0];
     const button1 = row.components[0];
@@ -623,7 +653,7 @@ export default class Functions {
     var page = 1;
 
     collector.on("collect", async (int) => {
-      if (!pFilter(int.user)) {
+      if (!filter(int.user)) {
         const embed = client.embeds.notComponent();
         return int.reply({ embeds: [embed], ephemeral: true });
       }
@@ -657,12 +687,17 @@ export default class Functions {
       button1.setDisabled();
       button2.setDisabled();
 
-      const row1 = client.buttons.actionRow([button1, button2]);
+      const row1 = client.components.actionRow([button1, button2]);
       message.edit({ embeds: [original], components: [row1] });
     });
   }
 
-  getArgs(args) {
+  /**
+   * A function that spreads the elements of an arguments array.
+   * @param {string[]} args - The arguments to spread.
+   * @returns {Types.args} The args object.
+   */
+  getArgs(args: string[]): Types.args {
     return {
       secArg: args[0],
       thirdArg: args[1],
@@ -671,24 +706,60 @@ export default class Functions {
     }
   }
 
-  createCase(data, settings, guild) {
-    const client = this.client;
-    const caseId = settings.cases.last() ? settings.cases.last().id + 1 : 1;
+  /**
+   * Sets case data in a guild.
+   * @param {Types.caseData} data - The case data for the action.
+   * @param {Types.cases} cases - The cases of the guild.
+   * @param {Discord.Guild|string} guild - The guild that the action took place in.
+   * @returns {void}
+   */
+  createCase(data: Types.caseData, cases: Types.cases, guild: Discord.Guild | string): void {
+    const caseId = cases.last() ? cases.last().id + 1 : 1;
     const key = `${data.user}-${guild.id}`;
     data.id = caseId;
 
-    var cases = settings.cases.set(caseId, data);
+    var cases = cases.set(caseId, data);
     client.db.settings.set(guild.id, cases, "cases");
   }
-
-  filterCases(cases, user, warns) {
-    user = user.id || user;
+  /**
+   * A function that filters moderation cases in a guild.
+   * @param {Types.cases} cases - The cases to filter.
+   * @param {Types.caseDataFilter} filter - Properties to filter for.
+   * @param {Types.caseTypes} [filter.type] - The type of case.
+   * @param {string} [filter.user] - The user of the case.
+   * @param {string} [filter.moderator] - The moderator of the case.
+   * @param {string} [filter.reason] - The reason of the case.
+   * @param {number} [filter.timestamp] - Filters for before or after a certain timestamp.
+   * @param {"BEFORE"|"AFTER"} [filter.when] - Filters if the case has a timestamp before or after the filter.
+   * @returns {Types.cases} The filtered collection of cases.
+   */
+  filterCases(cases: Types.cases, filter: Types.caseDataFilter): Types.cases {
     const filtered = new Discord.Collection();
+    const { type, user, moderator, reason, timestamp, when } = filter;
     
-    for (const [id, c] of cases.entries()) {
-      if (c.user !== user) continue;
-      if (warns) {
-        if (c.type !== "WARN") continue;
+    for (const [id, case1] of cases.entries()) {
+      if (type) {
+        if (type != case1.type) continue;
+      }
+
+      if (user) {
+        if (user != case1.user) continue;
+      }
+
+      if (moderator) {
+        if (moderator != case1.moderator) continue;
+      }
+
+      if (reason) {
+        if (reason != case1.reason) continue;
+      }
+
+      if (timestamp && when) {
+        if (when == "BEFORE") {
+          if (timestamp > case1.timestamp) continue;
+        } else {
+          if (timestamp < case1.timestamp) continue;
+        }
       }
 
       filtered.set(id, c);
@@ -697,12 +768,17 @@ export default class Functions {
     return filtered;
   }
 
-  divideChunk(array, chunk) {
-    var i = null;
+  /**
+   * Divides an array every certain number of elements.
+   * @param {any[]} array - The array to divide.
+   * @param {number} chunk - The number of elements to divide the array after.
+   * @returns {any[]} The chunked array.
+   */
+  divideChunk(array: any[], chunk: number): any[] {
     var length = array.length;
     var newArray = [];
 
-    for (i = 0; i < length; i += chunk) {
+    for (var i = 0; i < length; i += chunk) {
       var portion = array.slice(i, i + chunk);
       newArray.push(portion);
     }
@@ -710,43 +786,73 @@ export default class Functions {
     return newArray;
   }
 
-  getCmdPath(cmd) {
-    if (cmd.category !== "Ticket") return `/home/runner/Logic-Link/Commands/${cmd.category}/${cmd.commandName}.js`
-    return `/home/runner/Logic-Link/Commands/Ticket/${cmd.subCategory}/${cmd.commandName}.js`
+  /**
+   * Gets the command path of a command.
+   * @param {Types.commandData} cmd - The command to get the file path of.
+   * @returns {string} The file path of the command.
+   */
+  getCmdPath(cmd: Types.commandData): string {
+    if (cmd.category !== "Ticket") return `/home/runner/Logic-Link/Commands/${cmd.category}/${cmd.commandName}.ts`
+    return `/home/runner/Logic-Link/Commands/Ticket/${cmd.subCategory}/${cmd.commandName}.ts`
   }
 
-  log(content, option) {
+  /**
+   * Logs content to the console with a chalk colour option.
+   * @param {string} content - The content of the log.
+   * @param {Types.chalkOptions} option - The chalk option to log with.
+   * @returns {void}
+   */
+  log(content: string, option?: Types.chalkOptions): void {
     if (option) {
-      if (client.util.chalkOptions.includes(option)) {
-        console.log(Chalk[option](content))
-      } else {
-        return "Invalid Option";
-      }
+      console.log(Chalk[option](content))
     } else {
       console.log(content);
     }
   }
 
-  hasPermission(member, command, guild) {
+  /**
+   * 
+   * @param {Discord.Member} member - The member to check permissions on.
+   * @param {Types.commandData} command - The command to get permissions from.
+   * @param {Discord.Guild|string} guild - The guild or ID of the guild owner.
+   * @returns {boolean}
+   */
+  hasPermission(member: Discord.Member, command: Types.commandData, guild: Discord.Guild | string): boolean {
     const isDev = member.id == client.util.devId;
-    const devCmd = command.required == "dev";
+    const devCmd = command.category == "Developer";
     const perms = devCmd ? isDev : command.permissions.some(p => member.permissions.has(p));
-    const isOwner = guild.ownerId == member.id;
+    const isOwner = guild instanceof Discord.Guild ? guild.ownerId == member.id : guild == member.id;
 
     return perms || isOwner;
   }
 
-  upperFirstAll(array) {
+  /**
+   * Uppers the first character on every word in a sentence.
+   * @param {string|string[]} sentence - The sentence.
+   * @returns {string|string[]} The new sentence, returns the same type that was given as a parameter.
+   */
+  upperFirstAll(sentence: string | string[]): string | string[] {
+    var isArray = Array.isArray(sentence);
     var newArray = [];
-    for (var word of array) {
+
+    if (!isArray) sentence = sentence.split(" ");
+    for (var word of sentence) {
       newArray.push(word.charAt(0).toUpperCase() + word.slice(1));
     }
 
+    if (!isArray) newArray = newArray.join(" ");
     return newArray;
   }
 
-  setErrorData({ name, message, path, code, method, httpStatus } = null, errorId) {
-    var id = errorId || this.getRandomString(10);
+  /**
+   * Sets data from an error into the database.
+   * @param {Types.errorData} error - The error data.
+   * @param {string} [id] - The ID of the error, a random one is generated if left empty.
+   * @returns {Types.errorData}
+   */
+  setErrorData(error: Error, id?: string) {
+    if (!id) id = this.getRandomString(10);
+    const { name, message, path, code, method, httpStatus } = error;
 
     if (name) client.db.errors.set(id, name, "name");
     if (message) client.db.errors.set(id, message, "message");
@@ -754,10 +860,6 @@ export default class Functions {
     if (code) client.db.errors.set(id, code, "code");
     if (method) client.db.errors.set(id, method, "method");
     if (httpStatus) client.db.errors.set(id, httpStatus, "httpStatus");
-
-    if (!name && !message && !path && !code && !method && !httpStatus) {
-      client.db.errors.set(id, null, "info");
-    }
 
     return client.db.errors.get(id);
   }
@@ -769,8 +871,8 @@ export default class Functions {
     });
   }
 
-  async getMemory() {
-    const memory = await process.memoryUsage();
+  getMemory() {
+    const memory = process.memoryUsage();
     const memUnit = {};
 
     for (const key in memory) {
@@ -780,8 +882,14 @@ export default class Functions {
     return memUnit
   }
 
-  fetchPrefix(guild = {}) {
-    return client.db.settings.get(guild.id, "prefix") || null;
+  /**
+   * Fetches the prefix of a guild from the database.
+   * @param {Discord.Guild|string} guild - The guild to fetch the prefix from.
+   * @returns {string|null} The prefix of the guild.
+   */
+  fetchPrefix(guild: Discord.Guild | string): string | null {
+    const guildId = guild instanceof Discord.Guild ? guild.id : guild;
+    return client.db.settings.get(guildId, "prefix") || null;
   }
 
   async tryCatch(callback, params) {
@@ -1009,7 +1117,12 @@ export default class Functions {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
-  sleep(ms) {
+  /**
+   * Delays the Node process for a certain number of time.
+   * @param {number} ms - The duration in ms.
+   * @returns {Promise<any>}
+   */
+  sleep(ms: number): Promise<any> {
     return new Promise((resolve) => setTimeout(resolve, ms))
   }
 }

@@ -13,6 +13,72 @@ declare namespace Types {
     disabled?: boolean
   }
 
+  export interface panelData {
+
+  }
+
+  export interface guildSettings {
+    prefix: string,
+    modRole: string | null,
+    adminRole: string | null,
+    logChannel: string | null,
+    welcomeChannel: string | null,
+    welcomeRole: string | null,
+    welcomeMsg: string | null,
+    mutedRole: string | null,
+    welcomeSystem: boolean,
+    mutedRoleConfig: boolean,
+    panelSetup: boolean,
+    cases: Discord.Collection,
+
+    modRoleObj: Discord.Role | undefined,
+    adminRoleObj: Discord.Role | undefined,
+    logChannelObj: Discord.GuildChannel | undefined,
+    welcomeChannelObj: Discord.GuildChannel | undefined,
+    welcomeRoleObj: Discord.Role | undefined,
+    mutedRoleObj: Discord.Role | undefined
+  }
+
+  export interface paginateOptions {
+    filter: Function,
+    idle: number
+  }
+
+  export type caseTypes = "BAN" | "KICK" | "MUTE" | "UNBAN" | "UNMUTE" | "WARN";
+  export type cases = Discord.Collection<number, caseData>;
+  export type chalkOptions = "bold" | "dim" | "italic" | "underline" | "inverse" | "strikethrough" | "red" | "green" | "yellow" | "blue" | "magenta" | "cyan" | "white" | "gray" | "bgBlack" | "bgRed" | "bgGreen" | "bgYellow" | "bgBlue" | "bgMagenta" | "bgCyan" | "bgWhite"
+
+  export interface caseData {
+    type: caseTypes,
+    user: string,
+    moderator: string,
+    reason: string,
+    timestamp: number
+  }
+
+  export interface caseDataFilter {
+    type?: caseTypes,
+    user?: string,
+    moderator?: string,
+    reason?: string,
+    timestamp?: number
+    when?: "BEFORE" | "AFTER"
+  }
+
+  export interface args {
+    secArg: string,
+    thirdArg: string,
+    fourthArg: string,
+    fifthArg: string
+  }
+
+  export interface ticketData {
+    settings: {
+      dmUsers: boolean
+    },
+    panels: Discord.Collection<number, panelData>
+  }
+
   export interface selectMenuData {
     label: string,
     description: string,
@@ -36,6 +102,14 @@ declare namespace Types {
     image?: string,
     thumbnail?: string,
     fields?: fieldData[]
+  }
+
+  export interface timeData {
+    passed: boolean,
+    digit: number,
+    duration: number,
+    display: string,
+    unit: string
   }
 
   export interface menuItemData {
