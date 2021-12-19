@@ -29,7 +29,7 @@ declare namespace Types {
     welcomeSystem: boolean,
     mutedRoleConfig: boolean,
     panelSetup: boolean,
-    cases: Discord.Collection,
+    cases: cases,
 
     modRoleObj: Discord.Role | undefined,
     adminRoleObj: Discord.Role | undefined,

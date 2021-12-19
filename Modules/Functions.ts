@@ -169,7 +169,7 @@ export default class Functions {
    * @param {Function} [options.searchFilter] - A filter to test against all matched roles.
    * @returns {Discord.Role|null} The role, if it was found.
    */
-  findRole(filter: string, guild: Discord.Guild | Discord.Collection, options?: Types.itemFilterOptions): Discord.Role | null {
+  findRole(filter: string, guild: Discord.Guild | Discord.Collection<string, Discord.Role>, options?: Types.itemFilterOptions): Discord.Role | null {
     const filterL = filter.toLowerCase();
     const collection = guild instanceof Discord.Guild ? guild.roles.cache : guild;
     const { safe, searchFilter } = options;
