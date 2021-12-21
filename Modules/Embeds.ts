@@ -487,28 +487,28 @@ export default class Embeds {
    * @param {string} [info.noPanel] - A string which represents whether panels exist in the guild.
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  helpCategory(name: string, prefix: string, info: Types.categoryData): Discord.MessageEmbed {
-    const category = client.category.get(name);
-    const lowerName = name.toLowerCase();
+  // helpCategory(name: string, prefix: string, info: Types.helpCategoryData): Discord.MessageEmbed {
+  //   const category = client.category.get(name);
+  //   const lowerName = name.toLowerCase();
 
-    const basic = `${client.util.members} Basic Commands`;
-    const description = client.command[lowerName].description;
-    const cmdArray = [];
+  //   const basic = `${client.util.members} Basic Commands`;
+  //   const description = client.commands[lowerName].description;
+  //   const cmdArray = [];
 
-    if (name == "Ticket") {
-      cmdArray.push({ name: basic, value: `${code}\n${category.Basic.join("\n")}${code}`, inline: true });
-      cmdArray.push({ name: info.supView, value: `${code}\n${category.Support.join("\n")}${code}`, inline: true });
-      cmdArray.push({ name: info.main, value: `${code}\n${category.Administrator.join("\n")}${code}`, inline: true });
-    } else {
-      cmdArray.push({ name: info.main, value: `${code}\n${category.join("\n")}${code}`, inline: true });
-      cmdArray.push({ name: client.util.whitespace, value: `\u200b`, inline: true });
-      cmdArray.push({ name: client.util.whitespace, value: `\u200b`, inline: true });
-    }
+  //   if (name == "Ticket") {
+  //     cmdArray.push({ name: basic, value: `${code}\n${category.Basic.join("\n")}${code}`, inline: true });
+  //     cmdArray.push({ name: info.supView, value: `${code}\n${category.Support.join("\n")}${code}`, inline: true });
+  //     cmdArray.push({ name: info.main, value: `${code}\n${category.Administrator.join("\n")}${code}`, inline: true });
+  //   } else {
+  //     cmdArray.push({ name: info.main, value: `${code}\n${category.join("\n")}${code}`, inline: true });
+  //     cmdArray.push({ name: client.util.whitespace, value: `\u200b`, inline: true });
+  //     cmdArray.push({ name: client.util.whitespace, value: `\u200b`, inline: true });
+  //   }
 
-    const helpEmbed = this.blue(`Help - ${name}`, `${description}\n\n**Command List**\nBelow shows a list of all ${lowerName} commands.\nTo get more details about a particular command, run: \`${prefix}help [command]\`.\nIf you would like a detailed guide on the help menu, run \`${prefix}help guide\`.\n\n${code}${name} Commands${code}\u200b${info.noPanel}`, cmdArray);
+  //   const helpEmbed = this.blue(`Help - ${name}`, `${description}\n\n**Command List**\nBelow shows a list of all ${lowerName} commands.\nTo get more details about a particular command, run: \`${prefix}help [command]\`.\nIf you would like a detailed guide on the help menu, run \`${prefix}help guide\`.\n\n${code}${name} Commands${code}\u200b${info.noPanel}`, cmdArray);
 
-    return helpEmbed;
-  }
+  //   return helpEmbed;
+  // }
 
   /**
    * Creates a discord.js MessageEmbed and replaces info fields using the data given.
@@ -626,12 +626,7 @@ export default class Embeds {
     const stack = {
       title: `Error Stack`,
       description: `${code}${error.stack}${code}`,
-      color: "RED",
-      timestamp: Date.now(),
-      footer: {
-        text: footer1,
-        iconURL: footer2
-      }
+      color: "RED"
     }
 
     const msg = {
@@ -640,22 +635,16 @@ export default class Embeds {
       color: "RED",
       fields: [
         { name: "Error Identification", value: `${code}${errorId}${code}`, inline: false }
-      ],
-      timestamp: Date.now(),
-      footer: {
-        text: footer1,
-        iconURL: footer2
-      }
+      ]
     }
 
-    const embed = new MessageEmbed(msg);
-    const embed1 = new MessageEmbed(catcher);
-    const embed2 = new MessageEmbed(stack);
+    const embed = this.new(msg);
+    const embed1 = this.new(catcher);
+    const embed2 = this.new(stack);
 
     whClient.send({
       username: "Logic Link",
       avatarURL: client.user.displayAvatarURL(),
-      // @ts-ignore
       embeds: [embed1, embed2]
     })
     .catch((error) => console.log(error));
@@ -687,7 +676,7 @@ export default class Embeds {
       },
       {
         name: "Options",
-        value: `${command.options.size == 0 ? `${client.util.noOption}\n\u200b` : `\`${prefix}${command.commandName} ${command.options.join(`\`\n${prefix}${command.commandName} `)}\``}`,
+        value: `${command.options.length == 0 ? `${client.util.noOption}\n\u200b` : `\`${prefix}${command.commandName} ${command.options.join(`\`\n${prefix}${command.commandName} `)}\``}`,
         inline: false
       }
     ]);

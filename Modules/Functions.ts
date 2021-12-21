@@ -871,6 +871,11 @@ export default class Functions {
     });
   }
 
+  /**
+   * Gets the current memory usage data of the Node process.
+   * @function getMemory
+   * @returns {Object}
+   */
   getMemory() {
     const memory = process.memoryUsage();
     const memUnit = {};
@@ -879,7 +884,7 @@ export default class Functions {
       memUnit[key] = Math.round(memory[key] / 1024 / 1024 * 100) / 100;
     }
 
-    return memUnit
+    return memUnit;
   }
 
   /**
@@ -892,7 +897,14 @@ export default class Functions {
     return client.db.settings.get(guildId, "prefix") || null;
   }
 
-  async tryCatch(callback, params) {
+  /**
+   * Creates a try-catch block to run function.
+   * @function tryCatch
+   * @param {Function} callback - The function to be called in the try-catch block.
+   * @param {any[]} params - Parameters used in the function.
+   * @returns {any[]} An array, the first element being the data, and the second being an error if one was thrown.
+   */
+  async tryCatch(callback: Function, params: any[]): any[] {
     try {
       var data = null;
       if (params) data = await callback(...params);
@@ -982,11 +994,10 @@ export default class Functions {
     const hasRole = !noRole ? target.roles.cache.has(settings.adminRole) : null;
     const isOwner = guild.ownerId == target.id;
 
-    const client = this.client;
     const devMode = client.db.devSettings.get(client.util.devId, "devMode") ? target.id == client.util.devId : false;
-
     return hasPerm || hasRole || isOwner || devMode;
   }
+
 
   isMod(target, guild, settings, noRole) {
     const hasPerm = target.permissions.has("ADMINISTRATOR");
@@ -994,12 +1005,11 @@ export default class Functions {
     const hasAdmin = !noRole ? target.roles.cache.has(settings.adminRole) : null;
     const isOwner = guild.ownerId == target.id;
 
-    const client = this.client;
     const devMode = client.db.devSettings.get(client.util.devId, "devMode") ? target.id == client.util.devId : false;
-
     return hasPerm || hasMod || hasAdmin || isOwner || devMode;
   }
 
+  
   async updateApplicationCommands(data, guildId) {
     try {
       const id = client.user.id;
@@ -1022,9 +1032,7 @@ export default class Functions {
     const isDev = target.id == client.util.devId;
     const supportRole = target.roles.cache.has(client.supportRole);
 
-    const client = this.client;
     const devMode = client.db.devSettings.get(client.util.devId, "devMode") ? target.id == client.util.devId : false;
-
     const isAdmin = this.isAdmin(target, guild, settings);
     const isMod = this.isMod(target, guild, settings);
     var hasPerm = false;
@@ -1079,11 +1087,11 @@ export default class Functions {
   /**
    * Bulk deletes messages in a channel while ignoring pinned messages.
    * @function bulkDeleteMessages
-   * @param {Discord.BaseGuildTextChannel} channel - The channel to bulk delete messages in.
+   * @param {Discord.GuildChannel} channel - The channel to bulk delete messages in.
    * @param {number} num - The number of messages to purge.
    * @returns {Promise} A promise containing a collection of messages that were deleted.
    */
-  async bulkDeleteMessages(channel, num): Promise<Discord.Collection<string, Discord.Message>> {
+  async bulkDeleteMessages(channel: Discord.GuildChannel, num: number): Promise<Discord.Collection<string, Discord.Message>> {
     const msgs = await channel.messages.fetch({ limit: num });
     for await (const [id, msg] of msgs.entries()) {
       if (msg.pinned) msgs.delete(id);
@@ -1092,37 +1100,50 @@ export default class Functions {
     return await channel.bulkDelete(msgs, true);
   }
 
-  hierarchy(initiator, target, guild) {
-    const initRole = initiator.roles ? initiator.roles.highest : initiator;
-    const targRole = target.roles ? target.roles.highest : target;
-    const ownerId = guild.ownerId;
+  /**
+   * Checks whether a member or role is above another.
+   * @function hierarchy
+   * @param {Discord.Role|Discord.Member} initiator - The member or role that is being checked.
+   * @param {Discord.Role|Discord.Member} target - The member or role that the initator is being compared to.
+   * @param {Discord.Guild} guild - The guild that this action took place in.
+   * @returns {boolean} Whether or not the initator's role position is lower than the target's role position.
+   */
+  hierarchy(initiator: Discord.Role | Discord.Member, target: Discord.Role | Discord.Member, guild: Discord.Guild): boolean {
+    const initRole = initiator instanceof Discord.Member ? initiator.roles.highest : initiator;
+    const targRole = target instanceof Discord.Member ? target.roles.highest : target;
 
     const isLower = initRole.position <= targRole.position;
-    const isOwner = (initiator.id == ownerId) && (target.id !== client.user.id);
-    var lower = false;
-
-    if (isLower && !isOwner) lower = true;
-    return lower;
+    const isOwner = (initiator.id == guild.ownerId) && (target.id !== client.user.id);
+    return isLower && !isOwner;
   }
 
-  validPerms(test, array) {
-    return test.every(x => array.includes(x));
-  }
-
-  emojiId(emoji) {
+  /**
+   * Separates an emoji ID from an emoji string
+   * @function emojiId
+   * @param {string} emoji - The emoji string to get the ID of.
+   * @returns {string} The ID of the emoji.
+   */
+  emojiId(emoji: string): string {
     return emoji.split(":")[2].split(">")[0];
   }
 
-  upperFirst(string) {
+  /**
+   * Sets the first letter in a string to uppercase.
+   * @function upperFirst
+   * @param {string} string - The string to modify.
+   * @returns {string} The string that has been modified.
+   */
+  upperFirst(string: string): string {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
   /**
    * Delays the Node process for a certain number of time.
+   * @function sleep
    * @param {number} ms - The duration in ms.
-   * @returns {Promise<any>}
+   * @returns {Promise<number>} A promise that resolves the number of ms elapsed.
    */
-  sleep(ms: number): Promise<any> {
-    return new Promise((resolve) => setTimeout(resolve, ms))
+  sleep(ms: number): Promise<number> {
+    return new Promise((resolve) => setTimeout(resolve, ms, ms))
   }
 }
