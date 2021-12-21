@@ -88,6 +88,7 @@ declare namespace Types {
     usage: string,
     category: string,
     commandName: string
+    subCategory?: "Basic" | "Support" | "Administrator"
   }
 
   export interface timeData {
@@ -112,6 +113,8 @@ declare namespace Types {
     method?: string,
     httpStatus?: number | string
   }
+
+  export type guildChannel = Discord.TextChannel | Discord.VoiceChannel | Discord.CategoryChannel | Discord.StoreChannel | Discord.NewsChannel | Discord.StageChannel;
 
   export interface empty {
     [key: string]: any
