@@ -1120,15 +1120,19 @@ export default class Prompts {
 
         client.db.panels.set(message.guild.id, panels, "panels");
         const embed = client.embeds.success(command.option.delete, `Deleted the \`${panel.name}\` panel.`);
-        await component.reply({ embeds: [embed] });
+        await component.update({ embeds: [embed] });
 
-        var panelChannel = await client.channels.fetch(panel.channel);
-        var panelMsg = panelChannel ? await panelChannel.messages.fetch(panel.msg) : null;
-        if (panelMsg) panelMsg.delete();
+        try {
+          var panelChannel = await client.channels.fetch(panel.channel);
+          var panelMsg = panelChannel ? await panelChannel.messages.fetch(panel.msg) : null;
+          if (panelMsg) panelMsg.delete();
+        } catch (e) {
+          
+        }
 
       } else {
         const embed = client.embeds.success(command.option.delete, `Cancelled the panel deletetion.`);
-        await component.reply({ embeds: [embed] });
+        await component.update({ embeds: [embed] });
       }
 
       message.delete();
