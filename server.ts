@@ -6,7 +6,7 @@ app.get('/', (req, res) => res.send('Server is up.'));
 export default function server() {
   const server = app.listen(3000);
   setInterval(() => {
-    fetch(`https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`)
+    fetch(`${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`)
   }, 5 * 60 * 1000);
   return server;
 }
