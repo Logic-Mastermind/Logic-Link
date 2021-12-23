@@ -13,7 +13,10 @@ const question = "<:IconSupport:868117797429997578>";
 const error = "<:MessageFail:868113159737720912>";
 const warn = "<:Warn:868113114221121586>";
 
-/** A class with methods that return discord.js MessageEmbeds */
+/**
+ * A class with methods that return discord.js MessageEmbeds
+ * @class Embeds
+ */
 export default class Embeds {
   client: Discord.Client;
 

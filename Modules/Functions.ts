@@ -10,7 +10,10 @@ const code = "```";
 const footer1 = `Logic Link - Imagine A World`;
 const footer2 = `https://cdn.discordapp.com/emojis/775848533298905130.png?v=1`;
 
-/** A class with utility methods that help standardize strenuous tasks. */
+/**
+ * A class with utility methods that help standardize strenuous tasks.
+ * @class Functions
+ */
 export default class Functions {
   client: Discord.Client;
 
@@ -293,6 +296,7 @@ export default class Functions {
 
   /**
    * Searches through all cached users and finds one that matches the filter string.
+   * @async
    * @function findUser
    * @param {string} filter - The string to filter against.
    * @param {Object} [options] - Options for filtering.
@@ -381,6 +385,7 @@ export default class Functions {
 
   /**
    * Searches through all guild bans and finds one that matches the filter string.
+   * @async
    * @function findBan
    * @param {string} filter - The string to filter against.
    * @param {Discord.Guild|Discord.Collection} - The guild to get bans from, or a collection of bans.
@@ -898,6 +903,7 @@ export default class Functions {
 
   /**
    * Creates a try-catch block to run function.
+   * @async
    * @function tryCatch
    * @param {Function} callback - The function to be called in the try-catch block.
    * @param {any[]} params - Parameters used in the function.
@@ -1085,6 +1091,7 @@ export default class Functions {
 
   /**
    * Bulk deletes messages in a channel while ignoring pinned messages.
+   * @async
    * @function bulkDeleteMessages
    * @param {Types.guildChannel} channel - The channel to bulk delete messages in.
    * @param {number} num - The number of messages to purge.

@@ -1,104 +1,149 @@
+import Discord from "discord.js";
+import client from "../index";
+
+/**
+ * A class with methods used to save log data to the database.
+ * @class Logger
+ */
 export default class Logger {
-  constructor(client?) {
-    this.client = client;
+  client: Discord.Client;
+
+  /**
+   * Used to set the client property if it still exists.
+   * @constructor
+   * @param {Discord.Client} [client] - The client.
+   */
+  constructor(client?: Discord.Client) {
+    if (client) this.client = client;
   }
 
-  log(content, user) {
+  /**
+   * Saves a log to the database.
+   * @function log
+   * @param {string} content - The content of the log.
+   * @param {Discord.User|string} [user] - The user who emitted this log.
+   * @returns {number|void} The ID of the log that was created.
+   */
+  log(content: string, userId?: Discord.User | string): number | void {
     try {
-      const client = this.client;
-      if (user) {
+      if (userId) {
         const canLog = client.db.devSettings.get(client.util.devId, "allowLog");
-        if (!canLog && (user.id == client.util.devId)) return "Developer Logs turned off.";
+        if (userId instanceof Discord.User) userId = userId.id;
+        if (!canLog && (userId === client.util.devId)) return;
+
+        client.db.logs.set(logId, userId, "user");
       }
 
       const count = client.db.logs.count;
       const logId = (count + 1).toString();
 
-      if (user) client.db.logs.set(logId, user.id, "user");
       client.db.logs.set(logId, Date.now(), "timestamp");
       client.db.logs.set(logId, content, "content");
       client.db.logs.set(logId, "Log", "type");
 
       return Number(logId);
     } catch (error) {
-      return error;
+      client.functions.sendError(error);
     }
   }
 
-  warn(content, user) {
+  /**
+   * Saves a warning log to the database.
+   * @function warn
+   * @param {string} content - The content of the log.
+   * @param {Discord.User|string} [user] - The user who emitted this log.
+   * @returns {number|void} The ID of the warning log that was created.
+   */
+   warn(content: string, userId?: Discord.User | string): number | void {
     try {
-      const client = this.client;
-      if (user) {
+      if (userId) {
         const canLog = client.db.devSettings.get(client.util.devId, "allowLog");
-        if (!canLog && (user.id == client.util.devId)) return "Developer Logs turned off.";
+        if (userId instanceof Discord.User) userId = userId.id;
+        if (!canLog && (userId === client.util.devId)) return;
+
+        client.db.logs.set(logId, userId, "user");
       }
 
       const count = client.db.logs.count;
       const logId = (count + 1).toString();
 
-      if (user) client.db.logs.set(logId, user.id, "user");
       client.db.logs.set(logId, Date.now(), "timestamp");
       client.db.logs.set(logId, content, "content");
       client.db.logs.set(logId, "Warn", "type");
 
       return Number(logId);
     } catch (error) {
-      return error;
+      client.functions.sendError(error);
     }
   }
 
-  error(content, user) {
+  /**
+   * Saves an error log to the database.
+   * @function error
+   * @param {string} content - The content of the log.
+   * @param {Discord.User|string} [user] - The user who emitted this log.
+   * @returns {number|void} The ID of the log that was created.
+   */
+   error(content: string, userId?: Discord.User | string): number | void {
     try {
-      const client = this.client;
-      if (user) {
+      if (userId) {
         const canLog = client.db.devSettings.get(client.util.devId, "allowLog");
-        if (!canLog && (user.id == client.util.devId)) return "Developer Logs turned off.";
+        if (userId instanceof Discord.User) userId = userId.id;
+        if (!canLog && (userId === client.util.devId)) return;
+
+        client.db.logs.set(logId, userId, "user");
       }
 
       const count = client.db.logs.count;
       const logId = (count + 1).toString();
 
-      if (user) client.db.logs.set(logId, user.id, "user");
       client.db.logs.set(logId, Date.now(), "timestamp");
       client.db.logs.set(logId, content, "content");
       client.db.logs.set(logId, "Error", "type");
 
       return Number(logId);
     } catch (error) {
-      return error;
+      client.functions.sendError(error);
     }
   }
 
-  updateLog(content, id) {
+  /**
+   * Updates a log with further details.
+   * @function updateLog
+   * @param {string} content - The content of the update.
+   * @param {string|number} id - The ID of the log to update.
+   * @returns {string[]|void} All of the updates to the log.
+   */
+  updateLog(content: string, id: string | number): string[] | void {
     try {
-      const client = this.client;
-      if (typeof id === "string") return;
+      if (typeof id === "number") id.toString();
       const count = client.db.logs.count;
       const data = client.db.logs.get(id);
-      
-      if (!data) return "No ID Provided";
-      const logId = id ? id.toString() : (count + 1).toString();
-      var details = data.details;
 
-      if (!data.content) return "Invalid ID Provided";
-      if (!details) details = [];
+      const details = data.details || [];
       details.push(content);
 
-      client.db.logs.set(logId, details, "details");      
-      return content;
+      client.db.logs.set(id, details, "details");      
+      return details;
+
     } catch (error) {
-      return error;
+      client.functions.sendError(error);
     }
   }
 
-  clear() {
+  /**
+   * Clears all logs from the database.
+   * @function clear
+   * @returns {boolean|void} Whether the operation succeeded or not.
+   */
+  clear(): boolean | void {
     try {
-      const client = this.client;
       client.db.logs.clear();
       client.db.devSettings.set(client.util.devId, Date.now(), "logsCleared");
-      return null;
+      return true;
+
     } catch (error) {
-      return error;
+      client.functions.sendError(error);
     }
   }
 }

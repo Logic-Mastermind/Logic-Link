@@ -2,7 +2,10 @@ import Types from "../Typings/types";
 import Discord from "discord.js";
 import client from "../index";
 
-/** A class with methods that return discord.js interaction components. */
+/**
+ * A class with methods that return discord.js interaction components.
+ * @class Components
+ */
 export default class Components {
   client: Discord.Client;
 
