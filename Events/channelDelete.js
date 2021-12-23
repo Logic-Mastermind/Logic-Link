@@ -11,8 +11,6 @@ module.exports = async (client, channel) => {
       for (const [ticketId, ticket] of panel.tickets.entries()) {
         if (ticket.channel == channel.id) {
           panel.tickets.delete(ticketId);
-          tsettings.panels.set(panelId, panel);
-
           client.db.panels.set(channel.guild.id, tsettings.panels, "panels");
         }
       }

@@ -151,7 +151,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
           
           var infoCmd = await client.functions.findCommand(secArg);
           if (infoCmd) {
-            if (thirdArg) {
+            if (thirdArg && infoCmd.option) {
               const option = await client.functions.findOption(infoCmd, thirdArg);
 
               if (option) {
