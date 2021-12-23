@@ -26,7 +26,7 @@ module.exports = async (client, interaction) => {
         
         const cooldown = client.cooldown.get(member.id);
         const lastUsed = cooldown?.ticketButtonCooldown || 0;
-        const expiration = lastUsed + 1500;
+        const expiration = lastUsed + 2500;
 
         if (now < expiration) {
           return interaction.deferUpdate();
