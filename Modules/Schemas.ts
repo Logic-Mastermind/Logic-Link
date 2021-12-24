@@ -140,10 +140,16 @@ export default class Schemas {
     const count = ++panel.totalTicketCount;
 
     var filteredTickets = new Map();
+    var totalTickets = 0;
+
     for (const [id, ticket] of panel.tickets.entries()) {
-      if (ticket.opener == member.id && ticket.state == "OPENED") filteredTickets.set(id, ticket);
+      if (ticket.opener !== member.id) continue;
+
+      totalTickets++
+      if (ticket.state == "OPENED") filteredTickets.set(id, ticket);
     }
 
+    if (totalTickets >= client.config.globalTicketLimit) return "GLOBAL_LIMIT_EXCEEDED";
     if (filteredTickets.size >= panel.ticketLimit) return "LIMIT_EXCEEDED";
     if (!guild.me.permissions.has("MANAGE_CHANNELS")) return "BOT_MISSING_PERMISSIONS";
 

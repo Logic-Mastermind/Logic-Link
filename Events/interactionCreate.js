@@ -63,6 +63,10 @@ module.exports = async (client, interaction) => {
           const embed = client.embeds.error("Ticket Limit", `You have reached the active ticket limit for this panel. (${panel.ticketLimit}/${panel.ticketLimit})`);
           return interaction.reply({ embeds: [embed], ephemeral: true });
           
+        } else if (result == "GLOBAL_LIMIT_EXCEEDED") {
+          const embed = client.embeds.error("Global Ticket Limit", `You have reached the global ticket limit for this panel. (${client.config.globalTicketLimit}/${client.config.globalTicketLimit})`);
+          return interaction.reply({ embeds: [embed], ephemeral: true });
+
         } else if (result == "BOT_MISSING_PERMISSIONS") {
           const embed = client.embeds.botPermission("Insufficient Permissions", `MANAGE_CHANNELS`);
           return interaction.reply({ embeds: [embed], ephemeral: true });

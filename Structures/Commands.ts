@@ -472,7 +472,7 @@ const Commands = {
       minArgs: 1,
       options: [],
       aliases: ["emb"],
-      usage: "embed ~<title>~ <description>",
+      usage: "embed \"<title>\" <description>",
       category: "Moderator",
       commandName: "embed"
     },
