@@ -611,7 +611,7 @@ export default class Embeds {
     const catcher = {
       title: `Bot Error`,
       color: `RED`,
-      description: `An error has occured whilst running the \`${command.commandName}\` command.\n${error.name.includes("Discord") ? `This error was caused by a Discord API Error which passed through user filtering.` : `This error was caused by a human error from the command file of this command.   \u200b`}`,
+      description: `An error has occured whilst running the \`${command.commandName}\` command.\n${error.name.includes("Discord") ? `This error was caused by a Discord API Error which passed through user filtering.` : `This error was caused by a human error from the command file of this command.\u2001  \u200b`}`,
       fields: [
         {
           name: `Error Information`,

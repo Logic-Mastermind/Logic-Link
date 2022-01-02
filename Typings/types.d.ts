@@ -38,7 +38,7 @@ declare namespace Types {
   export interface embedData {
     title?: string,
     description: string,
-    color?: embedColors | number | embedColors,
+    color?: embedColors | number,
     footer?: [string, string],
     timestamp?: number | null | Date,
     image?: string,
@@ -66,7 +66,7 @@ declare namespace Types {
     welcomeSystem: boolean,
     mutedRoleConfig: boolean,
     panelSetup: boolean,
-    cases: Discord.Collection,
+    cases: Discord.Collection<number, caseData>,
 
     modRoleObj: Discord.Role,
     adminRoleObj: Discord.Role,
