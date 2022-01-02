@@ -73,7 +73,7 @@ export default class Components {
    * @param {number} [max] - The maximum number of selections.
    * @returns {Discord.MessageSelectMenu} The select menu that was created.
    */
-  selectMenu(placeholder: string, items: Types.menuOption[], id: string, min?: number, max?: number): Discord.MessageSelectMenu {
+  selectMenu(placeholder: string, items: Types.menuItemData[], id: string, min?: number, max?: number): Discord.MessageSelectMenu {
     const itemsArray = [];
 
     for (const item of items) {
