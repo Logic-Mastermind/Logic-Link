@@ -41,10 +41,10 @@ export default class Functions {
     const errorId = this.getRandomString(10);
     this.setErrorData(error, errorId);
 
-    const catcher = {
+    const catcher: Types.embedData = {
       title: `Bot Error`,
       color: `RED`,
-      description: `An error has occured whilst running the \`${command.commandName}\` command.\n${error.name.includes("Discord") ? `This error was caused by a Discord API Error which passed through user filtering.` : `This error was caused by a human error from the command file of this command.   \u200b`}`,
+      description: `An error has occured whilst running the \`${command.commandName}\` command.\n${error.name.includes("Discord") ? `This error was caused by a Discord API Error which passed through user filtering.` : `This error was caused by a human error from the command file of this command.\u2001  \u200b`}`,
       fields: [
         {
           name: `Error Information`,
@@ -59,18 +59,15 @@ export default class Functions {
       ]
     }
 
-    const stack = {
+    const stack: Types.embedData = {
       title: `Error Stack`,
       description: `${code}${error.stack}${code}`,
       color: "RED",
       timestamp: Date.now(),
-      footer: {
-        text: footer1,
-        iconURL: footer2
-      }
+      footer: [footer1, footer2]
     }
 
-    const msg = {
+    const msg: Types.embedData = {
       title: command.name,
       description: client.util.errorMsgDefault,
       color: "RED",
@@ -78,15 +75,12 @@ export default class Functions {
         { name: "Error Identification", value: `${code}${errorId}${code}`, inline: false }
       ],
       timestamp: Date.now(),
-      footer: {
-        text: footer1,
-        iconURL: footer2
-      }
+      footer: [footer1, footer2]
     }
 
-    const embed = new Discord.MessageEmbed(msg);
-    const embed1 = new Discord.MessageEmbed(catcher);
-    const embed2 = new Discord.MessageEmbed(stack);
+    const embed = client.embeds.new(msg);
+    const embed1 = client.embeds.new(catcher);
+    const embed2 = client.embeds.new(stack);
 
     if (logId) client.logger.updateLog(`An unexpected error occured.`, logId);
     message.channel.send({ embeds: [embed] }).catch((error) => console.log(error));
@@ -109,7 +103,7 @@ export default class Functions {
   sendError(error: Types.errorData): void {
     const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa"});
 
-    const catcher = {
+    const catcher: Types.embedData = {
       title: `Bot Error`,
       color: `RED`,
       description: client.util.unexpectedError,
@@ -122,19 +116,16 @@ export default class Functions {
       ]
     }
 
-    const stack = {
+    const stack: Types.embedData = {
       title: `Error Stack`,
       description: `${code}${error.stack}${code}`,
       color: "RED",
       timestamp: Date.now(),
-      footer: {
-        text: footer1,
-        iconURL: footer2
-      }
+      footer: [footer1, footer2]
     }
 
-    const embed1 = new Discord.MessageEmbed(catcher);
-    const embed2 = new Discord.MessageEmbed(stack);
+    const embed1 = client.embeds.new(catcher);
+    const embed2 = client.embeds.new(stack);
 
     whClient.send({
       username: "Logic Link",
@@ -185,9 +176,9 @@ export default class Functions {
     if (!role) role = collection.find(x => x.name.toLowerCase() == filterL);
 
     if (!role) {
-      for (const [id, role] of collection.entries()) {
+      for (const [id, item] of collection.entries()) {
         if (filter.length < 3) break;
-        let nameL = role.name.toLowerCase();
+        let nameL = item.name.toLowerCase();
         let safeFilter = safe ? nameL.startsWith(filterL) : nameL.includes(filterL);
 
         if (searchFilter) {
@@ -216,7 +207,7 @@ export default class Functions {
    * @param {Function} [options.searchFilter] - A filter to test against all matched channels.
    * @returns {Types.guildChannel|null} The channel, if it was found.
    */
-  findChannel(filter: string, guild: Discord.Guild | Discord.Collection, options?: Types.itemFilterOptions): Types.guildChannel | null {
+  findChannel(filter: string, guild: Discord.Guild | Discord.Collection<string, Types.guildChannel>, options?: Types.itemFilterOptions): Types.guildChannel | null {
     const filterL = filter.toLowerCase();
     const collection = guild instanceof Discord.Guild ? guild.channels.cache : guild;
     const { safe, searchFilter } = options;
@@ -260,7 +251,7 @@ export default class Functions {
    * @param {Function} [options.searchFilter] - A filter to test against all matched members.
    * @returns {Discord.GuildMember|null} The member, if they was found.
    */
-   findMember(filter: string, guild: Discord.Guild | Discord.Collection, options?: Types.itemFilterOptions): Discord.GuildMember | null {
+   findMember(filter: string, guild: Discord.Guild | Discord.Collection<string, Discord.GuildMember>, options?: Types.itemFilterOptions): Discord.GuildMember | null {
     const filterL = filter.toLowerCase();
     const collection = guild instanceof Discord.Guild ? guild.members.cache : guild;
     const { safe, searchFilter } = options;
@@ -332,7 +323,7 @@ export default class Functions {
       }
     }
 
-    if (!found && !user && !isNaN(filter)) {
+    if (!found && !user && !isNaN(filter as any)) {
       user = await client.users.fetch(filter);
     } 
 
@@ -394,12 +385,12 @@ export default class Functions {
    * @param {Function} [options.searchFilter] - A filter to test against all matched bans.
    * @returns {Discord.GuildMember|null} The ban, if it was found.
    */
-   async findBan(filter: string, guild: Discord.Guild | Discord.Collection, options?: Types.itemFilterOptions): Discord.GuildBan | null {
+   async findBan(filter: string, guild: Discord.Guild | Discord.Collection<string, Discord.GuildBan>, options?: Types.itemFilterOptions): Promise<Discord.GuildBan | null> {
     const filterL = filter.toLowerCase();
     const collection = guild instanceof Discord.Guild ? await guild.bans.fetch() : guild;
     const { safe, searchFilter } = options;
 
-    var ban: Discord.Guild;
+    var ban: Discord.GuildBan;
     var found: string;
 
     ban = collection.get(filter);
@@ -451,7 +442,7 @@ export default class Functions {
     for (const category of categories) {
       if (command) break;
 
-      for (const [_, data] of Object.entries(client.command[category])) {
+      for (const [_, data] of Object.entries(client.commands[category])) {
         if (filterCommands(data)) break;
       }
     }
@@ -506,7 +497,7 @@ export default class Functions {
     var unit = null;
     var hasNum = /\d/.test(string);
 
-    if (endsWithAny(timeUnits.total, string) || (!isNaN(string)) && (!isNaN(string.split("")[0]))) {
+    if (endsWithAny(timeUnits.total, string) || (!isNaN(string as any)) && (!isNaN(string.split("")[0] as any))) {
       if (hasNum) {
         passed = true;
         timeFromUnit = string.match(/[\d.]+/g);
@@ -583,10 +574,8 @@ export default class Functions {
    * @param {Discord.Guild|string} guild - The guild to get settings from.
    * @returns {Types.guildSettings} The guild settings.
    */
-  getSettings(guild: Discord.Guild | string): Types.guildSettings {
-    if (!guild instanceof Discord.Guild) guild = client.guilds.cache.get(guild);
-    if (!guild) throw new Error("Invalid guild ID");
-
+  getSettings(guild: Discord.Guild | string, setting?: string): Types.guildSettings | Types.anyGuildSetting {
+    if (typeof guild === "string") guild = client.guilds.cache.get(guild);
     const settings = client.db.settings.get(guild.id);
     const settingsObj = settings;
 
@@ -596,7 +585,8 @@ export default class Functions {
     settingsObj.welcomeChannelObj = guild.channels.cache.get(settingsObj.welcomeChannel);
     settingsObj.welcomeRoleObj = guild.roles.cache.get(settingsObj.welcomeRole);
     settingsObj.mutedRoleObj = guild.roles.cache.get(settingsObj.mutedRole);
-
+    
+    if (setting) return settingsObj[setting];
     return settingsObj;
   }
 
@@ -606,7 +596,7 @@ export default class Functions {
    * @param {Discord.Guild|string} guild - The guild to get data from.
    * @returns {Types.ticketData} The ticket data object.
    */
-  getTicketData(guild: Discord.Guild | string): Types.ticketData {
+  getTicketData(guild: Discord.Guild | string): Types.ticketSettings {
     const guildId = guild instanceof Discord.Guild ? guild.id : guild;
 
     const settings = client.db.tsettings.get(guildId);
@@ -642,7 +632,7 @@ export default class Functions {
    * @param {number} [options.idle] - The idle time that the collector should stop after.
    * @returns {void}
    */
-  paginate(message: Discord.Message, pages: Discord.MessageEmbed[], options: Types.paginateOptions): void {
+  paginate(message: Discord.Message, pages: Discord.MessageEmbed[], options: Types.collectorOptions): void {
     if (!message.components[0].components[1]) throw new Error("Message does not have 2 button components");
 
     const original = message.embeds[0];
@@ -714,18 +704,21 @@ export default class Functions {
   /**
    * Sets case data in a guild.
    * @param {Types.caseData} data - The case data for the action.
-   * @param {Types.cases} cases - The cases of the guild.
    * @param {Discord.Guild|string} guild - The guild that the action took place in.
    * @returns {void}
    */
-  createCase(data: Types.caseData, cases: Types.cases, guild: Discord.Guild | string): void {
+  createCase(data: Types.caseData, guild: Discord.Guild | string): void {
+    const guildId = guild instanceof Discord.Guild ? guild.id : guild;
+    const cases = this.getSettings(guildId, "cases") as Discord.Collection<number, Types.caseData>;
     const caseId = cases.last() ? cases.last().id + 1 : 1;
-    const key = `${data.user}-${guild.id}`;
+
+    const key = `${data.user}-${guildId}`;
     data.id = caseId;
 
-    var cases = cases.set(caseId, data);
-    client.db.settings.set(guild.id, cases, "cases");
+    cases.set(caseId, data);
+    client.db.settings.set(guildId, cases, "cases");
   }
+
   /**
    * A function that filters moderation cases in a guild.
    * @param {Types.cases} cases - The cases to filter.

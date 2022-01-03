@@ -608,7 +608,7 @@ export default class Embeds {
     
     const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa" });
 
-    const catcher = {
+    const catcher: Types.embedData = {
       title: `Bot Error`,
       color: `RED`,
       description: `An error has occured whilst running the \`${command.commandName}\` command.\n${error.name.includes("Discord") ? `This error was caused by a Discord API Error which passed through user filtering.` : `This error was caused by a human error from the command file of this command.\u2001  \u200b`}`,
@@ -626,13 +626,13 @@ export default class Embeds {
       ]
     }
 
-    const stack = {
+    const stack: Types.embedData = {
       title: `Error Stack`,
       description: `${code}${error.stack}${code}`,
       color: "RED"
     }
 
-    const msg = {
+    const msg: Types.embedData = {
       title: command.name,
       description: client.util.errorMsgDefault,
       color: "RED",
