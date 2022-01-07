@@ -689,6 +689,7 @@ export default class Functions {
 
   /**
    * A function that spreads the elements of an arguments array.
+   * @function getArgs
    * @param {string[]} args - The arguments to spread.
    * @returns {Types.args} The args object.
    */
@@ -702,7 +703,24 @@ export default class Functions {
   }
 
   /**
+   * A function that reads through a formatted string and splits it into a readable array.
+   * @
+   */
+  flipcard(string) {
+    let cards = string.split("\n");
+    let array = [];
+
+    for (const line of cards) {
+      let part = line.split(" - ");
+      array.push(part);
+    }
+
+    return array;
+  }
+
+  /**
    * Sets case data in a guild.
+   * @function createCase
    * @param {Types.caseData} data - The case data for the action.
    * @param {Discord.Guild|string} guild - The guild that the action took place in.
    * @returns {void}
@@ -721,6 +739,7 @@ export default class Functions {
 
   /**
    * A function that filters moderation cases in a guild.
+   * @function filterCases
    * @param {Types.cases} cases - The cases to filter.
    * @param {Types.caseDataFilter} filter - Properties to filter for.
    * @param {Types.caseTypes} [filter.type] - The type of case.
@@ -768,6 +787,7 @@ export default class Functions {
 
   /**
    * Divides an array every certain number of elements.
+   * @function divideChunk
    * @param {any[]} array - The array to divide.
    * @param {number} chunk - The number of elements to divide the array after.
    * @returns {any[]} The chunked array.
@@ -786,6 +806,7 @@ export default class Functions {
 
   /**
    * Gets the command path of a command.
+   * @function getCmdPath
    * @param {Types.commandData} cmd - The command to get the file path of.
    * @returns {string} The file path of the command.
    */
@@ -796,6 +817,7 @@ export default class Functions {
 
   /**
    * Logs content to the console with a chalk colour option.
+   * @function log
    * @param {string} content - The content of the log.
    * @param {Types.chalkOptions} option - The chalk option to log with.
    * @returns {void}
@@ -809,7 +831,8 @@ export default class Functions {
   }
 
   /**
-   * 
+   * Checks if a guild member has permission to use a certain command.
+   * @function hasPermission
    * @param {Discord.GuildMember} member - The member to check permissions on.
    * @param {Types.commandData} command - The command to get permissions from.
    * @param {Discord.Guild|string} guild - The guild or ID of the guild owner.
@@ -826,6 +849,7 @@ export default class Functions {
 
   /**
    * Uppers the first character on every word in a sentence.
+   * @function upperFirstAll
    * @param {string|string[]} sentence - The sentence.
    * @returns {string|string[]} The new sentence, returns the same type that was given as a parameter.
    */
@@ -843,6 +867,7 @@ export default class Functions {
 
   /**
    * Sets data from an error into the database.
+   * @function setErrorData
    * @param {Types.errorData} error - The error data.
    * @param {string} [id] - The ID of the error, a random one is generated if left empty.
    * @returns {Types.errorData}
@@ -886,6 +911,7 @@ export default class Functions {
 
   /**
    * Fetches the prefix of a guild from the database.
+   * @function fetchPrefix
    * @param {Discord.Guild|string} guild - The guild to fetch the prefix from.
    * @returns {string|null} The prefix of the guild.
    */
@@ -1137,7 +1163,7 @@ export default class Functions {
   }
 
   /**
-   * Delays the Node process for a certain number of time.
+   * Delays the NodeJS process for a certain number of time.
    * @function sleep
    * @param {number} ms - The duration in ms.
    * @returns {Promise<number>} A promise that resolves the number of ms elapsed.
