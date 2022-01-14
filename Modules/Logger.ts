@@ -30,12 +30,11 @@ export default class Logger {
         const canLog = client.db.devSettings.get(client.util.devId, "allowLog");
         if (userId instanceof Discord.User) userId = userId.id;
         if (!canLog && (userId === client.util.devId)) return;
-
-        client.db.logs.set(logId, userId, "user");
       }
 
       const count = client.db.logs.count;
       const logId = (count + 1).toString();
+      client.db.logs.set(logId, userId, "user");
 
       client.db.logs.set(logId, Date.now(), "timestamp");
       client.db.logs.set(logId, content, "content");
@@ -60,12 +59,11 @@ export default class Logger {
         const canLog = client.db.devSettings.get(client.util.devId, "allowLog");
         if (userId instanceof Discord.User) userId = userId.id;
         if (!canLog && (userId === client.util.devId)) return;
-
-        client.db.logs.set(logId, userId, "user");
       }
 
       const count = client.db.logs.count;
       const logId = (count + 1).toString();
+      client.db.logs.set(logId, userId, "user");
 
       client.db.logs.set(logId, Date.now(), "timestamp");
       client.db.logs.set(logId, content, "content");
@@ -90,12 +88,11 @@ export default class Logger {
         const canLog = client.db.devSettings.get(client.util.devId, "allowLog");
         if (userId instanceof Discord.User) userId = userId.id;
         if (!canLog && (userId === client.util.devId)) return;
-
-        client.db.logs.set(logId, userId, "user");
       }
 
       const count = client.db.logs.count;
       const logId = (count + 1).toString();
+      client.db.logs.set(logId, userId, "user");
 
       client.db.logs.set(logId, Date.now(), "timestamp");
       client.db.logs.set(logId, content, "content");

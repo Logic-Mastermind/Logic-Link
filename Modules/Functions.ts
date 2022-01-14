@@ -1,7 +1,6 @@
 import Types from "../Typings/types";
 import { REST } from '@discordjs/rest';
 import Discord from "discord.js";
-import Fetch from "node-fetch";
 import client from "../index";
 import Chalk from "chalk";
 import ms from "ms";
@@ -703,11 +702,13 @@ export default class Functions {
   }
 
   /**
-   * A function that reads through a formatted string and splits it into a readable array.
-   * @
+   * A function that reads through a formatted string and returns a 2d array.
+   * @function flashcard
+   * @param {string} data - The formatted string to deconstruct.
+   * @returns {any[]} The 2d array.
    */
-  flipcard(string) {
-    let cards = string.split("\n");
+  flashcard(data: string): any[] {
+    let cards = data.split("\n");
     let array = [];
 
     for (const line of cards) {
@@ -750,32 +751,32 @@ export default class Functions {
    * @param {"BEFORE"|"AFTER"} [filter.when] - Filters if the case has a timestamp before or after the filter.
    * @returns {Types.cases} The filtered collection of cases.
    */
-  filterCases(cases: Types.cases, filter: Types.caseDataFilter): Types.cases {
-    const filtered = new Discord.Collection();
+  filterCases(cases: Types.caseCollection, filter: Types.caseFilter): Types.caseCollection {
+    const filtered: Types.caseCollection = new Discord.Collection();
     const { type, user, moderator, reason, timestamp, when } = filter;
     
-    for (const [id, case1] of cases.entries()) {
+    for (const [id, c] of cases.entries()) {
       if (type) {
-        if (type != case1.type) continue;
+        if (type != c.type) continue;
       }
 
       if (user) {
-        if (user != case1.user) continue;
+        if (user != c.user) continue;
       }
 
       if (moderator) {
-        if (moderator != case1.moderator) continue;
+        if (moderator != c.moderator) continue;
       }
 
       if (reason) {
-        if (reason != case1.reason) continue;
+        if (reason != c.reason) continue;
       }
 
       if (timestamp && when) {
         if (when == "BEFORE") {
-          if (timestamp > case1.timestamp) continue;
+          if (timestamp > c.timestamp) continue;
         } else {
-          if (timestamp < case1.timestamp) continue;
+          if (timestamp < c.timestamp) continue;
         }
       }
 
@@ -854,15 +855,16 @@ export default class Functions {
    * @returns {string|string[]} The new sentence, returns the same type that was given as a parameter.
    */
   upperFirstAll(sentence: string | string[]): string | string[] {
-    var newArray = [];
-    if (!Array.isArray(sentence)) sentence = sentence.split(" ");
-    
+    var result = [];
+    var type = typeof sentence;
+
+    if (typeof sentence == "string") sentence = sentence.split(" ");
     for (var word of sentence) {
-      newArray.push(word.charAt(0).toUpperCase() + word.slice(1));
+      result.push(word.charAt(0).toUpperCase() + word.slice(1));
     }
 
-    if (!isArray) newArray = newArray.join(" ");
-    return newArray;
+    if (type == "string") return result.join(" ");
+    return result;
   }
 
   /**
@@ -872,7 +874,7 @@ export default class Functions {
    * @param {string} [id] - The ID of the error, a random one is generated if left empty.
    * @returns {Types.errorData}
    */
-  setErrorData(error: Error, id?: string) {
+  setErrorData(error: Types.errorData, id?: string): Types.errorData {
     if (!id) id = this.getRandomString(10);
     const { name, message, path, code, method, httpStatus } = error;
 
@@ -898,7 +900,7 @@ export default class Functions {
    * @function getMemory
    * @returns {Object}
    */
-  getMemory() {
+  getMemory(): {} {
     const memory = process.memoryUsage();
     const memUnit = {};
 
@@ -970,7 +972,6 @@ export default class Functions {
 
   getPermissions(member) {
     const unsPerms = member.permissions ? member.permissions.toArray() : [null];
-    const client = this.client;
     const newPerms = [];
 
     for (var perm of unsPerms) {
@@ -988,9 +989,7 @@ export default class Functions {
         perm = perm.replaceAll("_", " ");
         perm = perm.toLowerCase();
 
-        var permSplit = this.upperFirstAll(perm.split(" "));
-        perm = permSplit.join(" ");
-        newPerms.push(perm);
+        newPerms.push(this.upperFirstAll(perm));
       }
     }
 
@@ -1013,7 +1012,7 @@ export default class Functions {
     return compact[0] ? compact : "No Permission Overwrites";
   }
 
-  isAdmin(target, guild, settings, noRole) {
+  isAdmin(target, guild, settings, noRole?) {
     const hasPerm = target.permissions.has("ADMINISTRATOR");
     const hasRole = !noRole ? target.roles.cache.has(settings.adminRole) : null;
     const isOwner = guild.ownerId == target.id;
@@ -1023,7 +1022,7 @@ export default class Functions {
   }
 
 
-  isMod(target, guild, settings, noRole) {
+  isMod(target, guild, settings, noRole?) {
     const hasPerm = target.permissions.has("ADMINISTRATOR");
     const hasMod = !noRole ? target.roles.cache.has(settings.modRole) : null;
     const hasAdmin = !noRole ? target.roles.cache.has(settings.adminRole) : null;
@@ -1039,7 +1038,7 @@ export default class Functions {
       const id = client.user.id;
       const token = client.token;
 
-      const route = `/applications/${id}/${guildId ? `guilds/${guildId}/` : ``}commands`;
+      const route = `/applications/${id}/${guildId ? `guilds/${guildId}/` : ``}commands` as const;
       const rest = new REST({ version: "9" }).setToken(token);
       await rest.put(route, { body: data });
       return true;
@@ -1054,7 +1053,7 @@ export default class Functions {
     const perm = command.required || command;
     const perms = command.permissions || command;
     const isDev = target.id == client.util.devId;
-    const supportRole = target.roles.cache.has(client.supportRole);
+    const supportRole = target.roles.cache.has(client.util.supportRole);
 
     const devMode = client.db.devSettings.get(client.util.devId, "devMode") ? target.id == client.util.devId : false;
     const isAdmin = this.isAdmin(target, guild, settings);

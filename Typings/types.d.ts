@@ -1,11 +1,53 @@
 import Discord from "discord.js";
 
 declare namespace Types {
-  type embedColors = "RED" | "GREEN" | "BLUE" | "ORANGE" | "DEFAULT";
-  type RGBOptions = [number, number, number];
+  export type embedColors = "RED" | "GREEN" | "BLUE" | "ORANGE" | "DEFAULT";
+  export type caseTypes = "BAN" | "KICK" | "MUTE" | "UNBAN" | "UNMUTE" | "WARN";
+  export type RGBOptions = [number, number, number];
 
   export type guildChannel = Discord.GuildChannel | Discord.ThreadChannel;
-  export type anyGuildSetting = string | guildChannel | Discord.Role | null | boolean | Discord.Collection<number, caseData>;
+  export type caseCollection = Discord.Collection<number, caseData>;
+  export type anyGuildSetting = string | guildChannel | Discord.Role | null | boolean | caseCollection;
+  export type chalkOptions = "bold" | "dim" | "italic" | "underline" | "inverse" | "strikethrough" | "red" | "green" | "yellow" | "blue" | "magenta" | "cyan" | "white" | "gray" | "bgBlack" | "bgRed" | "bgGreen" | "bgYellow" | "bgBlue" | "bgMagenta" | "bgCyan" | "bgWhite";
+
+  export type permissionString =
+  'CREATE_INSTANT_INVITE'
+  | 'KICK_MEMBERS'
+  | 'BAN_MEMBERS'
+  | 'ADMINISTRATOR'
+  | 'MANAGE_CHANNELS'
+  | 'MANAGE_GUILD'
+  | 'ADD_REACTIONS'
+  | 'VIEW_AUDIT_LOG'
+  | 'PRIORITY_SPEAKER'
+  | 'STREAM'
+  | 'VIEW_CHANNEL'
+  | 'SEND_MESSAGES'
+  | 'SEND_TTS_MESSAGES'
+  | 'MANAGE_MESSAGES'
+  | 'EMBED_LINKS'
+  | 'ATTACH_FILES'
+  | 'READ_MESSAGE_HISTORY'
+  | 'MENTION_EVERYONE'
+  | 'USE_EXTERNAL_EMOJIS'
+  | 'VIEW_GUILD_INSIGHTS'
+  | 'CONNECT'
+  | 'SPEAK'
+  | 'MUTE_MEMBERS'
+  | 'DEAFEN_MEMBERS'
+  | 'MOVE_MEMBERS'
+  | 'USE_VAD'
+  | 'CHANGE_NICKNAME'
+  | 'MANAGE_NICKNAMES'
+  | 'MANAGE_ROLES'
+  | 'MANAGE_WEBHOOKS'
+  | 'MANAGE_EMOJIS_AND_STICKERS'
+  | 'USE_APPLICATION_COMMANDS'
+  | 'REQUEST_TO_SPEAK'
+  | 'MANAGE_THREADS'
+  | 'USE_PUBLIC_THREADS'
+  | 'USE_PRIVATE_THREADS'
+  | 'USE_EXTERNAL_STICKERS';
 
   export interface buttonData {
     label: string,
@@ -16,9 +58,18 @@ declare namespace Types {
     disabled?: boolean
   }
 
+  export interface caseFilter {
+    type: caseTypes,
+    user: string,
+    moderator: string,
+    reason: string,
+    timestamp: number
+    when: "BEFORE" | "AFTER"
+  }
+
   export interface caseData {
     id?: number,
-    type: "BAN" | "KICK" | "MUTE" | "UNBAN" | "UNMUTE" | "WARN",
+    type: caseTypes,
     user: string,
     moderator: string,
     reason: string,
@@ -83,15 +134,15 @@ declare namespace Types {
   export interface commandData {
     name: string,
     description: string,
-    permissions: string[],
-    clientPerms: string[],
+    permissions: permissionString[],
+    clientPerms: permissionString[],
     cooldown: number,
     minArgs: number,
     options: string[],
     aliases: string[],
     usage: string,
-    category: string,
     commandName: string
+    category: "Administrator" | "Developer" | "General" | "Moderator" | "Support" | "Ticket",
     subCategory?: "Basic" | "Support" | "Administrator",
     option?: empty
   }
