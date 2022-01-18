@@ -1,4 +1,4 @@
-import Discord from "discord.js";
+import Discord, { Intents } from "discord.js";
 
 declare namespace Types {
   export type embedColors = "RED" | "GREEN" | "BLUE" | "ORANGE" | "DEFAULT";
@@ -65,6 +65,14 @@ declare namespace Types {
     reason: string,
     timestamp: number
     when: "BEFORE" | "AFTER"
+  }
+
+  export interface memoryUsage {
+    rss?: number,
+    heapTotal?: number,
+    heapUsed?: number,
+    external?: number,
+    arrayBuffers?: number
   }
 
   export interface caseData {

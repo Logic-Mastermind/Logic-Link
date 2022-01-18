@@ -6,10 +6,10 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "target": "es5",
-    "lib": ["dom", "es2015"],
+    "target": "ES5",
+    "lib": ["DOM", "ES2015", "ES2021.String"],
     "module": "CommonJS",
-    "moduleResolution": "node",
+    "moduleResolution": "Node",
     "downlevelIteration": true, 
     "experimentalDecorators": true
   }
