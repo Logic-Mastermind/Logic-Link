@@ -1,6 +1,6 @@
 import Types from "../Typings/types";
 import { REST } from '@discordjs/rest';
-import Discord from "discord.js";
+import Discord, { GuildMember } from "discord.js";
 import client from "../index";
 import Chalk from "chalk";
 import ms from "ms";
@@ -888,21 +888,14 @@ export default class Functions {
     return client.db.errors.get(id);
   }
 
-  async next(channel, obj, embeds, num) {
-    const msg = await channel.send({ embeds: [embeds[num - 1]] });
-    Object.defineProperty(obj, num - 1, {
-      value: msg.id
-    });
-  }
-
   /**
    * Gets the current memory usage data of the Node process.
    * @function getMemory
-   * @returns {Object}
+   * @returns {Types.memoryUsage}
    */
-  getMemory(): {} {
+  getMemory(): Types.memoryUsage {
     const memory = process.memoryUsage();
-    const memUnit = {};
+    const memUnit: Types.memoryUsage = {};
 
     for (const key in memory) {
       memUnit[key] = Math.round(memory[key] / 1024 / 1024 * 100) / 100;
@@ -943,14 +936,16 @@ export default class Functions {
     }
   }
 
-  getBadges(user) {
+  /**
+   * Gets the badges from a user and returns an array of emojis.
+   * @function getBadges
+   * @param {Discord.User} user - The user to get badges from.
+   * @returns {string[]} An array of emojis correlating to a badge.
+   */
+  getBadges(user: Discord.User): string[] {
     const flags = user.flags;
-    const noBadges = ["No Badges"];
-    const replaced = [];
-
-    if (!flags) return noBadges;
-    if (flags.bitfield == 0) return noBadges;
-
+    const replaced: string[] = [];
+    
     for (const flag of flags.toArray()) {
       if (flag == "DISCORD_EMPLOYEE") replaced.push(client.util.discordStaff);
       if (flag == "PARTNERED_SERVER_OWNER") replaced.push(client.util.partnered);
@@ -961,32 +956,32 @@ export default class Functions {
       if (flag == "HOUSE_BRAVERY") replaced.push(client.util.bravery);
       if (flag == "HOUSE_BALANCE") replaced.push(client.util.balance);
       if (flag == "EARLY_SUPPORTER") replaced.push(client.util.earlySupporter);
+      //if (flag == "TEAM_USER") 
+      //if (flag == "BOT_HTTP_INTERACTIONS")
       if (flag == "DISCORD_CERTIFIED_MODERATOR") replaced.push(client.util.certifiedMod);
       if (flag == "VERIFIED_BOT") replaced.push(client.util.verified);
-      if (flag == "EARLY_VERIFIED_DEVELOPER") replaced.push(client.util.hypesquad);
+      if (flag == "EARLY_VERIFIED_BOT_DEVELOPER") replaced.push(client.util.botDev);
     }
 
-    if (!replaced[0]) return noBadges;
+    if (replaced.length == 0) return ["No Badges"];
     return replaced;
   }
 
-  getPermissions(member) {
-    const unsPerms = member.permissions ? member.permissions.toArray() : [null];
+  /**
+   * Gets a member's permissions and converts them into an array of formatted strings.
+   * @function getPermissions
+   * @param {Discord.GuildMember} member - The member to get the permissions from.
+   * @returns {string[]} The formatted permissions of the member.
+   */
+  getPermissions(member: Discord.GuildMember): string[] {
+    const permissions = member.permissions.toArray() as string[];
     const newPerms = [];
 
-    for (var perm of unsPerms) {
-      if (unsPerms[0] == null) {
-        newPerms.push("No Permissions");
-        break;
-      }
-
-      if (unsPerms.includes("ADMINISTRATOR")) {
-        newPerms.push("Administrator");
-        break;
-      }
-
+    if (permissions.includes("ADMINISTRATOR")) return ["Administrator"];
+    for (var perm of permissions) {
       if (client.util.keyPerms.includes(perm)) {
-        perm = perm.replaceAll("_", " ");
+        //@ts-ignore
+        perm.replaceAll("_", " ");
         perm = perm.toLowerCase();
 
         newPerms.push(this.upperFirstAll(perm));
@@ -994,52 +989,117 @@ export default class Functions {
     }
 
     if (!newPerms[0]) newPerms.push("No Key Permissions");
-    return newPerms
+    return newPerms;
   }
 
-  getPermOverwrites(channel) {
-    if (channel.type.endsWith("THREAD")) channel = channel.guild.channels.cache.get(channel.parentId);
+  /**
+   * Gets the permission overwrites for a channel and returns an array of formatted strings.
+   * @function getPermOverwrites
+   * @param {Types.guildChannel} channel - The channel to get permission overwrites for.
+   * @returns {string[]} The array of mention-formatted permission overwrites.
+   */
+  getPermOverwrites(channel: Types.guildChannel): string[] {
+    if (channel instanceof Discord.ThreadChannel) channel = channel.guild.channels.cache.get(channel.parentId) as Discord.GuildChannel;
     const overwrites = channel.permissionOverwrites.cache;
     const everyone = channel.guild.roles.everyone;
-    const compact = [];
+    const compact: string[] = [];
 
     for (const [key, perm] of overwrites.entries()) {
       if (key == everyone.id) continue;
-      const mention = perm.type == "role" ? `<@&${key}>` : perm.type == "member" ? `<@${key}>` : `null`;
+      const mention = perm.type == "role" ? `<@&${key}>` : `<@${key}>`;
       compact.push(mention);
     }
 
-    return compact[0] ? compact : "No Permission Overwrites";
+    if (compact.length == 0) compact.push("No Permission Overwrites");
+    return compact;
   }
 
-  isAdmin(target, guild, settings, noRole?) {
-    const hasPerm = target.permissions.has("ADMINISTRATOR");
-    const hasRole = !noRole ? target.roles.cache.has(settings.adminRole) : null;
-    const isOwner = guild.ownerId == target.id;
+  /**
+   * Checks various factors to determine whether a user is a server admin.
+   * @function isAdmin
+   * @param {Discord.GuildMember} target - The user that is being checked.
+   * @returns {boolean} Whether or not the user is an admin.
+   */
+  isAdmin(target: Discord.GuildMember): boolean {
+    const settings: Types.guildSettings = client.db.settings.get(target.guild.id);
+    const hasPerm = target.permissions.has("ADMINISTRATOR") || target.roles.cache.has(settings.adminRole);
+    const isOwner = target.guild.ownerId == target.id;
 
     const devMode = client.db.devSettings.get(client.util.devId, "devMode") ? target.id == client.util.devId : false;
-    return hasPerm || hasRole || isOwner || devMode;
+    return hasPerm || isOwner || devMode;
   }
 
-
-  isMod(target, guild, settings, noRole?) {
-    const hasPerm = target.permissions.has("ADMINISTRATOR");
-    const hasMod = !noRole ? target.roles.cache.has(settings.modRole) : null;
-    const hasAdmin = !noRole ? target.roles.cache.has(settings.adminRole) : null;
-    const isOwner = guild.ownerId == target.id;
+  /**
+   * Checks various factors to determine whether a user is a server moderator.
+   * @function isMod
+   * @param {Discord.GuildMember} target - The user that is being checked.
+   * @returns {boolean} Whether or not the user is a moderator.
+   */
+   isMod(target: Discord.GuildMember): boolean {
+    const settings: Types.guildSettings = client.db.settings.get(target.guild.id);
+    const hasPerm = target.permissions.has("ADMINISTRATOR") || target.roles.cache.has(settings.modRole);
+    const isOwner = target.guild.ownerId == target.id;
 
     const devMode = client.db.devSettings.get(client.util.devId, "devMode") ? target.id == client.util.devId : false;
-    return hasPerm || hasMod || hasAdmin || isOwner || devMode;
+    return hasPerm || isOwner || devMode;
   }
 
-  
-  async updateApplicationCommands(data, guildId) {
+  /**
+   * Checks whether a user has at least one role in a guild's support panels.
+   * @function isTicketSupport
+   * @param {Discord.GuildMember} target - The user to compare.
+   * @returns {boolean} Whether the user has a ticket support role.
+   */
+  isTicketSupport(target: Discord.GuildMember): boolean {
+    const tsettings = this.getTicketData(target.guild.id);
+    var hasRole = false;
+
+    for (const [id, panel] of tsettings.panels.entries()) {
+      if (panel.support.some(() => ))
+    }
+
+    return hasRole;
+  }
+
+  /**
+   * Checks if a user has the required permissions to run a command.
+   * @function hasPerm
+   * @param {Types.commandData} command - The command to compare with.
+   * @param {Discord.GuildMember} target - The user to check permissions for.
+   * @returns {boolean} Whether or not the user has the required permissions.
+   */
+  hasPerm(command: Types.commandData, target: Discord.GuildMember): boolean {
+    const hasPermissions = target.permissions.any(command.permissions);
+    var otherPerm = false;
+
+    if (command.category == "Administrator") otherPerm = this.isAdmin(target);
+    else if (command.category == "Moderator") otherPerm = this.isMod(target);
+    else if (command.category == "Developer") otherPerm = client.util.devId == target.id;
+    else if (command.category == "Support") otherPerm = target.roles.cache.has(client.util.supportRole);
+    else if (command.category == "General") otherPerm = true;
+
+    else if (command.category == "Ticket") {
+      const settings = this.getTicketData(target.guild.id);
+
+      if (command.subCategory == "Administrator") this.isAdmin(target);
+      else if (command.subCategory == "Support") target.roles.cache.has(settings.)
+    }
+
+    return hasPermissions && otherPerm;
+  }
+
+  /**
+   * Sends an API request that overwrites the application commands globally, or locally to a guild.
+   * @function updateApplicationCommands
+   * @param {Object} data - The new data.
+   * @param {any[]} [guildId] - The guild to update.
+   * @returns {boolean} Whether the action was successful.
+   */
+   async updateApplicationCommands(data: any[], guildId: string): Promise<boolean> {
     try {
-      const id = client.user.id;
-      const token = client.token;
+      const route = `/applications/${client.user.id}/${guildId ? `guilds/${guildId}/` : ``}commands` as const;
+      const rest = new REST({ version: "9" }).setToken(client.token);
 
-      const route = `/applications/${id}/${guildId ? `guilds/${guildId}/` : ``}commands` as const;
-      const rest = new REST({ version: "9" }).setToken(token);
       await rest.put(route, { body: data });
       return true;
 
@@ -1047,54 +1107,6 @@ export default class Functions {
       this.sendError(error);
       return false;
     }
-  }
-
-  hasPerm(command, target, guild, settings, supRole) {
-    const perm = command.required || command;
-    const perms = command.permissions || command;
-    const isDev = target.id == client.util.devId;
-    const supportRole = target.roles.cache.has(client.util.supportRole);
-
-    const devMode = client.db.devSettings.get(client.util.devId, "devMode") ? target.id == client.util.devId : false;
-    const isAdmin = this.isAdmin(target, guild, settings);
-    const isMod = this.isMod(target, guild, settings);
-    var hasPerm = false;
-
-    if (perm == "admin") {
-      if (isAdmin || target.permissions.has(perms)) hasPerm = true;
-
-    } else if (perm == "mod") {
-      if (isMod || target.permissions.has(perms)) hasPerm = true;
-
-    } else if (perm == "dev") {
-      if (isDev) hasPerm = true;
-
-    } else if (perm == "ticket") {
-      if (command.subCategory == "Administrator") {
-        if (isAdmin || target.permissions.has(perms)) hasPerm = true;
-
-      } else if (command.subCategory == "Support") {
-        if (isAdmin || supRole) hasPerm = true;
-      }
-    } else if (perm == "support") {
-      if (supportRole) hasPerm = true;
-      
-    } else if (perm == "none") {
-      hasPerm = true;
-
-    } else {
-      if (supRole == "admin") {
-        if (isAdmin || target.permissions.has(perms)) hasPerm = true;
-
-      } else if (supRole == "mod") {
-        if (isMod || target.permissions.has(perms)) hasPerm = true;
-
-      } else {
-        if (target.permissions.has(perms)) hasPerm = true;
-      }
-    }
-
-    return hasPerm || devMode;
   }
 
   /**
