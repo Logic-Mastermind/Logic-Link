@@ -30,7 +30,7 @@ fs.readdir("./Events/", async (error, files) => {
   }
 });
 
-function handleError(error) {
+function handleError(error): void {
   if (client.isReady()) client.functions.sendError(error);
   else console.log(error);
 }

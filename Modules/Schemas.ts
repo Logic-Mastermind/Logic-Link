@@ -1,93 +1,28 @@
-const Discord = require("discord.js");
-const Fetch = require("node-fetch");
-const Chalk = require("chalk");
-const FS = require("fs");
+import Discord from "discord.js";
+import clearMod from "clear-module";
+import client from "../index";
+import Chalk from "chalk";
+import FS from "fs";
 
-export default class Schemas {
-  constructor(client?) {
-    this.client = client;
+/**
+ * A class with methods that standardize specific functions.
+ * @class Schemas
+ */
+ export default class Schemas {
+  client: Discord.Client;
+
+  /**
+   * Used to set the client property if it still exists.
+   * @constructor
+   * @param {Discord.Client} [client] - The client.
+   */
+  constructor(client?: Discord.Client) {
+    if (client) this.client = client;
   }
   
-  async restart() {
+  async restart(): Promise<boolean> {
     try {
-      const client = this.client;
-      await client.destroy();
-      await client.clearMod.all();
-      client.functions.log("\n----------\n");
-
-      const commands = require("/home/runner/Logic-Link/Structures/commands.js");
-      const config = require("/home/runner/Logic-Link/Structures/config.js");
-      const database = require("/home/runner/Logic-Link/Structures/database.js");
-      const util = require("/home/runner/Logic-Link/Structures/util.js");
-      const discordFn = require("/home/runner/Logic-Link/Modules/discordFn.js");
-
-      for (const [key, opt] of Object.entries(discordFn)) {
-        Discord[key] = opt;
-      }
-
-      client.command = commands;
-      client.config = config;
-      client.db = database;
-      client.util = util;
-
-      const cmds = {
-        Administrator: [],
-        Developer: [],
-        General: [],
-        Moderator: [],
-        Support: [],
-        Ticket: { Basic: [], Support: [], Administrator: [] }
-      };
-
-      for (const category of client.command.categories) {
-        if (category == "Ticket") {
-          for (const category of client.command.ticketCategories) {
-            FS.readdir(`/home/runner/Logic-Link/Commands/Ticket/${category}/`, (error, files) => {
-              if (error) return console.error(error);
-              files.forEach((file) => {
-                if (!file.endsWith(".js")) return;
-                let cmd = require(`/home/runner/Logic-Link/Commands/Ticket/${category}/${file}`);
-                let name = file.split(".")[0];
-                
-                client.functions.log(`CMD: ${Chalk["bold"](name)}`);
-                client.commands.set(name, cmd);
-                cmds["Ticket"][category].push(name);
-              });
-              client.category.set("Ticket", cmds["Ticket"]);
-            })
-          }
-          continue;
-        }
-
-        FS.readdir(`/home/runner/Logic-Link/Commands/${category}/`, (error, files) => {
-          if (error) return console.error(error);
-          files.forEach((file) => {
-            if (!file.endsWith(".js")) return;
-            let cmd = require(`/home/runner/Logic-Link/Commands/${category}/${file}`);
-            let name = file.split(".")[0];
-            
-            client.functions.log(`CMD: ${Chalk["bold"](name)}`);
-            client.commands.set(name, cmd);
-            cmds[category].push(name);
-          });
-          client.category.set(category, cmds[category]);
-        })
-      }
-
-
-      FS.readdir("/home/runner/Logic-Link/Events/", (error, files) => {
-        if (error) return console.error(error);
-        files.forEach((file) => {
-          const event = require(`/home/runner/Logic-Link/Events/${file}`);
-          const bound = event.bind(null, client);
-          const name = file.split(".")[0];
-
-          client.removeAllListeners(name);
-          client.on(name, bound);
-        });
-      });
-
-      await client.login(config.token);
+      
       return true;
     } catch (error) {
       client.functions.sendError(error);
@@ -96,7 +31,6 @@ export default class Schemas {
   }
 
   async sendPanel(panel, tsettings, guildId) {
-    const client = this.client;
     const channel = client.channels.cache.get(panel.channel);
     const embed = client.embeds.blue(panel.name, `${client.util.check} To create a ticket, click on the button below.`, [{
       name: "Additional Info",
@@ -118,7 +52,7 @@ export default class Schemas {
   }
 
   async editPanelMsg(panel, tsettings, guildId) {
-    const client = this.client;
+    
     const channel = await client.channels.fetch(panel.channel);
     const embed = client.embeds.blue(panel.name, `${client.util.check} To create a ticket, click on the button below.`, [{
       name: "Additional Info",
@@ -135,7 +69,7 @@ export default class Schemas {
   }
 
   async createTicket(guild, panel, member) {
-    const client = this.client;
+    
     const panels = client.functions.getTicketData(guild).panels;
     const count = ++panel.totalTicketCount;
 
@@ -203,7 +137,7 @@ export default class Schemas {
   }
 
   async closeTicket(guild, panel, ticket) {
-    const client = this.client;
+    
     const panels = client.functions.getTicketData(guild).panels;
     const openerId = ticket.opener;
     const count = ticket.id;
@@ -241,7 +175,7 @@ export default class Schemas {
   }
 
   async openTicket(guild, panel, ticket) {
-    const client = this.client;
+    
     const panels = client.functions.getTicketData(guild).panels;
     const openerId = ticket.opener;
     const count = ticket.id;
@@ -274,7 +208,7 @@ export default class Schemas {
   }
 
   async deleteTicket(guild, panel, ticket) {
-    const client = this.client;
+    
     const panels = client.functions.getTicketData(guild).panels;
     const count = ticket.id;
 

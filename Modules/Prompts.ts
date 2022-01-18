@@ -1,13 +1,25 @@
-const Discord = require("discord.js");
+import Discord from "discord.js";
+import client from "../index";
 const code = "```";
 
-export default class Prompts {
-  constructor(client?) {
-    this.client = client;
+/**
+ * A class with methods that run specific prompts.
+ * @class Prompts
+ */
+ export default class Prompts {
+  client: Discord.Client;
+
+  /**
+   * Used to set the client property if it still exists.
+   * @constructor
+   * @param {Discord.Client} [client] - The client.
+   */
+  constructor(client?: Discord.Client) {
+    if (client) this.client = client;
   }
 
   async deleteConfirmation(message, command, cond) {
-    const client = this.client;
+    
     const embed = client.embeds.orange(command, cond);
     const filter = () => true;
     var clicked = false;
@@ -49,7 +61,7 @@ export default class Prompts {
 
   async helpMenu(msg, message, obj) {
     const filter = () => true;
-    const client = this.client;
+    
 
     const collector = msg.createMessageComponentCollector({ filter, idle: 60 * 1000 });
     const original = msg.embeds[0];
@@ -115,7 +127,7 @@ export default class Prompts {
   }
 
   async bugReport(message, command) {
-    const client = this.client;
+    
     const clientMember = message.guild.me;
     const prompt = {
       description: `Please describe the bug in full detail.\nProvide images or videos if you can.`,
@@ -171,7 +183,7 @@ export default class Prompts {
   }
 
   async newPanel(settings, tsettings, message, command) {
-    const client = this.client;
+    
     const clientMember = message.guild.me;
 
     if (settings.panelSetup) {
@@ -584,7 +596,7 @@ export default class Prompts {
   }
 
   async modifyPanel(command, message, msg, id, tsettings) {
-    const client = this.client;
+    
     const clientMember = message.guild.me;
     const filter = () => true;
     var clicked1 = false;
@@ -1102,7 +1114,7 @@ export default class Prompts {
   }
 
   async deletePanel(message, tsettings, panel, command, userMsg) {
-    const client = this.client;
+    
     const filter = () => true;
     const collector = message.createMessageComponentCollector({ filter, idle: 60000 });
     var clicked = false;
@@ -1153,7 +1165,7 @@ export default class Prompts {
     const collector = msg.createMessageComponentCollector({ filter, idle: 60 * 1000 });
     const channel = msg.channel;
     const guildId = msg.guild.id;
-    const client = this.client;
+    
     const option = command.option.reset;
     var clicked = false;
 

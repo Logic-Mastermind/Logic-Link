@@ -5,9 +5,10 @@ declare namespace Types {
   export type caseTypes = "BAN" | "KICK" | "MUTE" | "UNBAN" | "UNMUTE" | "WARN";
   export type RGBOptions = [number, number, number];
 
-  export type guildChannel = Discord.GuildChannel | Discord.ThreadChannel;
+  export type guildChannels = Discord.GuildChannel | Discord.ThreadChannel;
   export type caseCollection = Discord.Collection<number, caseData>;
-  export type anyGuildSetting = string | guildChannel | Discord.Role | null | boolean | caseCollection;
+  export type guildTextChannels = Discord.TextChannel | Discord.ThreadChannel | Discord.NewsChannel;
+  export type anyGuildSetting = string | guildChannels | Discord.Role | null | boolean | caseCollection;
   export type chalkOptions = "bold" | "dim" | "italic" | "underline" | "inverse" | "strikethrough" | "red" | "green" | "yellow" | "blue" | "magenta" | "cyan" | "white" | "gray" | "bgBlack" | "bgRed" | "bgGreen" | "bgYellow" | "bgBlue" | "bgMagenta" | "bgCyan" | "bgWhite";
 
   export type permissionString =

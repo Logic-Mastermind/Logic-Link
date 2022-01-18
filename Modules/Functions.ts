@@ -1,6 +1,6 @@
 import Types from "../Typings/types";
 import { REST } from '@discordjs/rest';
-import Discord, { GuildMember } from "discord.js";
+import Discord from "discord.js";
 import client from "../index";
 import Chalk from "chalk";
 import ms from "ms";
@@ -204,15 +204,15 @@ export default class Functions {
    * @param {Object} [options] - Options for filtering.
    * @param {boolean} [options.safe] - Whether or not to check if channel names start or are included in the filter.
    * @param {Function} [options.searchFilter] - A filter to test against all matched channels.
-   * @returns {Types.guildChannel|null} The channel, if it was found.
+   * @returns {Types.guildChannels|null} The channel, if it was found.
    */
-  findChannel(filter: string, guild: Discord.Guild | Discord.Collection<string, Types.guildChannel>, options?: Types.itemFilterOptions): Types.guildChannel | null {
+  findChannel(filter: string, guild: Discord.Guild | Discord.Collection<string, Types.guildChannels>, options?: Types.itemFilterOptions): Types.guildChannels | null {
     const filterL = filter.toLowerCase();
     const collection = guild instanceof Discord.Guild ? guild.channels.cache : guild;
     const { safe, searchFilter } = options;
     if (!collection) throw new Error("Invalid collection recieved");
 
-    var channel: Types.guildChannel;
+    var channel: Types.guildChannels;
     var found: string;
 
     channel = collection.get(filter);
@@ -571,6 +571,7 @@ export default class Functions {
    * Returns a guild settings object for a guild.
    * @function getSettings
    * @param {Discord.Guild|string} guild - The guild to get settings from.
+   * @param {string} [setting] - A specific setting to to get from the guild.
    * @returns {Types.guildSettings} The guild settings.
    */
   getSettings(guild: Discord.Guild | string, setting?: string): Types.guildSettings | Types.anyGuildSetting {
@@ -820,7 +821,7 @@ export default class Functions {
    * Logs content to the console with a chalk colour option.
    * @function log
    * @param {string} content - The content of the log.
-   * @param {Types.chalkOptions} option - The chalk option to log with.
+   * @param {Types.chalkOptions} [option] - The chalk option to log with.
    * @returns {void}
    */
   log(content: string, option?: Types.chalkOptions): void {
@@ -995,10 +996,10 @@ export default class Functions {
   /**
    * Gets the permission overwrites for a channel and returns an array of formatted strings.
    * @function getPermOverwrites
-   * @param {Types.guildChannel} channel - The channel to get permission overwrites for.
+   * @param {Types.guildChannels} channel - The channel to get permission overwrites for.
    * @returns {string[]} The array of mention-formatted permission overwrites.
    */
-  getPermOverwrites(channel: Types.guildChannel): string[] {
+  getPermOverwrites(channel: Types.guildChannels): string[] {
     if (channel instanceof Discord.ThreadChannel) channel = channel.guild.channels.cache.get(channel.parentId) as Discord.GuildChannel;
     const overwrites = channel.permissionOverwrites.cache;
     const everyone = channel.guild.roles.everyone;
@@ -1046,16 +1047,19 @@ export default class Functions {
 
   /**
    * Checks whether a user has at least one role in a guild's support panels.
-   * @function isTicketSupport
+   * @function hasTicketSupport
    * @param {Discord.GuildMember} target - The user to compare.
    * @returns {boolean} Whether the user has a ticket support role.
    */
-  isTicketSupport(target: Discord.GuildMember): boolean {
+  hasTicketRole(target: Discord.GuildMember, role: "Support" | "Additional"): boolean {
     const tsettings = this.getTicketData(target.guild.id);
     var hasRole = false;
 
     for (const [id, panel] of tsettings.panels.entries()) {
-      if (panel.support.some(() => ))
+      if (panel[role.toLowerCase()].some((id) => target.roles.cache.has(id))) {
+        hasRole = true;
+        break;
+      }
     }
 
     return hasRole;
@@ -1081,15 +1085,18 @@ export default class Functions {
     else if (command.category == "Ticket") {
       const settings = this.getTicketData(target.guild.id);
 
-      if (command.subCategory == "Administrator") this.isAdmin(target);
-      else if (command.subCategory == "Support") target.roles.cache.has(settings.)
+      if (command.subCategory == "Administrator") otherPerm = this.isAdmin(target);
+      else if (command.subCategory == "Support") otherPerm = this.hasTicketRole(target, "Support");
+      else if (command.subCategory == "Basic") otherPerm = true;
     }
 
-    return hasPermissions && otherPerm;
+    if (client.db.devSettings.get(client.util.devId, "devMode")) otherPerm = target.id == client.util.devId;
+    return hasPermissions || otherPerm;
   }
 
   /**
    * Sends an API request that overwrites the application commands globally, or locally to a guild.
+   * @async
    * @function updateApplicationCommands
    * @param {Object} data - The new data.
    * @param {any[]} [guildId] - The guild to update.
@@ -1123,11 +1130,11 @@ export default class Functions {
    * Bulk deletes messages in a channel while ignoring pinned messages.
    * @async
    * @function bulkDeleteMessages
-   * @param {Types.guildChannel} channel - The channel to bulk delete messages in.
+   * @param {Types.guildTextChannels} channel - The channel to bulk delete messages in.
    * @param {number} num - The number of messages to purge.
    * @returns {Promise} A promise containing a collection of messages that were deleted.
    */
-  async bulkDeleteMessages(channel: Types.guildChannel, num: number): Promise<Discord.Collection<string, Discord.Message>> {
+  async bulkDeleteMessages(channel: Types.guildTextChannels, num: number): Promise<Discord.Collection<string, Discord.Message>> {
     const msgs = await channel.messages.fetch({ limit: num });
     for await (const [id, msg] of msgs.entries()) {
       if (msg.pinned) msgs.delete(id);
@@ -1141,15 +1148,14 @@ export default class Functions {
    * @function hierarchy
    * @param {Discord.Role|Discord.GuildMember} initiator - The member or role that is being checked.
    * @param {Discord.Role|Discord.GuildMember} target - The member or role that the initator is being compared to.
-   * @param {Discord.Guild} guild - The guild that this action took place in.
    * @returns {boolean} Whether or not the initator's role position is lower than the target's role position.
    */
-  hierarchy(initiator: Discord.Role | Discord.GuildMember, target: Discord.Role | Discord.GuildMember, guild: Discord.Guild): boolean {
+  hierarchy(initiator: Discord.Role | Discord.GuildMember, target: Discord.Role | Discord.GuildMember): boolean {
     const initRole = initiator instanceof Discord.GuildMember ? initiator.roles.highest : initiator;
     const targRole = target instanceof Discord.GuildMember ? target.roles.highest : target;
 
     const isLower = initRole.position <= targRole.position;
-    const isOwner = (initiator.id == guild.ownerId) && (target.id !== client.user.id);
+    const isOwner = (initiator.id == initiator.guild.ownerId) && (target.id !== client.user.id);
     return isLower && !isOwner;
   }
 
@@ -1180,6 +1186,6 @@ export default class Functions {
    * @returns {Promise<number>} A promise that resolves the number of ms elapsed.
    */
   sleep(ms: number): Promise<number> {
-    return new Promise((resolve) => setTimeout(resolve, ms, ms))
+    return new Promise((resolve) => setTimeout(resolve, ms, ms));
   }
 }
