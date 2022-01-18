@@ -1,5 +1,6 @@
 import Discord from "discord.js";
 import client from "../index";
+import Types from "../Typings/types";
 const code = "```";
 
 /**
@@ -8,68 +9,89 @@ const code = "```";
  */
  export default class Prompts {
   client: Discord.Client;
+  message: Discord.Message;
+  command: Types.commandData;
 
   /**
-   * Used to set the client property if it still exists.
+   * Used to set class properties.
    * @constructor
-   * @param {Discord.Client} [client] - The client.
+   * @param {Discord.Message} message - The message.
+   * @param {Types.commandData} command - The command.
    */
-  constructor(client?: Discord.Client) {
-    if (client) this.client = client;
+  constructor(message: Discord.Message, command: Types.commandData) {
+    this.message = message;
+    this.command = command;
   }
 
-  async deleteConfirmation(message, command, cond) {
-    
-    const embed = client.embeds.orange(command, cond);
+  /**
+   * Creates a new prompt instance.
+   * @param {Discord.Message} message - The message that started the prompt.
+   * @param {Types.commandData} command - The command that ran the prompt.
+   * @returns {Prompts} The new Prompts instance.
+   */
+  static new(message: Discord.Message, command: Types.commandData): Prompts {
+    return new this(message, command);
+  }
+
+  /**
+   * Sends a button prompt asking whether the user agrees to the delete command terms.
+   * @async
+   * @function deleteConfirmation
+   * @return {Promise<void>}
+   */
+  async deleteConfirmation(): Promise<void> {
+    const embed = client.embeds.orange(this.command, client.util.deleteConfirmation);
     const filter = () => true;
-    var clicked = false;
 
-    const accept = client.buttons.accept("Delete_Conditions:Accept");
-    const decline = client.buttons.decline("Delete_Conditions:Decline");
-    const row = client.buttons.actionRow([accept, decline]);
+    const accept = client.components.button({ label: "Accept", style: "SUCCESS", id: "Delete_Conditions:Accept" });
+    const decline = client.components.button({ label: "Decline", style: "DANGER", id: "Delete_Conditions:Decline" });
+    const row = client.components.actionRow(accept, decline);
 
-    const acceptEmbed = client.embeds.success(command,`Accepted the command conditions.`);
-    const declineEmbed = client.embeds.warn(command, `Declined the command conditions.`);
+    const acceptEmbed = client.embeds.success(this.command,`Accepted the command conditions.`);
+    const declineEmbed = client.embeds.warn(this.command, `Declined the command conditions.`);
 
-    const msg = await message.reply({ embeds: [embed], components: [row] });
+    const msg = await this.message.reply({ embeds: [embed], components: [row] });
     const collector = msg.createMessageComponentCollector({ filter, idle: 90 * 1000 });
 
     collector.on("collect", async (int) => {
-      if (int.member.id !== message.author.id) {
+      if (int.user.id !== this.message.author.id) {
         const embed = client.embeds.notComponent();
         return int.reply({ embeds: [embed], ephemeral: true });
       }
 
+      collector.stop("clicked");
       if (int.customId == "Delete_Conditions:Accept") {
-        client.db.first.set(int.member.id, false, "deleteCmd");
+        client.db.first.set(int.user.id, false, "deleteCmd");
         int.update({ embeds: [acceptEmbed], components: [] });
 
       } else {
         int.update({ embeds: [declineEmbed], components: [] });
       }
-
-      clicked = true;
     });
 
-    collector.on("end", async () => {
-      if (clicked) return;
+    collector.on("end", async (_, reason) => {
+      if (reason !== "user") return;
 
-      const embed = client.embeds.inactivity(command);
+      const embed = client.embeds.inactivity(this.command);
       msg.edit({ embeds: [embed], components: [] });
     });
   }
 
-  async helpMenu(msg, message, obj) {
+  /**
+   * Makes the 
+   * @async
+   * @function helpMenu
+   * @param obj 
+   */
+  async helpMenu(obj) {
     const filter = () => true;
-    
-
     const collector = msg.createMessageComponentCollector({ filter, idle: 60 * 1000 });
     const original = msg.embeds[0];
     const select = msg.components[0].components[0];
 
-    const backBtn = client.buttons.grey("Back", "Help_Menu:Back");
-    const btnRow = client.buttons.actionRow([backBtn]);
-    const selectRow = client.buttons.actionRow([select]);
+    const backBtn = client.components.button({ label: "Back", style: "SECONDARY", id: "Help_Menu:Back" });
+    const btnRow = client.components.actionRow(backBtn);
+    const selectRow = client.components.actionRow(select);
 
     collector.on("collect", async (int) => {
       if (int.member.id !== message.author.id) {

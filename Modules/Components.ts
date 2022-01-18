@@ -48,10 +48,10 @@ export default class Components {
   /**
    * Creates a new discord.js MessageActionRow and sets the components.
    * @function actionRow
-   * @param {any[]} components - The components that should be added.
+   * @param {Discord.BaseMessageComponent[]} components - The components that should be added.
    * @returns {Discord.MessageActionRow} The action row containing the components.
    */
-  actionRow(components: any[]): Discord.MessageActionRow {
+  actionRow(...components: Discord.BaseMessageComponent[]): Discord.MessageActionRow {
     components = Array.from(components);
     if (!components.every(c => c instanceof Discord.BaseMessageComponent)) {
       throw new Error("One or more arguments is not a valid message component.");

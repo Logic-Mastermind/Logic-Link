@@ -159,6 +159,7 @@ const Util = {
     'USE_PRIVATE_THREADS',
     'USE_EXTERNAL_STICKERS'
   ],
+  deleteConfirmation: `This command is able to delete roles and channels based on partial names without warning. Please be careful when using this command, if you don't feel comfortable providing a partial name, remember that you can always just mention the role or channel to be sure that you are deleting the right one.\n\nBy clicking the "Accept" button below, you acknowledge the conditions above and understand that you will be fully responsible for roles and channels deleted with this command.`,
   chalkOptions: ["bold", "dim", "italic", "underline", "inverse", "strikethrough", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "gray", "bgBlack", "bgRed", "bgGreen", "bgYellow", "bgBlue", "bgMagenta", "bgCyan", "bgWhite"],
   skipAliases: ["skip", "skip.", "skip,"],
   cancelAliases: ["cancel", "cancel.", "cancel,"],
