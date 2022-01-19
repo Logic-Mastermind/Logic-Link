@@ -31,15 +31,15 @@ import FS from "fs";
   }
 
   async sendPanel(panel, tsettings, guildId) {
-    const channel = client.channels.cache.get(panel.channel);
+    const channel = client.channels.cache.get(panel.channel) as Discord.TextChannel;
     const embed = client.embeds.blue(panel.name, `${client.util.check} To create a ticket, click on the button below.`, [{
       name: "Additional Info",
       value: `Clicking the button below will create a ticket for this panel.\nPlease remember to adhere to this server's rules within the ticket.`,
       inline: false
     }]);
 
-    const button = client.buttons.emoji(`Ticket_Create:${panel.id}`, `📩`, "SUCCESS", `Create Ticket`);
-    const row = client.buttons.actionRow([button]);
+    const button = client.components.button({ label: "Create Ticket", id: `Ticket_Create:${panel.id}`, style: "SUCCESS", emoji: "📩" });
+    const row = client.components.actionRow(button);
 
     if (!channel.permissionsFor(channel.guild.me).has("SEND_MESSAGES")) return false;
     const msg = await channel.send({ embeds: [embed], components: [row] });
@@ -60,8 +60,8 @@ import FS from "fs";
       inline: false
     }]);
 
-    const button = client.buttons.emoji(`Ticket_Create:${panel.id}`, `📩`, "SUCCESS", `Create Ticket`);
-    const row = client.buttons.actionRow([button]);
+    const button = client.components.button({ label: "Create Ticket", id: `Ticket_Create:${panel.id}`, style: "SUCCESS", emoji: "📩" });
+    const row = client.components.actionRow(button);
 
     const msg = channel ? await channel.messages.fetch(panel.msg) : null;
     if (msg) await msg.edit({ embeds: [embed], components: [row] });

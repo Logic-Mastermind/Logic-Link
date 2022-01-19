@@ -682,7 +682,7 @@ export default class Functions {
       button1.setDisabled();
       button2.setDisabled();
 
-      const row1 = client.components.actionRow([button1, button2]);
+      const row1 = client.components.actionRow(button1, button2);
       message.edit({ embeds: [original], components: [row1] });
     });
   }
@@ -830,23 +830,6 @@ export default class Functions {
     } else {
       console.log(content);
     }
-  }
-
-  /**
-   * Checks if a guild member has permission to use a certain command.
-   * @function hasPermission
-   * @param {Discord.GuildMember} member - The member to check permissions on.
-   * @param {Types.commandData} command - The command to get permissions from.
-   * @param {Discord.Guild|string} guild - The guild or ID of the guild owner.
-   * @returns {boolean}
-   */
-  hasPermission(member: Discord.GuildMember, command: Types.commandData, guild: Discord.Guild | string): boolean {
-    const isDev = member.id == client.util.devId;
-    const devCmd = command.category == "Developer";
-    const perms = devCmd ? isDev : command.permissions.some(p => member.permissions.has(p));
-    const isOwner = guild instanceof Discord.Guild ? guild.ownerId == member.id : guild == member.id;
-
-    return perms || isOwner;
   }
 
   /**
@@ -1073,7 +1056,8 @@ export default class Functions {
    * @returns {boolean} Whether or not the user has the required permissions.
    */
   hasPerm(command: Types.commandData, target: Discord.GuildMember): boolean {
-    const hasPermissions = target.permissions.any(command.permissions);
+    //@ts-ignore
+    const hasPermissions = command.permissions.some((p) => target.permissions.has(p));
     var otherPerm = false;
 
     if (command.category == "Administrator") otherPerm = this.isAdmin(target);
