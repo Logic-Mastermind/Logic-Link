@@ -19,7 +19,7 @@ export default class Client extends Discord.Client {
   components = new Components();
   functions = new Functions();
   embeds = new Embeds();
-  prompts = new Prompts();
+  prompts = Prompts;
   schemas = new Schemas();
   logger = new Logger();
   cooldown = new Enmap();
