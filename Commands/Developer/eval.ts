@@ -1,14 +1,14 @@
-const Discord = require("discord.js");
-const Fetch = require("node-fetch");
-const googleApis = require("googleapis");
-const Paste = require("pastebin-api").default;
-const YouTube = require("ytdl-core-discord");
-const Chalk = require("chalk");
-const Mongoose = require("mongoose");
-const Enmap = require("enmap");
-const Roblox = require("noblox.js");
-const FS = require("fs");
-const ms = require("ms");
+import Discord from "discord.js";
+import Fetch from "node-fetch";
+import googleApis from "googleapis";
+import Paste from "pastebin-api";
+import YouTube from "ytdl-core-discord";
+import Chalk from "chalk";
+import Mongoose from "mongoose";
+import Enmap from "enmap";
+import Roblox from "noblox.js";
+import FS from "fs";
+import ms from "ms";
 
 exports.run = async (client, message, args, command, settings, tsettings, extra) => {
   const clientMember = message.guild.me;

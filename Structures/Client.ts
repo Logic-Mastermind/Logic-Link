@@ -36,7 +36,7 @@ export default class Client extends Discord.Client {
 
   constructor(options) {
     super(options);
-
+    
     let categories = new Discord.Collection();
     categories.set("Administrator", []);
     categories.set("Developer", []);
