@@ -2,6 +2,7 @@ import Discord from "discord.js";
 import Types from "../Typings/types";
 import Enmap from "enmap";
 import fs from "fs";
+import path from "path";
 
 import Components from "../Modules/Components";
 import Commands from "../Structures/Commands";
@@ -52,13 +53,13 @@ export default class Client extends Discord.Client {
     for (const category of Commands.categories) {
       if (category == "Ticket") {
         for (let tckCategory of Commands.ticketCategories) {
-          fs.readdir(`../Commands/Ticket/${tckCategory}/`, async (error, files) => {
+          fs.readdir(path.resolve(__dirname, `../Commands/Ticket/${tckCategory}/`), async (error, files) => {
             if (error) throw error;
 
             for (let file of files) {
               if (!file.endsWith(".ts")) return;
               let name = file.split(".")[0];
-              let cmd = await import(`../Commands/Ticket/${tckCategory}/${name}`);
+              let cmd = await import(path.resolve(__dirname, `../Commands/Ticket/${tckCategory}/${name}`));
 
               this.functions.log(`CMD: ${name}`, "bold");
               this.commands.ticket[tckCategory][name].run = cmd;
@@ -67,13 +68,13 @@ export default class Client extends Discord.Client {
           });
         }
       } else {
-        fs.readdir(`../Commands/${category}/`, async (error, files) => {
+        fs.readdir(path.resolve(__dirname, `../Commands/${category}/`), async (error, files) => {
           if (error) throw error;
 
           for (let file of files) {
             if (!file.endsWith(".ts")) return;
             let name = file.split(".")[0];
-            let cmd = await import(`../Commands/${category}/${name}`);
+            let cmd = await import(path.resolve(__dirname, `../Commands/${category}/${name}/`));
 
             this.functions.log(`CMD: ${name}`);
             this.commands[category][name].run = cmd;

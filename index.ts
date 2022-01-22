@@ -2,6 +2,7 @@ import fs from "fs";
 import Client from "./Structures/Client";
 import Util from "./Structures/Util";
 import server from "./server";
+import path from "path";
 
 const client = new Client({
   intents: Util.intents,
@@ -19,11 +20,11 @@ const client = new Client({
 console.time("Login");
 client.server = server();
 
-fs.readdir("./Events/", async (error, files) => {
+fs.readdir(path.resolve(__dirname, `./Events`), async (error, files) => {
   if (error) throw error;
 
   for (let file of files) {
-    const event = await import(`./Events/${file}`);
+    const event = await import(path.resolve(__dirname, `./Events/${file}/`));
     const bound = event.bind(null, client);
     const name = file.split(".")[0];
     client.on(name, bound);
