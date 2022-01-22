@@ -1,7 +1,4 @@
-const Discord = require("discord.js");
-const Fetch = require("node-fetch");
-
-exports.run = async (client, message, args, command, settings, tsettings, extra) => {
+export default async function run(client, message, args, command, settings, tsettings, extra) {
   const clientMember = message.guild.me;
   const guildPrefix = client.functions.fetchPrefix(message.guild);
 

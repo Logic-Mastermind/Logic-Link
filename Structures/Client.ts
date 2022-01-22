@@ -25,30 +25,29 @@ export default class Client extends Discord.Client {
   logger = new Logger();
   cooldown = new Enmap();
 
-  commands = null;
-  category = null;
+  commands = Commands;
+  category = new Discord.Collection([
+    ["administrator", []],
+    ["developer", []],
+    ["general", []],
+    ["moderator", []],
+    ["support", []],
+    ["ticket", {
+      administrator: [],
+      support: [],
+      basic: []
+    }],
+  ]);
   config = Config;
   db = Database;
   util = Util;
 
   server: any;
   readySince: number;
-  ready: boolean;
+  cmdScheme: any[];
 
   constructor(options) {
     super(options);
-    
-    let categories = new Discord.Collection();
-    categories.set("Administrator", []);
-    categories.set("Developer", []);
-    categories.set("General", []);
-    categories.set("Moderator", []);
-    categories.set("Support", []);
-    categories.set("Ticket", {
-      Administrator: [],
-      Support: [],
-      General: []
-    });
 
     for (const category of Commands.categories) {
       if (category == "Ticket") {
@@ -59,26 +58,34 @@ export default class Client extends Discord.Client {
             for (let file of files) {
               if (!file.endsWith(".ts")) return;
               let name = file.split(".")[0];
-              let cmd = await import(path.resolve(__dirname, `../Commands/Ticket/${tckCategory}/${name}`));
+              let cmd = (await import(path.resolve(__dirname, `../Commands/Ticket/${tckCategory}/${name}`))).default;
 
               this.functions.log(`CMD: ${name}`, "bold");
               this.commands.ticket[tckCategory][name].run = cmd;
-              categories[category][tckCategory].push(name);
+
+              let currentCategory = this.category.get(category)[tckCategory];
+              currentCategory.push(name);
+
+              this.category.set(category, currentCategory);
             }
           });
         }
       } else {
         fs.readdir(path.resolve(__dirname, `../Commands/${category}/`), async (error, files) => {
           if (error) throw error;
-
           for (let file of files) {
-            if (!file.endsWith(".ts")) return;
+            if (!file.endsWith(".ts")) continue;
+            
             let name = file.split(".")[0];
-            let cmd = await import(path.resolve(__dirname, `../Commands/${category}/${name}/`));
-
+            let cmd = (await import(path.resolve(__dirname, `../Commands/${category}/${name}/`))).default;
+            
             this.functions.log(`CMD: ${name}`);
             this.commands[category][name].run = cmd;
-            categories[category].push(name);
+            
+            let currentCategory = this.category.get(category) as string[];
+            currentCategory.push(name);
+
+            this.category.set(category, currentCategory);
           }
         });
       }

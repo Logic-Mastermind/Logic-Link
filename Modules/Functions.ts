@@ -441,7 +441,8 @@ export default class Functions {
     for (const category of categories) {
       if (command) break;
 
-      for (const [_, data] of Object.entries(client.commands[category])) {
+      for (const [key, data] of Object.entries(client.commands[category])) {
+        if (key == "description") continue;
         if (filterCommands(data)) break;
       }
     }

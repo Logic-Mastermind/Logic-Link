@@ -25,9 +25,8 @@ fs.readdir(path.resolve(__dirname, `./Events`), async (error, files) => {
 
   for (let file of files) {
     const event = await import(path.resolve(__dirname, `./Events/${file}/`));
-    const bound = event.bind(null, client);
     const name = file.split(".")[0];
-    client.on(name, bound);
+    client.on(name, event.handle);
   }
 });
 

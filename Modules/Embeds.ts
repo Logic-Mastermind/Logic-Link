@@ -47,7 +47,6 @@ export default class Embeds {
     const { title, description, color, footer, timestamp, image, thumbnail, fields } = data;
     const embed = new MessageEmbed();
     embed.setDescription(description);
-    embed.setFooter(footer[0] || footer1, footer[1] || footer2);
     embed.setColor(color || "BLUE");
     embed.setTimestamp(null);
 
@@ -57,6 +56,9 @@ export default class Embeds {
     if (image) embed.setImage(image);
     if (thumbnail) embed.setThumbnail(thumbnail);
     if (fields) embed.addFields(fields);
+
+    if (footer) embed.setFooter(footer[0], footer[1]);
+    else embed.setFooter(footer1, footer2);
     return embed;
   }
 
@@ -664,25 +666,31 @@ export default class Embeds {
   noArgs(command: Types.commandData, guild: Discord.Guild | string): Discord.MessageEmbed {
     const guildId = typeof guild == "object" ? guild.id : guild;
     const prefix = client.functions.fetchPrefix(guildId);
+    const cmdName = command.commandName;
 
-    const embed = new MessageEmbed();
-    embed.setTitle(command.name);
-    embed.setColor("ORANGE");
-    embed.setDescription(`${command.description}\n\u200b`);
-    embed.setFooter(footer1, footer2);
-    embed.setTimestamp();
-    embed.addFields([
-      {
-        name: "Usage",
-        value: `${code}${prefix}${command.usage}${code}\n\u200b`,
-        inline: false
-      },
-      {
-        name: "Options",
-        value: `${command.options.length == 0 ? `${client.util.noOption}\n\u200b` : `\`${prefix}${command.commandName} ${command.options.join(`\`\n${prefix}${command.commandName} `)}\``}`,
-        inline: false
-      }
-    ]);
+    const embed = this.new({
+      title: command.name,
+      description: `${command.description}\n\u200b`,
+      color: "ORANGE",
+      fields: [
+        {
+          name: "Usage",
+          value: `${code}${prefix}${command.usage}${code}\u200b`
+        },
+        {
+          name: "Aliases",
+          value: `${command.aliases.length == 0 ? `${client.util.noAlias}` : `\`${prefix}${command.aliases.join(`\`\n${prefix}`)}\``}\n\u200b`
+        },
+        {
+          name: "Options",
+          value: `${command.options.length == 0 ? `${client.util.noOption}` : `\`${prefix}${cmdName} ${command.options.join(`\`\n\`${prefix}${cmdName} `)}\``}\n\u200b`
+        },
+        {
+          name: "Usage Error",
+          value: `You are missing required parameters needed to carry out this command.\nTo get more information, run \`>help eval.\``
+        }
+      ]
+    })
     
     return embed;
   }

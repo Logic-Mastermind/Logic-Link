@@ -10,7 +10,7 @@ import Roblox from "noblox.js";
 import FS from "fs";
 import ms from "ms";
 
-exports.run = async (client, message, args, command, settings, tsettings, extra) => {
+export default async function run(client, message, args, command, settings, tsettings, extra) {
   const clientMember = message.guild.me;
   const guildPrefix = await client.functions.fetchPrefix(message.guild);
   
@@ -63,7 +63,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
       if (typeof evaled !== "string") evaled = require("util").inspect(evaled);
       if (!silent) {
-        const msgs = await Discord.splitMessage(evaled);
+        const msgs = Discord.Util.splitMessage(evaled, { maxLength: 1975 });
         var inc = 0;
 
         for (const msg of msgs) {

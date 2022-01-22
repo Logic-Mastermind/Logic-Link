@@ -1,7 +1,4 @@
-const Discord = require("discord.js");
-const Fetch = require("node-fetch");
-
-exports.run = async (client, message, args, command, settings, tsettings, extra) => {
+export default async function run(client, message, args, command, settings, tsettings, extra){
   const clientMember = message.guild.me;
   const guildPrefix = await client.functions.fetchPrefix(message.guild);
   
@@ -59,7 +56,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       }
 
       const announceEmbed = client.embeds.custom("Announcement", announcement, [`Announced by ${message.author.tag}`, message.author.displayAvatarURL()]);
-      const messageOptions = { embeds: [announceEmbed] };
+      const messageOptions = { embeds: [announceEmbed], content: null };
 
       if (option) {
         if (option == "everyone" || option == "here") messageOptions.content = `@${option}`;

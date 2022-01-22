@@ -1256,17 +1256,17 @@ const Commands = {
     },
   },
   categories: [
-    "Administrator",
-    "Developer",
-    "General",
-    "Moderator",
-    "Support",
-    "Ticket"
+    "administrator",
+    "developer",
+    "general",
+    "moderator",
+    "support",
+    "ticket"
   ],
   ticketCategories: [
-    "Administrator",
-    "Basic",
-    "Support"
+    "administrator",
+    "basic",
+    "support"
   ],
   aliases: {
     "av": "avatar",

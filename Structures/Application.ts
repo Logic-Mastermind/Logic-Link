@@ -1,4 +1,4 @@
-import Commands from "./Commands.js";
+import Commands from "./Commands";
 const reason: string = "The reason for this action.";
 
 const gen = Commands.general;

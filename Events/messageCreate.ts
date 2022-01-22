@@ -1,8 +1,8 @@
-const Discord = require("discord.js");
-const Fetch = require("node-fetch");
-const ms = require("ms");
+import Discord from "discord.js";
+import client from "../index";
+import ms from "ms";
 
-module.exports = async (client, message) => {
+export async function handle(message: Discord.Message) {
   if (message.author.bot) return;
   if (!message.guild) return;
 
@@ -12,7 +12,7 @@ module.exports = async (client, message) => {
 
     var mentioned = false;
     var allArgs = message.content.split(/ +/g);
-    var guildPrefix = await client.functions.fetchPrefix(message.guild);
+    var guildPrefix = client.functions.fetchPrefix(message.guild);
     var pingPrefixes = [`<@${client.user.id}>`, `<@!${client.user.id}>`];
     var blacklistInfo = client.db.blacklists.get(message.author.id);
     var userInfo = client.db.userInfo.get(`${message.author.id}-${message.guild.id}`);
@@ -41,15 +41,12 @@ module.exports = async (client, message) => {
       }
     }
     
-    const args = message.content.slice(prefix.length).trim().split(/ +/g);
-    const now = Date.now();
+    var args = message.content.slice(prefix.length).trim().split(/ +/g);
+    var now = Date.now();
 
     var commandName = args.shift().toLowerCase();
-    var command = await client.functions.findCommand(commandName);
+    var command = client.functions.findCommand(commandName);
     if (!command) return;
-
-    var cmd = client.commands.get(command.commandName);
-    if (!cmd) return;
 
     var userCooldown = client.cooldown.get(message.author.id);
     if (!userCooldown) {
@@ -101,69 +98,18 @@ module.exports = async (client, message) => {
       return message.reply({ embeds: [embed] });
     }
 
-    const settings = await client.functions.getSettings(message.guild);
-    const tsettings = await client.functions.getTicketData(message.guild);
-    const devMode = client.db.devSettings.get(client.util.devId, "devMode");
-    const logId = client.logger.log(`Command ${command.commandName} ran by ${message.author.id}`, message.author);
+    var settings = client.functions.getSettings(message.guild);
+    var tsettings = client.functions.getTicketData(message.guild);
+    var devMode = client.db.devSettings.get(client.util.devId, "devMode");
+    var logId = client.logger.log(`Command ${command.commandName} ran by ${message.author.id}`, message.author);
     
     const permissionWhitelist = ["delete", "lock", "hide", "unhide", "unlock"];
     const checkBotPerms = ["addrole", "addroles", "hide", "hoist", "lock", "removerole", "removeroles", "unhide", "unhoist", "unlock", "announce", "ban", "kick", "purge", "slowmode", "nickname", "softban", "tempban", "unban", "unmute"];
 
-    async function filterPermissions() {
-      if (permissionWhitelist.includes(command.commandName)) return null;
-      if (devMode && (message.author.id == client.util.devId)) return null;
-      if (command.required == "none") return null;
-
-      if (command.required == "dev") {
-        if (message.author.id !== client.util.devId) {
-          if (!command.permissions.includes("ALL")) {
-            client.logger.updateLog(`User lacked permissions.`, logId);
-            const embed = client.embeds.permission(command);
-            return message.reply({ embeds: [embed] });
-          }
-        }
-      } else if (command.required == "support") {
-        if (message.member.roles.cache.has(client.util.supportRole)) return null;
-        if (message.author.id == client.util.devId) return null;
-        if (command.permissions.includes("ALL") || !command.permissions[0]) return null;
-
-        client.logger.updateLog(`User lacked permissions.`, logId);
-        const embed = client.embeds.permission(command);
-        return message.reply({ embeds: [embed] });
-        
-      } else if (command.required == "ticket") {
-        if (command.permissions.includes("ALL")) return null;
-      }
-
-      var hasPerms = await client.functions.hasPermission(message.member, command, message.guild);
-      var hasAdminRole = message.member.roles.cache.has(settings.adminRole);
-      var hasModRole = message.member.roles.cache.has(settings.modRole);
-
-      if (!hasPerms) {
-        if (hasAdminRole) return null;
-
-        if (command.required == "mod") {
-          if (hasModRole) return null;
-          
-          client.logger.updateLog(`User lacked permissions.`, logId);
-          const embed = client.embeds.permission(command);
-          return message.reply({ embeds: [embed] });
-
-        } else if (command.required == "admin") {
-          client.logger.updateLog(`User lacked permissions.`, logId);
-          const embed = client.embeds.permission(command);
-          return message.reply({ embeds: [embed] });
-
-        } else if (command.required == "ticket") {
-          client.logger.updateLog(`User lacked permissions.`, logId);
-          const embed = client.embeds.permission(command);
-          return message.reply({ embeds: [embed] });
-        }
-      }
+    if (!client.functions.hasPerm(command, message.member)) {
+      const embed = client.embeds.permission(command);
+      return message.reply({ embeds: [embed] });
     }
-
-    const filtered = await filterPermissions();
-    if (filtered) return;
 
     const locked = client.db.devlock.get(command.commandName, "locked");
     const lockedGuild = client.guilds.cache.get(client.db.devlock.get(command.commandName, "guild"));
@@ -206,33 +152,30 @@ module.exports = async (client, message) => {
 
     if (command.minArgs > 0) {
       if (!args[command.minArgs - 1]) {
-        const denied = await filterPermissions();
+        const denied = !client.functions.hasPerm(command, message.member);
         if (denied) return;
 
         client.logger.updateLog(`User did not pass enough arguments.`, logId);
-        const embed = await client.embeds.noArgs(command, message.guild);
+        const embed = client.embeds.noArgs(command, message.guild);
         return message.reply({ embeds: [embed] });
       }
     }
 
     if (checkBotPerms.includes(command.commandName)) {
-      if (!clientMember.permissions.has(command.permissions)) {
+      //@ts-ignore
+      if (command.permissions.some((p) => clientMember.permissions.has(p))) {
         client.logger.updateLog(`Bot lacked permissions.`, logId);
         const embed = client.embeds.botPermission(command);
         return message.reply({ embeds: [embed] });
       }
     }
 
-    var hasSupportRole = false;
-    for await (const [key, val] of tsettings.panels.entries()) {
-      hasSupportRole = await val.support.some((r) => message.member.roles.cache.has(r));
-    }
-
+    var hasSupportRole = client.functions.hasTicketRole(message.member, "Support");
     const extra = {
       commandName: commandName,
       allArgs: allArgs,
       mentioned: mentioned,
-      logId: logId,
+      logId,
       hasBotSupport: message.member.roles.cache.has(client.util.supportRole),
       isDev: message.author.id == client.util.devId,
       hasSupport: hasSupportRole
@@ -240,8 +183,8 @@ module.exports = async (client, message) => {
     
     client.logger.updateLog(`All checks were passed.`, logId);
     client.cooldown.set(message.author.id, now, command.commandName);
-    cmd.run(client, message, args, command, settings, tsettings, extra);
+    command.run(client, message, args, command, settings, tsettings, extra);
   } catch (error) {
-    client.functions.sendError(error, message, command);
+    client.functions.sendError(error);
   }
 }

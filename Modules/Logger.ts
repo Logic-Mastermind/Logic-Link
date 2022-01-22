@@ -120,16 +120,16 @@ export default class Logger {
    * Updates a log with further details.
    * @function updateLog
    * @param {string} content - The content of the update.
-   * @param {string|number} id - The ID of the log to update.
+   * @param {string|number|Error} id - The ID of the log to update.
    * @returns {string[]|Error} All of the updates to the log.
    */
-  updateLog(content: string, id: string | number): string[] | Error {
+  updateLog(content: string, id: string | number | Error): string[] | Error {
     try {
-      if (typeof id === "number") id.toString();
+      if (id instanceof Error) return;
       const data = client.db.logs.get(id);
 
       data.details.push(content);
-      client.db.logs.set(id, data.details, "details");      
+      client.db.logs.set(id.toString(), data.details, "details");      
       return data.details;
 
     } catch (error) {

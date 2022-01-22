@@ -1,17 +1,12 @@
-const Discord = require("discord.js");
-const Fetch = require("node-fetch");
-const Enmap = require("enmap");
-const applicationScheme = require("../Structures/application.js");
+import applicationScheme from "../Structures/Application";
+import client from "../index";
 
-module.exports = async (client) => {
-  client.application.commands.scheme = applicationScheme;
+export async function handle()  {
+  client.cmdScheme = applicationScheme;
   client.functions.log(`\n[${client.user.tag}]\nTotal Channels: ${client.channels.cache.size}\nTotal Servers: ${client.guilds.cache.size}\nTotal Users: ${client.users.cache.size}`);
   console.timeEnd("Login");
-
-  client.ready = true;
+``
   client.readySince = Math.floor(Date.now() / 1000);
-  client.readySinceMS = Date.now();
-
   const timeouts = client.db.timeouts.fetchEverything();
   const logs = client.db.logs.fetchEverything();
   
@@ -42,7 +37,7 @@ module.exports = async (client) => {
       
     } else if (val.type == "reminders") {
       const reminders = val.reminders;
-      if (!reminders instanceof Map) continue;
+      if (reminders instanceof Map) continue;
 
       for (const [k, v] of reminders.entries()) {
         const content = `Your reminder from <t:${v.date}:R> has just went off.`;

@@ -154,7 +154,8 @@ declare namespace Types {
     commandName: string
     category: "Administrator" | "Developer" | "General" | "Moderator" | "Support" | "Ticket",
     subCategory?: "Basic" | "Support" | "Administrator",
-    option?: empty
+    option?: empty,
+    run: Function
   }
 
   export interface timeData {
