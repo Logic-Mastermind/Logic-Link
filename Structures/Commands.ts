@@ -1,5 +1,5 @@
 const Commands = {
-  general: {
+  General: {
     description: "Basic info / utility commands available to all users.",
     avatar: {
       name: "Avatar",
@@ -113,7 +113,7 @@ const Commands = {
       cooldown: 10800,
       minArgs: 1,
       options: ["new"],
-      aliases: ["paste"],
+      aliases: ["paste", "pbin"],
       usage: "pastebin <option>",
       category: "General",
       commandName: "pastebin"
@@ -238,7 +238,7 @@ const Commands = {
       commandName: "whois"
     }
   },
-  ticket: {
+  Ticket: {
     description: "Next generation ticket systems and commands great for de-cluttering channels.",
     thelp: {
       name: "Ticket Help",
@@ -355,7 +355,7 @@ const Commands = {
       commandName: "tsettings"
     }
   },
-  moderator: {
+  Moderator: {
     description: "Advanced moderation commands useful for stopping raids and attacks.",
     announce: {
       name: "Announce",
@@ -510,7 +510,7 @@ const Commands = {
       cooldown: 2,
       minArgs: 1,
       options: [],
-      aliases: [],
+      aliases: ["nick", "setnick", "set-nick"],
       usage: "nickname <user> <new nickname | reset>",
       category: "Moderator",
       commandName: "nickname"
@@ -588,13 +588,13 @@ const Commands = {
       cooldown: 3,
       minArgs: 1,
       options: [],
-      aliases: [],
+      aliases: ["warns"],
       usage: "warnings <member>",
       category: "Moderator",
       commandName: "warnings"
     }
   },
-  administrator: {
+  Administrator: {
     description: "Easy to use admin / utility commands that can get the job done quickly.",
     addrole: {
       name: "Add Role",
@@ -604,7 +604,7 @@ const Commands = {
       cooldown: 2,
       minArgs: 1,
       options: [],
-      aliases: ["giverole", "ar", "adr"],
+      aliases: ["giverole", "add"],
       usage: "addrole <user> <role>",
       category: "Administrator",
       commandName: "addrole",
@@ -617,7 +617,7 @@ const Commands = {
       cooldown: 10,
       minArgs: 1,
       options: [],
-      aliases: ["giveroles", "ars", "adrs"],
+      aliases: ["giveroles"],
       usage: "addroles <user> <roles>",
       category: "Administrator",
       commandName: "addroles",
@@ -681,7 +681,7 @@ const Commands = {
       cooldown: 2,
       minArgs: 1,
       options: [],
-      aliases: [],
+      aliases: ["dlt"],
       usage: "delete <role | channel>",
       category: "Administrator",
       commandName: "delete",
@@ -772,7 +772,7 @@ const Commands = {
       cooldown: 2,
       minArgs: 1,
       options: [],
-      aliases: ["takerole", "rr"],
+      aliases: ["takerole", "remove"],
       usage: "removerole <user> <role>",
       category: "Administrator",
       commandName: "removerole",
@@ -785,7 +785,7 @@ const Commands = {
       cooldown: 10,
       minArgs: 1,
       options: [],
-      aliases: ["takeroles", "rrs"],
+      aliases: ["takeroles"],
       usage: "removeroles <user> <roles>",
       category: "Administrator",
       commandName: "removeroles",
@@ -955,7 +955,7 @@ const Commands = {
       commandName: "unlock"
     }
   },
-  support: {
+  Support: {
     description: "Helpful commands for our support team used to diagnose issues.",
     bug: {
       name: "Bug Report",
@@ -965,7 +965,7 @@ const Commands = {
       cooldown: 10,
       minArgs: 1,
       options: [],
-      aliases: [],
+      aliases: ["report"],
       usage: "bug new",
       category: "Support",
       commandName: "bug"
@@ -978,7 +978,7 @@ const Commands = {
       cooldown: 3,
       minArgs: 1,
       options: [],
-      aliases: [],
+      aliases: ["err"],
       usage: "error <id>",
       category: "Support",
       commandName: "error"
@@ -997,7 +997,7 @@ const Commands = {
       commandName: "shelp"
     }
   },
-  developer: {
+  Developer: {
     description: "Secret development commands used to debug problems and fix bugs.",
     blacklist: {
       name: "Blacklist",
@@ -1007,7 +1007,7 @@ const Commands = {
       cooldown: 0,
       minArgs: 1,
       options: ["view"],
-      aliases: [],
+      aliases: ["bl", "bls"],
       usage: "blacklist <user> [reason]",
       category: "Developer",
       commandName: "blacklist",
@@ -1035,7 +1035,7 @@ const Commands = {
       cooldown: 0,
       minArgs: 1,
       options: ["view"],
-      aliases: ["dlock", "dl", "developerlock"],
+      aliases: ["dlock", "dl"],
       usage: "devlock <command> [guild] [option | reason]",
       category: "Developer",
       commandName: "devlock",
@@ -1089,7 +1089,7 @@ const Commands = {
       cooldown: 0,
       minArgs: 1,
       options: [],
-      aliases: ["dmode", "devm"],
+      aliases: ["dmode"],
       usage: "devmode <on | off>",
       category: "Developer",
       commandName: "devmode"
@@ -1210,7 +1210,7 @@ const Commands = {
       cooldown: 0,
       minArgs: 0,
       options: [],
-      aliases: ["rstart", "rst"],
+      aliases: [],
       usage: "restart",
       category: "Developer",
       commandName: "restart"
@@ -1249,103 +1249,11 @@ const Commands = {
       cooldown: 0,
       minArgs: 1,
       options: [],
-      aliases: [],
+      aliases: ["ubl"],
       usage: "unblacklist <user>",
       category: "Developer",
       commandName: "unblacklist",
     },
-  },
-  categories: [
-    "administrator",
-    "developer",
-    "general",
-    "moderator",
-    "support",
-    "ticket"
-  ],
-  ticketCategories: [
-    "administrator",
-    "basic",
-    "support"
-  ],
-  aliases: {
-    "av": "avatar",
-    "binfo": "botinfo",
-    "inv": "invite",
-    "mcount": "membercount",
-    "memcount": "membercount",
-    "mc": "membercount",
-    "vc": "voice",
-    "un-mute": "unmute",
-    "un-ban": "unban",
-    "role": "roles",
-    "setting": "settings",
-    "set": "settings",
-    "e": "eval",
-    "rld": "reload",
-    "crt": "create",
-    "tickets": "ticket",
-    "tck": "ticket",
-    "slow": "slowmode",
-    "smode": "slowmode",
-    "slowmod": "slowmode",
-    "setnick": "nickname",
-    "nickset": "nickname",
-    "nick": "nickname",
-    "dlock": "devlock",
-    "developerlock": "devlock",
-    "dl": "devlock",
-    "un-lock": "unlock",
-    "up-time": "uptime",
-    "un-hoist": "unhoist",
-    "giverole": "addrole",
-    "takerole": "removerole",
-    "paste": "pastebin",
-    "giveroles": "addroles",
-    "takeroles": "removeroles",
-    "upt": "uptime",
-    "commands": "help",
-    "links": "invite",
-    "cmds": "help",
-    "cmd": "help",
-    "warning": "warnings",
-    "warns": "warnings",
-    "dhelp": "devhelp",
-    "emb": "embed",
-    "log": "logs",
-    "tickethelp": "thelp",
-    "ticketsettings": "tsettings",
-    "ticketsetting": "tsettings",
-    "tset": "tsettings",
-    "ticketpanels": "panels",
-    "tpanel": "panels",
-    "tpanels": "panels",
-    "ticketpanel": "panels",
-    "panel": "panels",
-    "errors": "error",
-    "blacklists": "blacklist",
-    "bl": "blacklist",
-    "bls": "blacklist",
-    "ubl": "unblacklist",
-    "ubls": "unblacklist",
-    "sban": "softban",
-    "tban": "tempban",
-    "cinfo": "channelinfo",
-    "rinfo": "roleinfo",
-    "sinfo": "serverinfo",
-    "userinfo": "whois",
-    "uinfo": "whois",
-    "who": "whois",
-    "unb": "unblacklist",
-    "dvl": "devlock",
-    "ar": "addrole",
-    "ars": "addroles",
-    "adr": "addrole",
-    "adrs": "addroles",
-    "rr": "removerole",
-    "rrs": "removeroles",
-    "setings": "settings",
-    "cases": "case"
   }
 }
 

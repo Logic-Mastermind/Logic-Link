@@ -68,7 +68,7 @@ export default class Functions {
 
     const msg: Types.embedData = {
       title: command.name,
-      description: client.util.errorMsgDefault,
+      description: client.util.messages.errorMsgDefault,
       color: "RED",
       fields: [
         { name: "Error Identification", value: `${code}${errorId}${code}`, inline: false }
@@ -105,7 +105,7 @@ export default class Functions {
     const catcher: Types.embedData = {
       title: `Bot Error`,
       color: `RED`,
-      description: client.util.unexpectedError,
+      description: client.util.messages.unexpectedError,
       fields: [
         {
           name: `Error Information`,
@@ -932,20 +932,20 @@ export default class Functions {
     const replaced: string[] = [];
     
     for (const flag of flags.toArray()) {
-      if (flag == "DISCORD_EMPLOYEE") replaced.push(client.util.discordStaff);
-      if (flag == "PARTNERED_SERVER_OWNER") replaced.push(client.util.partnered);
-      if (flag == "HYPESQUAD_EVENTS") replaced.push(client.util.hypesquad);
-      if (flag == "BUGHUNTER_LEVEL_1") replaced.push(client.util.bugHunter);
-      if (flag == "BUGHUNTER_LEVEL_2") replaced.push(client.util.bugHunterLvl2);
-      if (flag == "HOUSE_BRILLIANCE") replaced.push(client.util.brilliance);
-      if (flag == "HOUSE_BRAVERY") replaced.push(client.util.bravery);
-      if (flag == "HOUSE_BALANCE") replaced.push(client.util.balance);
-      if (flag == "EARLY_SUPPORTER") replaced.push(client.util.earlySupporter);
+      if (flag == "DISCORD_EMPLOYEE") replaced.push(client.util.emojis.discordStaff);
+      if (flag == "PARTNERED_SERVER_OWNER") replaced.push(client.util.emojis.partnered);
+      if (flag == "HYPESQUAD_EVENTS") replaced.push(client.util.emojis.hypesquad);
+      if (flag == "BUGHUNTER_LEVEL_1") replaced.push(client.util.emojis.bugHunter);
+      if (flag == "BUGHUNTER_LEVEL_2") replaced.push(client.util.emojis.bugHunterLvl2);
+      if (flag == "HOUSE_BRILLIANCE") replaced.push(client.util.emojis.brilliance);
+      if (flag == "HOUSE_BRAVERY") replaced.push(client.util.emojis.bravery);
+      if (flag == "HOUSE_BALANCE") replaced.push(client.util.emojis.balance);
+      if (flag == "EARLY_SUPPORTER") replaced.push(client.util.emojis.earlySupporter);
       //if (flag == "TEAM_USER") 
       //if (flag == "BOT_HTTP_INTERACTIONS")
-      if (flag == "DISCORD_CERTIFIED_MODERATOR") replaced.push(client.util.certifiedMod);
-      if (flag == "VERIFIED_BOT") replaced.push(client.util.verified);
-      if (flag == "EARLY_VERIFIED_BOT_DEVELOPER") replaced.push(client.util.botDev);
+      if (flag == "DISCORD_CERTIFIED_MODERATOR") replaced.push(client.util.emojis.certifiedMod);
+      if (flag == "VERIFIED_BOT") replaced.push(client.util.emojis.verified);
+      if (flag == "EARLY_VERIFIED_BOT_DEVELOPER") replaced.push(client.util.emojis.botDev);
     }
 
     if (replaced.length == 0) return ["No Badges"];
@@ -1010,7 +1010,7 @@ export default class Functions {
     const hasPerm = target.permissions.has("ADMINISTRATOR") || target.roles.cache.has(settings.adminRole);
     const isOwner = target.guild.ownerId == target.id;
 
-    const devMode = client.db.devSettings.get(client.util.devId, "devMode") ? target.id == client.util.devId : false;
+    const devMode = client.db.devSettings.get(client.config.devId).devMode ? target.id == client.config.devId : false;
     return hasPerm || isOwner || devMode;
   }
 
@@ -1025,7 +1025,7 @@ export default class Functions {
     const hasPerm = target.permissions.has("ADMINISTRATOR") || target.roles.cache.has(settings.modRole);
     const isOwner = target.guild.ownerId == target.id;
 
-    const devMode = client.db.devSettings.get(client.util.devId, "devMode") ? target.id == client.util.devId : false;
+    const devMode = client.db.devSettings.get(client.config.devId).devMode ? target.id == client.config.devId : false;
     return hasPerm || isOwner || devMode;
   }
 
@@ -1063,8 +1063,8 @@ export default class Functions {
 
     if (command.category == "Administrator") otherPerm = this.isAdmin(target);
     else if (command.category == "Moderator") otherPerm = this.isMod(target);
-    else if (command.category == "Developer") otherPerm = client.util.devId == target.id;
-    else if (command.category == "Support") otherPerm = target.roles.cache.has(client.util.supportRole);
+    else if (command.category == "Developer") otherPerm = client.config.devId == target.id;
+    else if (command.category == "Support") otherPerm = target.roles.cache.has(client.config.supportRole);
     else if (command.category == "General") otherPerm = true;
 
     else if (command.category == "Ticket") {
@@ -1075,7 +1075,7 @@ export default class Functions {
       else if (command.subCategory == "Basic") otherPerm = true;
     }
 
-    if (client.db.devSettings.get(client.util.devId, "devMode")) otherPerm = target.id == client.util.devId;
+    if (client.db.devSettings.get(client.config.devId).devMode) otherPerm = target.id == client.config.devId;
     return hasPermissions || otherPerm;
   }
 

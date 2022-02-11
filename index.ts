@@ -18,8 +18,6 @@ const client = new Client({
 });
 
 console.time("Login");
-client.server = server();
-
 fs.readdir(path.resolve(__dirname, `./Events`), async (error, files) => {
   if (error) throw error;
 
@@ -37,6 +35,4 @@ function handleError(error): void {
 
 process.on("unhandledRejection", handleError);
 process.on("unhandledException", handleError);
-
-client.login(client.config.token);
 export default client;

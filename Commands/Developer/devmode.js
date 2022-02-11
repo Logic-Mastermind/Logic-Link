@@ -11,14 +11,14 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
   const responses = {};
 
   try {
-    const devMode = client.db.devSettings.get(client.util.devId, "devMode");
+    const devMode = client.db.devSettings.get(client.config.devId, "devMode");
     if (secArg == "on") {
       if (devMode == true) {
         const embed = client.embeds.error(command, `Developer mode has already been turned on.`);
         return message.reply({ embeds: [embed] });
       }
 
-      client.db.devSettings.set(client.util.devId, true, "devMode");
+      client.db.devSettings.set(client.config.devId, true, "devMode");
       const embed = client.embeds.success(command, `Turned on developer mode.`);
 
       message.reply({ embeds: [embed] });
@@ -28,7 +28,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         return message.reply({ embeds: [embed] });
       }
 
-      client.db.devSettings.set(client.util.devId, false, "devMode");
+      client.db.devSettings.set(client.config.devId, false, "devMode");
       const embed = client.embeds.success(command, `Turned off developer mode.`);
 
       message.reply({ embeds: [embed] });

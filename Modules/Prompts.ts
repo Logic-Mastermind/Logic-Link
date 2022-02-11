@@ -40,7 +40,7 @@ const code = "```";
    * @return {Promise<void>}
    */
   async deleteConfirmation(): Promise<void> {
-    const embed = client.embeds.orange(this.command, client.util.deleteConfirmation);
+    const embed = client.embeds.orange(this.command, client.util.messages.deleteConfirmation);
     const filter = () => true;
 
     const accept = client.components.button({ label: "Accept", style: "SUCCESS", id: "Delete_Conditions:Accept" });

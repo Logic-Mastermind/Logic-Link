@@ -125,7 +125,7 @@ export default class Embeds {
 
     embed.setTitle(title);
     embed.setColor(`BLUE`);
-    embed.setDescription(`${client.util.clock} ${msg || `Loading...`} ${client.util.pending}`);
+    embed.setDescription(`${client.util.emojis.clock} ${msg || `Loading...`} ${client.util.emojis.pending}`);
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
 
@@ -376,18 +376,18 @@ export default class Embeds {
    */
   helpMenu(command: Types.commandData, prefix: string): Discord.MessageEmbed {
     const fields = [
-      { name: `Permissions`, value: `${command.permissions.includes("ALL") ? `${client.util.noPerms}` : `${command.category == "Developer" ? `Locked to bot developer.` : `\`${command.permissions.join(" | ")}\``}`}`, inline: true },
-      { name: `Bot Permissions`, value: `${command.clientPerms ? command.clientPerms[0] ? `\`${command.clientPerms.join(" | ")}\`` : client.util.noPerms : client.util.noPerms}`, inline: true },
+      { name: `Permissions`, value: `${command.permissions.includes("ALL") ? `${client.util.messages.noPerms}` : `${command.category == "Developer" ? `Locked to bot developer.` : `\`${command.permissions.join(" | ")}\``}`}`, inline: true },
+      { name: `Bot Permissions`, value: `${command.clientPerms ? command.clientPerms[0] ? `\`${command.clientPerms.join(" | ")}\`` : client.util.messages.noPerms : client.util.messages.noPerms}`, inline: true },
       { name: `\u200b`, value: `\u200b`, inline: true },
-      { name: `Aliases`, value: `${command.aliases[0] ? `\`${command.aliases.join("\`\n\`")}\`` : client.util.noAlias}`, inline: true },
-      { name: `Options`, value: `${command.options[0] ? `\`${command.options.join("\`\n\`")}\`` : client.util.noOption}`, inline: true },
+      { name: `Aliases`, value: `${command.aliases[0] ? `\`${command.aliases.join("\`\n\`")}\`` : client.util.messages.noAlias}`, inline: true },
+      { name: `Options`, value: `${command.options[0] ? `\`${command.options.join("\`\n\`")}\`` : client.util.messages.noOption}`, inline: true },
       { name: `\u200b`, value: `\u200b`, inline: true },
     ]
     
     const embed = new MessageEmbed();
     embed.setTitle(`Help - ${command.name}`);
     embed.setColor(`BLUE`);
-    embed.setDescription(`${command.description}\n\n**Usage**\n${code}\n${prefix}${command.usage}${code}\n**Cooldown**\n${command.cooldown == 0 ? `${client.util.noCooldown}` : `${ms(command.cooldown * 1000, { long: true })} cooldown.`}`);
+    embed.setDescription(`${command.description}\n\n**Usage**\n${code}\n${prefix}${command.usage}${code}\n**Cooldown**\n${command.cooldown == 0 ? `${client.util.messages.noCooldown}` : `${ms(command.cooldown * 1000, { long: true })} cooldown.`}`);
     embed.addFields(fields);
     embed.setFooter(footer1, footer2);
     embed.setTimestamp();
@@ -636,7 +636,7 @@ export default class Embeds {
 
     const msg: Types.embedData = {
       title: command.name,
-      description: client.util.errorMsgDefault,
+      description: client.util.messages.errorMsgDefault,
       color: "RED",
       fields: [
         { name: "Error Identification", value: `${code}${errorId}${code}`, inline: false }
@@ -679,11 +679,11 @@ export default class Embeds {
         },
         {
           name: "Aliases",
-          value: `${command.aliases.length == 0 ? `${client.util.noAlias}` : `\`${prefix}${command.aliases.join(`\`\n${prefix}`)}\``}\n\u200b`
+          value: `${command.aliases.length == 0 ? `${client.util.messages.noAlias}` : `\`${prefix}${command.aliases.join(`\`\n${prefix}`)}\``}\n\u200b`
         },
         {
           name: "Options",
-          value: `${command.options.length == 0 ? `${client.util.noOption}` : `\`${prefix}${cmdName} ${command.options.join(`\`\n\`${prefix}${cmdName} `)}\``}\n\u200b`
+          value: `${command.options.length == 0 ? `${client.util.messages.noOption}` : `\`${prefix}${cmdName} ${command.options.join(`\`\n\`${prefix}${cmdName} `)}\``}\n\u200b`
         },
         {
           name: "Usage Error",

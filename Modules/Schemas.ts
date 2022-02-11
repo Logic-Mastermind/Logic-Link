@@ -32,7 +32,7 @@ import FS from "fs";
 
   async sendPanel(panel, tsettings, guildId) {
     const channel = client.channels.cache.get(panel.channel) as Discord.TextChannel;
-    const embed = client.embeds.blue(panel.name, `${client.util.check} To create a ticket, click on the button below.`, [{
+    const embed = client.embeds.blue(panel.name, `${client.util.emojis.check} To create a ticket, click on the button below.`, [{
       name: "Additional Info",
       value: `Clicking the button below will create a ticket for this panel.\nPlease remember to adhere to this server's rules within the ticket.`,
       inline: false
@@ -54,7 +54,7 @@ import FS from "fs";
   async editPanelMsg(panel, tsettings, guildId) {
     
     const channel = await client.channels.fetch(panel.channel) as Discord.TextChannel;
-    const embed = client.embeds.blue(panel.name, `${client.util.check} To create a ticket, click on the button below.`, [{
+    const embed = client.embeds.blue(panel.name, `${client.util.emojis.check} To create a ticket, click on the button below.`, [{
       name: "Additional Info",
       value: `Clicking the button below will create a ticket for this panel.\nPlease remember to adhere to this server's rules within the ticket.`,
       inline: false

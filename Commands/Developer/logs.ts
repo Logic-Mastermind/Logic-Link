@@ -8,7 +8,7 @@ export default async function run(client, message, args, command, settings, tset
   const responses = {};
 
   try {
-    var canLog = client.db.devSettings.get(client.util.devId, "allowLog");
+    var canLog = client.db.devSettings.get(client.config.devId, "allowLog");
     var logs = new Discord.Collection(client.db.logs).sort(Discord.Collection.defaultSort);
     var pages = [];
     var allLogs = [];
@@ -29,7 +29,7 @@ export default async function run(client, message, args, command, settings, tset
           return message.reply({ embeds: [embed] });
         }
 
-        client.db.devSettings.set(client.util.devId, false, "allowLog");
+        client.db.devSettings.set(client.config.devId, false, "allowLog");
         const embed = client.embeds.success(command, `Turned off developer logs.`);
         return message.reply({ embeds: [embed] });
 
@@ -39,7 +39,7 @@ export default async function run(client, message, args, command, settings, tset
           return message.reply({ embeds: [embed] });
         }
 
-        client.db.devSettings.set(client.util.devId, true, "allowLog");
+        client.db.devSettings.set(client.config.devId, true, "allowLog");
         const embed = client.embeds.success(command, `Turned on developer logs.`);
         return message.reply({ embeds: [embed] });
 
