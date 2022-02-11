@@ -1,6 +1,4 @@
-const Discord = require("discord.js");
-const Fetch = require("node-fetch");
-const ms = require("ms");
+import ms from "ms";
 
 module.exports = async (client, interaction) => {
   const guild = interaction.guild;
@@ -224,4 +222,8 @@ module.exports = async (client, interaction) => {
   } catch (error) {
     client.functions.sendError(error);
   }
+}
+
+function newFunction() {
+  return require("discord.js");
 }

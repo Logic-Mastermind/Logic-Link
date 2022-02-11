@@ -19,7 +19,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
       },
       {
         name: "Developer",
-        value: `<@${client.util.devId}>`,
+        value: `<@${client.config.devId}>`,
         inline: false
       }
     ];

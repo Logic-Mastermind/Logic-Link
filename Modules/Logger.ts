@@ -30,8 +30,8 @@ export default class Logger {
       const logId = (count + 1).toString();
 
       if (user) {
-        const canLog = client.db.devSettings.get(client.util.devId, "allowLog");
-        if (!canLog && (userId === client.util.devId)) return;
+        const canLog = client.db.devSettings.get(client.config.devId).allowLog;
+        if (!canLog && (userId === client.config.devId)) return;
 
         var userId = user;
         if (user instanceof Discord.User) userId = user.id;
@@ -63,8 +63,8 @@ export default class Logger {
       const logId = (count + 1).toString();
 
       if (user) {
-        const canLog = client.db.devSettings.get(client.util.devId, "allowLog");
-        if (!canLog && (userId === client.util.devId)) return;
+        const canLog = client.db.devSettings.get(client.config.devId, "allowLog");
+        if (!canLog && (userId === client.config.devId)) return;
 
         var userId = user;
         if (user instanceof Discord.User) userId = user.id;
@@ -96,8 +96,8 @@ export default class Logger {
       const logId = (count + 1).toString();
 
       if (user) {
-        const canLog = client.db.devSettings.get(client.util.devId, "allowLog");
-        if (!canLog && (userId === client.util.devId)) return;
+        const canLog = client.db.devSettings.get(client.config.devId, "allowLog");
+        if (!canLog && (userId === client.config.devId)) return;
 
         var userId = user;
         if (user instanceof Discord.User) userId = user.id;
@@ -146,7 +146,7 @@ export default class Logger {
   clear(): boolean {
     try {
       client.db.logs.clear();
-      client.db.devSettings.set(client.util.devId, Date.now(), "logsCleared");
+      client.db.devSettings.set(client.config.devId, Date.now(), "logsCleared");
       return true;
 
     } catch (error) {

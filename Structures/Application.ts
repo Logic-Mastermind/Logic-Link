@@ -1,12 +1,12 @@
 import Commands from "./Commands";
 const reason: string = "The reason for this action.";
 
-const gen = Commands.general;
-const tck = Commands.ticket;
-const mod = Commands.moderator;
-const adm = Commands.administrator;
-const sup = Commands.support;
-const dev = Commands.developer;
+const gen = Commands.General;
+const tck = Commands.Ticket;
+const mod = Commands.Moderator;
+const adm = Commands.Administrator;
+const sup = Commands.Support;
+const dev = Commands.Developer;
 
 enum AppTypes {
   CHAT_INPUT = 1,

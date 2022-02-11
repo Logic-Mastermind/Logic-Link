@@ -1,5 +1,4 @@
 import Discord from "discord.js";
-import Types from "../Typings/types";
 import Enmap from "enmap";
 import fs from "fs";
 import path from "path";
@@ -15,8 +14,13 @@ import Logger from "../Modules/Logger";
 import Util from "../Structures/Util";
 import Schemas from "../Modules/Schemas";
 import server from "../server";
+import { file } from "googleapis/build/src/apis/file";
 
-export default class Client extends Discord.Client {
+/**
+ * An extended discord.js client used for Logic Link.
+ * @class AdvancedClient
+ */
+export default class AdvancedClient extends Discord.Client {
   components = new Components();
   functions = new Functions();
   embeds = new Embeds();
@@ -25,15 +29,15 @@ export default class Client extends Discord.Client {
   cooldown = new Enmap();
 
   category = new Discord.Collection([
-    ["administrator", []],
-    ["developer", []],
-    ["general", []],
-    ["moderator", []],
-    ["support", []],
-    ["ticket", {
-      administrator: [],
-      support: [],
-      basic: []
+    ["Administrator", []],
+    ["Developer", []],
+    ["General", []],
+    ["Moderator", []],
+    ["Support", []],
+    ["Ticket", {
+      Administrator: [],
+      Support: [],
+      Basic: []
     }],
   ]);
   
@@ -47,52 +51,78 @@ export default class Client extends Discord.Client {
   readySince: number;
   cmdScheme: any[];
 
+  /**
+   * Creates the client and starts the server, the initialize function must be called next.
+   * @constructor
+   * @param {Object} options - The original discord.js Client options.
+   */
   constructor(options) {
     super(options);
+    this.server = server();
+  }
 
-    for (let category of Util.cmdCategories) {
-      const pathCategory = this.functions.upperFirst(category);
-      if (category == "ticket") {
-        for (let tckCategory of Util.ticketCategories) {
-          const pathTckCategory = this.functions.upperFirst(tckCategory);
-          fs.readdir(path.resolve(__dirname, `../Commands/Ticket/${pathTckCategory}/`), async (error, files) => {
-            if (error) throw error;
+  /**
+   * Imports command and event files for use and logins into the bot.
+   * @async
+   * @function initialize
+   * @returns {boolean}
+   */
+  initialize(): boolean {
 
-            for (let file of files) {
-              if (!file.endsWith(".ts")) return;
-              let name = file.split(".")[0];
-              let cmd = (await import(path.resolve(__dirname, `../Commands/Ticket/${pathTckCategory}/${name}`))).default;
+    for (const category in Commands) {
+      if (category == "Ticket") continue;
+      let cmds = [];
 
-              this.functions.log(`CMD: ${name}`, "bold");
-              this.commands.ticket[tckCategory][name].run = cmd;
+      fs.readdir(path.resolve(__dirname, `../Commands/${category}`), async (error, files) => {
+        if (error) return console.log(error);
 
-              let currentCategory = this.category.get(category)[tckCategory];
-              currentCategory.push(name);
+        for (const file of files) {
+          if (!file.endsWith(".ts")) continue;
 
-              this.category.set(category, currentCategory);
-            }
-          });
+          let name = file.split(".")[0];
+          let cmd = (await import(path.resolve(__dirname, `../Commands/${category}/${name}`))).default;
+
+          console.log(`CMD: ${name}`);
+          this.commands[category][name].run = cmd;
+          cmds.push(name);
         }
-      } else {
-        fs.readdir(path.resolve(__dirname, `../Commands/${pathCategory}/`), async (error, files) => {
-          if (error) throw error;
-          for (let file of files) {
-            if (!file.endsWith(".ts")) continue;
-            
-            let name = file.split(".")[0];
-            let cmd = (await import(path.resolve(__dirname, `../Commands/${pathCategory}/${name}/`))).default;
-            
-            this.functions.log(`CMD: ${name}`);
-            console.log(this.commands, category)
-            this.commands[category][name].run = cmd;
-            
-            let currentCategory = this.category.get(category) as string[];
-            currentCategory.push(name);
+      });
+      
+      this.category.set(category, cmds);
+    }
 
-            this.category.set(category, currentCategory);
+    fs.readdir(path.resolve(__dirname, `../Commands/Ticket`), async (error, catergoryFiles) => {
+      if (error) return console.log(error);
+      let categoryCmds = {
+        Administrator: [],
+        Support: [],
+        Basic: []
+      };
+
+      for (const category of catergoryFiles) {
+        let cmds = [];
+
+        fs.readdir(path.resolve(__dirname, `../Commands/Ticket/${category}`), async (error, files) => {
+          if (error) return console.log(error);
+
+          for (const file of files) {
+            if (!file.endsWith(".ts")) continue;
+  
+            let name = file.split(".")[0];
+            let cmd = (await import(path.resolve(__dirname, `../Commands/Ticket/${category}/${name}`))).default;
+  
+            console.log(`CMD: ${name}`);
+            this.commands.Ticket[name].run = cmd;
+            cmds.push(name);
           }
         });
+
+        categoryCmds[category] = cmds;
       }
-    }
+
+      this.category.set("Ticket", categoryCmds);
+    });
+
+    return true;
   }
 }

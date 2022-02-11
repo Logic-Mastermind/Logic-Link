@@ -19,7 +19,7 @@ export async function handle(message: Discord.Message) {
     var prefix = guildPrefix;
 
     if (userInfo.inPrompt == message.channel.id) return;
-    if (message.author.id == client.util.devId) {
+    if (message.author.id == client.config.devId) {
       if (message.content.startsWith(".")) prefix = ".";
       if (message.content.startsWith("-")) prefix = "-";
     }
@@ -100,7 +100,7 @@ export async function handle(message: Discord.Message) {
 
     var settings = client.functions.getSettings(message.guild);
     var tsettings = client.functions.getTicketData(message.guild);
-    var devMode = client.db.devSettings.get(client.util.devId, "devMode");
+    var devMode = client.db.devSettings.get(client.config.devId).devMode;
     var logId = client.logger.log(`Command ${command.commandName} ran by ${message.author.id}`, message.author);
     
     const permissionWhitelist = ["delete", "lock", "hide", "unhide", "unlock"];
@@ -115,7 +115,7 @@ export async function handle(message: Discord.Message) {
     const lockedGuild = client.guilds.cache.get(client.db.devlock.get(command.commandName, "guild"));
     const lockedReason = client.db.devlock.get(command.commandName, "reason");
 
-    if (message.author.id !== client.util.devId) {
+    if (message.author.id !== client.config.devId) {
       if (locked == true && lockedGuild) {
         if (message.guild.id == lockedGuild.id) {
           client.logger.updateLog(`Command was locked in the guild.`, logId);
@@ -176,8 +176,8 @@ export async function handle(message: Discord.Message) {
       allArgs: allArgs,
       mentioned: mentioned,
       logId,
-      hasBotSupport: message.member.roles.cache.has(client.util.supportRole),
-      isDev: message.author.id == client.util.devId,
+      hasBotSupport: message.member.roles.cache.has(client.config.supportRole),
+      isDev: message.author.id == client.config.devId,
       hasSupport: hasSupportRole
     }
     
