@@ -18,6 +18,8 @@ const client = new Client({
 });
 
 console.time("Login");
+client.initialize();
+
 fs.readdir(path.resolve(__dirname, `./Events`), async (error, files) => {
   if (error) throw error;
 

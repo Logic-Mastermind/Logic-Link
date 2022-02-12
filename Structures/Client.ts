@@ -14,7 +14,6 @@ import Logger from "../Modules/Logger";
 import Util from "../Structures/Util";
 import Schemas from "../Modules/Schemas";
 import server from "../server";
-import { file } from "googleapis/build/src/apis/file";
 
 /**
  * An extended discord.js client used for Logic Link.
