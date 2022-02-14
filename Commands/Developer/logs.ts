@@ -1,15 +1,19 @@
-export default async function run(client, message, args, command, settings, tsettings, extra) {
-  const clientMember = message.guild.me;
-  const guildPrefix = await client.functions.fetchPrefix(message.guild);
+import Discord from "discord.js";
+import Types from "../../Typings/types";
+
+export default async function run(client: Types.client, message: Discord.Message, args: string[], command: Types.commandData, settings: Types.guildSettings, tsettings: Types.ticketSettings, extra: Types.extraObject) {
   
-  const noArgs = await client.functions.getNoArgs(command, message.guild);
-  const { secArg, thirdArg, fourthArg, fifthArg } = await client.functions.getArgs(args);
+  const clientMember = message.guild.me;
+  const guildPrefix = client.functions.fetchPrefix(message.guild);
+  
+  const noArgs = client.functions.getNoArgs(command, message.guild);
+  const { secArg, thirdArg, fourthArg, fifthArg } = client.functions.getArgs(args);
   const code = `\`\`\``;
   const responses = {};
 
   try {
     var canLog = client.db.devSettings.get(client.config.devId, "allowLog");
-    var logs = new Discord.Collection(client.db.logs).sort(Discord.Collection.defaultSort);
+    var logs = new Discord.Collection(client.db.logs).sort() as Types.logData;
     var pages = [];
     var allLogs = [];
 
@@ -20,7 +24,7 @@ export default async function run(client, message, args, command, settings, tset
         return message.reply({ embeds: [embed] });
 
       } else if (secArg == "count") {
-        const embed = client.embeds.success(command, `There is a total of \`${logs.count}\` bot log${logs.count == 1 ? `` : `s`}.`);
+        const embed = client.embeds.success(command, `There is a total of \`${logs.size}\` bot log${logs.size == 1 ? `` : `s`}.`);
         return message.reply({ embeds: [embed] });
 
       } else if (secArg == "off") {
@@ -43,14 +47,14 @@ export default async function run(client, message, args, command, settings, tset
         const embed = client.embeds.success(command, `Turned on developer logs.`);
         return message.reply({ embeds: [embed] });
 
-      } else if (!isNaN(secArg)) {
+      } else if (!isNaN(secArg as any)) {
         var logData = client.db.logs.get(secArg);
         if (!logData.content) {
           const embed = client.embeds.error(command, `A log with the ID: \`${secArg}\` was not found.`);
           return message.reply({ embeds: [embed] });
         }
 
-        const embed = client.embeds.blue(command, `Showing info for the log with ID: \`${secArg}\`.\n\n${client.util.category} Type: \`${logData.type}\`\n${logData.user ? `${client.util.moderator} User: <@${logData.user}>\n` : ``}${client.util.clock} Date: <t:${Math.round(logData.timestamp / 1000)}:R>\n${client.util.message} Content: ${logData.content}${logData.details ? `\n\n**Log Details**\n${client.util.reply}${logData.details.join(`\n${client.util.reply}`)}` : ``}`);
+        const embed = client.embeds.blue(command, `Showing info for the log with ID: \`${secArg}\`.\n\n${client.util.emojis.category} Type: \`${logData.type}\`\n${logData.user ? `${client.util.emojis.moderator} User: <@${logData.user}>\n` : ``}${client.util.emojis.clock} Date: <t:${Math.round(logData.timestamp / 1000)}:R>\n${client.util.emojis.message} Content: ${logData.content}${logData.details ? `\n\n**Log Details**\n${client.util.emojis.reply}${logData.details.join(`\n${client.util.emojis.reply}`)}` : ``}`);
         return message.reply({ embeds: [embed] });
 
       } else {
@@ -100,17 +104,17 @@ export default async function run(client, message, args, command, settings, tset
       pages.push(embed);
     }
 
-    const leftBtn = client.buttons.emoji("Button_Left:DevLogs", client.util.arrowLeft, "SECONDARY");
-    const rightBtn = client.buttons.emoji("Button_Right:DevLogs", client.util.arrowRight, "SECONDARY");
+    const leftBtn = client.components.button({ id: "Button_Left:DevLogs", emoji: client.util.emojis.arrowLeft, style: "SECONDARY" });
+    const rightBtn = client.components.button({ id: "Button_Right:DevLogs", emoji: client.util.emojis.arrowRight, style: "SECONDARY" });
 
     if (allLogs.length <= 15) rightBtn.setDisabled();
     leftBtn.setDisabled();
-    const actionRow = client.buttons.actionRow([leftBtn, rightBtn]);
+    const actionRow = client.components.actionRow(leftBtn, rightBtn);
 
     const msg = await message.reply({ embeds: [pages[0]], components: [actionRow] });
     pages = pages.slice(1);
 
-    if (pages[0]) client.functions.paginate(msg, pages, (m) => m.id == message.author.id);
+    if (pages[0]) client.functions.paginate(msg, pages, { filter: (c) => c.user.id == message.author.id });
   } catch (error) {
     client.functions.sendErrorMsg(error, message, command, extra.logId);
   }

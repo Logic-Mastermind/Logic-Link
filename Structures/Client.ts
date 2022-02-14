@@ -57,7 +57,6 @@ export default class AdvancedClient extends Discord.Client {
    */
   constructor(options) {
     super(options);
-    this.server = server();
   }
 
   /**
@@ -122,6 +121,8 @@ export default class AdvancedClient extends Discord.Client {
       this.category.set("Ticket", categoryCmds);
     });
 
+    this.server = server();
+    this.login(this.config.token);
     return true;
   }
 }

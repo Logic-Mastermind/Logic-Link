@@ -1,35 +1,27 @@
 import Discord from "discord.js";
-import Fetch from "node-fetch";
-import googleApis from "googleapis";
-import Paste from "pastebin-api";
-import YouTube from "ytdl-core-discord";
-import Chalk from "chalk";
-import Mongoose from "mongoose";
-import Enmap from "enmap";
-import Roblox from "noblox.js";
-import FS from "fs";
-import ms from "ms";
+import Types from "../../Typings/types";
+import fetch from "node-fetch";
 
-export default async function run(client, message, args, command, settings, tsettings, extra) {
-  const clientMember = message.guild.me;
-  const guildPrefix = await client.functions.fetchPrefix(message.guild);
+export default async function run(client: Types.client, message: Discord.Message, args: string[], command: Types.commandData, settings: Types.guildSettings, tsettings: Types.ticketSettings, extra: Types.extraObject) {
   
-  const noArgs = await client.functions.getNoArgs(command, message.guild);
-  const { secArg, thirdArg, fourthArg, fifthArg } = await client.functions.getArgs(args);
+  const clientMember = message.guild.me;
+  const guildPrefix = client.functions.fetchPrefix(message.guild);
+  
+  const noArgs = client.functions.getNoArgs(command, message.guild);
+  const { secArg, thirdArg, fourthArg, fifthArg } = client.functions.getArgs(args);
   const code = `\`\`\``;
   const responses = {};
 
   try {
     const guild = message.guild;
-    const channel = message.channel;
-    const category = message.channel.parent;
-    const author = message.author;
     const member = message.member;
-    const pasteClient = new Paste(client.config.pasteBinAPI);
+    const channel = message.channel;
+    const category = message.channel.type !== "DM" ? message.channel.parent : null;
+    const author = message.author;
     const ugKey = `${member.id}-${guild.id}`;
 
     try {
-      var execCode;
+      var execCode: string;
       var evaled = null;
       var silent = false;
 
@@ -40,7 +32,7 @@ export default async function run(client, message, args, command, settings, tset
         if (execCode) {
           evaled = await eval(`${execCode}`);
         } else {
-          const embed = await client.embeds.noArgs(command.option.silent, message.guild);
+          const embed = client.embeds.noArgs(command.option.silent, message.guild);
           return message.reply({ embeds: [embed] });
         }
       } else if (secArg.includes("await")) {
@@ -53,7 +45,7 @@ export default async function run(client, message, args, command, settings, tset
         if (execCode) {
           evaled = await eval(`(async function() {${execCode}})()`);
         } else {
-          const embed = await client.embeds.noArgs(command.option.async, message.guild);
+          const embed = client.embeds.noArgs(command.option.async, message.guild);
           return message.reply({ embeds: [embed] })
         }
       } else {

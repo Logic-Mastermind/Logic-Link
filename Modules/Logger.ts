@@ -125,7 +125,7 @@ export default class Logger {
    */
   updateLog(content: string, id: string | number | Error): string[] | Error {
     try {
-      if (id instanceof Error) return;
+      if (typeof id != "number") return;
       const data = client.db.logs.get(id);
 
       data.details.push(content);

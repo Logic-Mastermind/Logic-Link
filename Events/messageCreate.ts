@@ -163,22 +163,20 @@ export async function handle(message: Discord.Message) {
 
     if (checkBotPerms.includes(command.commandName)) {
       //@ts-ignore
-      if (command.permissions.some((p) => clientMember.permissions.has(p))) {
+      if (command.permissions.some((p) => !clientMember.permissions.has(p))) {
         client.logger.updateLog(`Bot lacked permissions.`, logId);
         const embed = client.embeds.botPermission(command);
         return message.reply({ embeds: [embed] });
       }
     }
 
-    var hasSupportRole = client.functions.hasTicketRole(message.member, "Support");
     const extra = {
-      commandName: commandName,
       allArgs: allArgs,
       mentioned: mentioned,
       logId,
       hasBotSupport: message.member.roles.cache.has(client.config.supportRole),
       isDev: message.author.id == client.config.devId,
-      hasSupport: hasSupportRole
+      hasTicketSupport: client.functions.hasTicketRole(message.member, "Support")
     }
     
     client.logger.updateLog(`All checks were passed.`, logId);

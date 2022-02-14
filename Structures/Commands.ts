@@ -353,6 +353,20 @@ const Commands = {
       category: "Ticket",
       subCategory: "Administrator",
       commandName: "tsettings"
+    },
+    add: {
+      name: "Add",
+      description: "Adds a person or role to a ticket.",
+      permissions: ["TICKET_SUPPORT"],
+      clientPerms: [],
+      cooldown: 3,
+      minArgs: 0,
+      options: [],
+      aliases: [],
+      usage: "add <user | role>",
+      category: "Ticket",
+      subCategory: "Support",
+      commandName: "add"
     }
   },
   Moderator: {

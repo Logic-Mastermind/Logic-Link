@@ -34,7 +34,7 @@ export default class Functions {
    * @param {string} [logId] - The logId that the command action recieved.
    * @returns {void}
    */
-  sendErrorMsg(error: Types.errorData, message: Discord.Message, command: Types.commandData, logId?: string): void {
+  sendErrorMsg(error: Types.errorData, message: Discord.Message, command: Types.commandData, logId?: number | Error): void {
     const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa" });
 
     const errorId = this.getRandomString(10);
@@ -165,7 +165,9 @@ export default class Functions {
   findRole(filter: string, guild: Discord.Guild | Discord.Collection<string, Discord.Role>, options?: Types.itemFilterOptions): Discord.Role | null {
     const filterL = filter.toLowerCase();
     const collection = guild instanceof Discord.Guild ? guild.roles.cache : guild;
-    const { safe, searchFilter } = options;
+    
+    const safe = options?.safe;
+    const searchFilter = options?.searchFilter;
     if (!collection) throw new Error("Invalid collection recieved");
 
     var role: Discord.Role;
@@ -209,7 +211,9 @@ export default class Functions {
   findChannel(filter: string, guild: Discord.Guild | Discord.Collection<string, Types.guildChannels>, options?: Types.itemFilterOptions): Types.guildChannels | null {
     const filterL = filter.toLowerCase();
     const collection = guild instanceof Discord.Guild ? guild.channels.cache : guild;
-    const { safe, searchFilter } = options;
+
+    const safe = options?.safe;
+    const searchFilter = options?.searchFilter;
     if (!collection) throw new Error("Invalid collection recieved");
 
     var channel: Types.guildChannels;
@@ -253,7 +257,9 @@ export default class Functions {
    findMember(filter: string, guild: Discord.Guild | Discord.Collection<string, Discord.GuildMember>, options?: Types.itemFilterOptions): Discord.GuildMember | null {
     const filterL = filter.toLowerCase();
     const collection = guild instanceof Discord.Guild ? guild.members.cache : guild;
-    const { safe, searchFilter } = options;
+    
+    const safe = options?.safe;
+    const searchFilter = options?.searchFilter;
     if (!collection) throw new Error("Invalid collection recieved");
 
     var member: Discord.GuildMember;
@@ -297,7 +303,8 @@ export default class Functions {
    async findUser(filter: string, options?: Types.itemFilterOptions): Promise<Discord.User | null> {
     const filterL = filter.toLowerCase();
     const collection = client.users.cache;
-    const { safe, searchFilter } = options;
+    const safe = options?.safe;
+    const searchFilter = options?.searchFilter;
 
     var user: Discord.User;
     var found: string;
@@ -343,7 +350,8 @@ export default class Functions {
    findGuild(filter: string, options?: Types.itemFilterOptions): Discord.Guild | null {
     const filterL = filter.toLowerCase();
     const collection = client.guilds.cache;
-    const { safe, searchFilter } = options;
+    const safe = options?.safe;
+    const searchFilter = options?.searchFilter;
 
     var guild: Discord.Guild;
     var found: string;
@@ -387,7 +395,8 @@ export default class Functions {
    async findBan(filter: string, guild: Discord.Guild | Discord.Collection<string, Discord.GuildBan>, options?: Types.itemFilterOptions): Promise<Discord.GuildBan | null> {
     const filterL = filter.toLowerCase();
     const collection = guild instanceof Discord.Guild ? await guild.bans.fetch() : guild;
-    const { safe, searchFilter } = options;
+    const safe = options?.safe;
+    const searchFilter = options?.searchFilter;
 
     var ban: Discord.GuildBan;
     var found: string;
@@ -427,7 +436,6 @@ export default class Functions {
     var command = null;
     filter = filter.toLowerCase();
 
-    const categories = ["general", "moderator", "ticket", "administrator", "support", "developer"];
     function filterCommands(cmdData) {
       if (filter == cmdData.commandName || cmdData.aliases.includes(filter)) {
         command = cmdData
@@ -438,7 +446,7 @@ export default class Functions {
       }
     }
 
-    for (const category of categories) {
+    for (const category of Object.keys(client.commands)) {
       if (command) break;
 
       for (const [key, data] of Object.entries(client.commands[category])) {

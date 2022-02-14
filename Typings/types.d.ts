@@ -1,4 +1,5 @@
 import Discord, { Intents } from "discord.js";
+import Client from "../Structures/Client";
 
 declare namespace Types {
   export type embedColors = "RED" | "GREEN" | "BLUE" | "ORANGE" | "DEFAULT";
@@ -10,7 +11,15 @@ declare namespace Types {
   export type guildTextChannels = Discord.TextChannel | Discord.ThreadChannel | Discord.NewsChannel;
   export type anyGuildSetting = string | guildChannels | Discord.Role | null | boolean | caseCollection;
   export type chalkOptions = "bold" | "dim" | "italic" | "underline" | "inverse" | "strikethrough" | "red" | "green" | "yellow" | "blue" | "magenta" | "cyan" | "white" | "gray" | "bgBlack" | "bgRed" | "bgGreen" | "bgYellow" | "bgBlue" | "bgMagenta" | "bgCyan" | "bgWhite";
-
+  export type logData = Discord.Collection<string, {
+    timestamp: number,
+    content: string,
+    type: "Log" | "Warn" | "Error",
+    user: string | null,
+    details: string[]
+  }>
+  
+  export type client = Client;
   export type permissionString =
   'CREATE_INSTANT_INVITE'
   | 'KICK_MEMBERS'
@@ -52,7 +61,7 @@ declare namespace Types {
   | 'ALL';
 
   export interface buttonData {
-    label: string,
+    label?: string,
     style: "PRIMARY" | "SECONDARY" | "SUCCESS" | "DANGER" | "LINK",
     id: string,
     emoji?: string,
@@ -67,6 +76,15 @@ declare namespace Types {
     reason: string,
     timestamp: number
     when: "BEFORE" | "AFTER"
+  }
+
+  export interface extraObject {
+    allArgs: string[],
+    mentioned: boolean,
+    logId: number | Error,
+    hasBotSupport: boolean,
+    hasTicketSupport: boolean,
+    isDev: boolean,
   }
 
   export interface memoryUsage {

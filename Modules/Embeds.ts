@@ -4,8 +4,8 @@ import client from "../index";
 import ms from "ms";
 
 const code = "```"
-const footer1 = `Logic Link - Imagine A World`;
-const footer2 = `https://cdn.discordapp.com/emojis/775848533298905130.png?v=1`;
+const text = `Logic Link - Imagine A World`;
+const iconURL = `https://cdn.discordapp.com/emojis/775848533298905130.png?v=1`;
 const { MessageEmbed } = Discord;
 
 const check = "<:Check:867931890437476353>";
@@ -57,8 +57,8 @@ export default class Embeds {
     if (thumbnail) embed.setThumbnail(thumbnail);
     if (fields) embed.addFields(fields);
 
-    if (footer) embed.setFooter(footer[0], footer[1]);
-    else embed.setFooter(footer1, footer2);
+    if (footer) embed.setFooter({ text: footer[0], iconURL: footer[1] });
+    else embed.setFooter({ text, iconURL });
     return embed;
   }
 
@@ -81,7 +81,7 @@ export default class Embeds {
     embed.setDescription(description);
     embed.setColor(`RED`);
     embed.addField("Command Permissions", `${code}${permissions.join(" | ")}${code}`);
-    embed.setFooter(footer1, footer2);
+    embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
     return embed;
@@ -106,7 +106,7 @@ export default class Embeds {
     embed.setDescription(description);
     embed.setColor(`RED`);
     embed.addField("Command Permissions", `${code}${permissions.join(" | ")}${code}`);
-    embed.setFooter(footer1, footer2);
+    embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
     return embed;
@@ -126,7 +126,7 @@ export default class Embeds {
     embed.setTitle(title);
     embed.setColor(`BLUE`);
     embed.setDescription(`${client.util.emojis.clock} ${msg || `Loading...`} ${client.util.emojis.pending}`);
-    embed.setFooter(footer1, footer2);
+    embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
     return embed;
@@ -147,10 +147,10 @@ export default class Embeds {
     embed.setTitle(title);
     embed.setColor(`GREEN`);
     embed.setDescription(`${check} ${description}`);
-    embed.setFooter(footer1, footer2);
+    embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
-    if (fields.length != 0) embed.addFields(fields);
+    if (fields?.length != 0) embed.addFields(fields);
     return embed;
   }
 
@@ -169,10 +169,10 @@ export default class Embeds {
     embed.setTitle(title);
     embed.setColor(`GREEN`);
     embed.setDescription(description);
-    embed.setFooter(footer1, footer2);
+    embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
-    if (fields.length != 0) embed.addFields(fields);
+    if (fields?.length != 0) embed.addFields(fields);
     return embed;
   }
 
@@ -191,10 +191,10 @@ export default class Embeds {
     embed.setTitle(title);
     embed.setColor(`#f9a61a`);
     embed.setDescription(`${warn} ${description}`);
-    embed.setFooter(footer1, footer2);
+    embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
-    if (fields.length != 0) embed.addFields(fields);
+    if (fields?.length != 0) embed.addFields(fields);
     return embed;
   }
 
@@ -213,10 +213,10 @@ export default class Embeds {
     embed.setTitle(title);
     embed.setColor(`#f9a61a`);
     embed.setDescription(description);
-    embed.setFooter(footer1, footer2);
+    embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
-    if (fields.length != 0) embed.addFields(fields);
+    if (fields?.length != 0) embed.addFields(fields);
     return embed;
   }
 
@@ -235,10 +235,10 @@ export default class Embeds {
     embed.setTitle(title);
     embed.setColor(`RED`);
     embed.setDescription(`${error} ${description}`);
-    embed.setFooter(footer1, footer2);
+    embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
-    if (fields.length != 0) embed.addFields(fields);
+    if (fields?.length != 0) embed.addFields(fields);
     return embed;
   }
 
@@ -257,10 +257,10 @@ export default class Embeds {
     embed.setTitle(title);
     embed.setColor(`RED`);
     embed.setDescription(description);
-    embed.setFooter(footer1, footer2);
+    embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
-    if (fields.length != 0) embed.addFields(fields);
+    if (fields?.length != 0) embed.addFields(fields);
     return embed;
   }
 
@@ -279,10 +279,10 @@ export default class Embeds {
     embed.setTitle(title);
     embed.setColor(`BLUE`);
     embed.setDescription(`${question} ${description}`);
-    embed.setFooter(footer1, footer2);
+    embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
-    if (fields.length != 0) embed.addFields(fields);
+    if (fields?.length != 0) embed.addFields(fields);
     return embed;
   }
 
@@ -301,10 +301,10 @@ export default class Embeds {
     embed.setTitle(title);
     embed.setColor(`BLUE`);
     embed.setDescription(description);
-    embed.setFooter(footer1, footer2);
+    embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
-    if (fields.length != 0) embed.addFields(fields);
+    if (fields?.length != 0) embed.addFields(fields);
     return embed;
   }
 
@@ -326,7 +326,7 @@ export default class Embeds {
     embed.addField("Current Setting", `${description}\n\u200b`);
     embed.addField("Usage", `${code}${prefix}${command.usage}${code}\u200b`);
     embed.addField("Usage Error", `You are missing required parameters needed to carry out this command.\nTo get more information, run: \`${prefix}help ${command.commandName}\`.`);
-    embed.setFooter(footer1, footer2);
+    embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
     return embed;
@@ -345,7 +345,7 @@ export default class Embeds {
     embed.setTitle(title);
     embed.setColor(`RED`);
     embed.setDescription(`${error} This prompt has timed out due to inactivity.`);
-    embed.setFooter(footer1, footer2);
+    embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
     return embed;
@@ -361,7 +361,7 @@ export default class Embeds {
     embed.setTitle("Message Component");
     embed.setColor(`RED`);
     embed.setDescription(`${error} This is not your message component.`);
-    embed.setFooter(footer1, footer2);
+    embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
     return embed;
@@ -389,44 +389,35 @@ export default class Embeds {
     embed.setColor(`BLUE`);
     embed.setDescription(`${command.description}\n\n**Usage**\n${code}\n${prefix}${command.usage}${code}\n**Cooldown**\n${command.cooldown == 0 ? `${client.util.messages.noCooldown}` : `${ms(command.cooldown * 1000, { long: true })} cooldown.`}`);
     embed.addFields(fields);
-    embed.setFooter(footer1, footer2);
+    embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
     return embed;
   }
 
   /**
-   * Creates a discord.js MessageEmbed based on the arguments provided.
+   * Creates a discord.js MessageEmbed with details on what arguments are invalid in a certain context.
    * @function invalidItem
    * @param {command|string} command - The command this function is executing from.
-   * @param {string|string[]} item - The type(s) of items that are invalid.
-   * @param {string|string[]} arg - The provided argument(s) that are invalid.
+   * @param {string[]} items - The item(s) that are invalid.
+   * @param {string[]} arg - The provided argument(s) that are invalid.
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  invalidItem(command: Types.commandData | string, item: string | string[], args: string | string[]): Discord.MessageEmbed {
+  invalidItem(command: Types.commandData | string, items: string[], args: string[]): Discord.MessageEmbed {
     const title = typeof command == "object" ? command.name : command;
+    const fieldArgs = [];
+
+    for (const [key, arg] of Object.entries(args)) {
+      const string = `\`${arg}\` is not a valid ${items[key]}.`;
+      fieldArgs.push(string);
+    }
+
     const embed = new MessageEmbed();
-    
-    var items: string[];
-    var fieldMsg: string[];
-    if (!Array.isArray(args)) args = [args];
-
-    if (Array.isArray(item)) {
-      item.forEach((i: string) => items.push(i.toLowerCase()));
-    } else {
-      items.push(item.toLowerCase());
-    }
-
-    for (const [key, val] of Object.entries(args)) {
-      var currentLine = `\`${val}\` is not a valid ${item[key]}.`;
-      fieldMsg.push(currentLine);
-    }
-
     embed.setTitle(title);
     embed.setColor(`RED`);
     embed.setDescription(`${error} I could not record any ${items.map(i => i + "s").join(" or ")} from your message.`);
-    embed.addField("Detailed Info", fieldMsg.join("\n"));
-    embed.setFooter(footer1, footer2);
+    embed.addField("Detailed Info", fieldArgs.join("\n"));
+    embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
     return embed;
@@ -447,7 +438,7 @@ export default class Embeds {
     embed.setTitle(title);
     embed.setColor(`RED`);
     embed.setDescription(`${error} ${content}`);
-    embed.setFooter(footer1, footer2);
+    embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
     if (fields) embed.addField("Detailed Info", fields.join("\n"));
@@ -529,7 +520,7 @@ export default class Embeds {
 
     embed.setTitle(title);
     embed.setColor("GREEN");
-    embed.setFooter(footer1, footer2);
+    embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
     if (item == "user") {
@@ -679,7 +670,7 @@ export default class Embeds {
         },
         {
           name: "Aliases",
-          value: `${command.aliases.length == 0 ? `${client.util.messages.noAlias}` : `\`${prefix}${command.aliases.join(`\`\n${prefix}`)}\``}\n\u200b`
+          value: `${command.aliases.length == 0 ? `${client.util.messages.noAlias}` : `\`${prefix}${cmdName} ${command.aliases.join(`\`\n\`${prefix}${cmdName} `)}\``}\n\u200b`
         },
         {
           name: "Options",

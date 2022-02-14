@@ -1,34 +1,38 @@
-export default async function run(client, message, args, command, settings, tsettings, extra){
-  const clientMember = message.guild.me;
-  const guildPrefix = await client.functions.fetchPrefix(message.guild);
+import Discord from "discord.js";
+import Types from "../../Typings/types";
+
+export default async function run(client: Types.client, message: Discord.Message, args: string[], command: Types.commandData, settings: Types.guildSettings, tsettings: Types.ticketSettings, extra: Types.extraObject) {
   
-  const noArgs = await client.functions.getNoArgs(command, message.guild);
-  const { secArg, thirdArg, fourthArg, fifthArg } = await client.functions.getArgs(args);
+  const clientMember = message.guild.me;
+  const guildPrefix = client.functions.fetchPrefix(message.guild);
+  
+  const noArgs = client.functions.getNoArgs(command, message.guild);
+  const { secArg, thirdArg, fourthArg, fifthArg } = client.functions.getArgs(args);
   const code = `\`\`\``;
   const responses = {};
 
   try {
-    var channel = message.mentions.channels.first();
+    var channel: any = message.mentions.channels.first();
     var announcement = args.slice(1).join(" ");
     var option = null;
 
     if (command.options.includes(secArg)) {
       if (!fourthArg) {
-        const embed = await client.embeds.noArgs(command.option[secArg], message.guild);
+        const embed = client.embeds.noArgs(command.option[secArg], message.guild);
         return message.reply({ embeds: [embed] });
       }
 
       if (secArg == "role") {
         if (!fifthArg) {
-          const embed = await client.embeds.noArgs(command.option[secArg], message.guild);
+          const embed = client.embeds.noArgs(command.option[secArg], message.guild);
           return message.reply({ embeds: [embed] });
         }
 
-        if (!channel) channel = await client.functions.findChannel(fourthArg, message.guild);
-        const role = await client.functions.findRole(thirdArg, message.guild);
+        if (!channel) channel = client.functions.findChannel(fourthArg, message.guild, { searchFilter: (c) => c.isText() });
+        const role = client.functions.findRole(thirdArg, message.guild);
 
         if (!role) {
-          const embed = client.embeds.noRole(command, thirdArg);
+          const embed = client.embeds.invalidItem(command, ["role"], [thirdArg]);
           return message.reply({ embeds: [embed] });
         }
 
@@ -37,10 +41,10 @@ export default async function run(client, message, args, command, settings, tset
       } else {
         option = secArg;
         announcement = args.slice(2).join(" ");
-        if (!channel) channel = await client.functions.findChannel(thirdArg, message.guild);
+        if (!channel) channel = client.functions.findChannel(thirdArg, message.guild);
       }
     } else {
-      if (!channel) channel = await client.functions.findChannel(secArg, message.guild);
+      if (!channel) channel = client.functions.findChannel(secArg, message.guild);
       option = null;
     }
 
@@ -50,12 +54,7 @@ export default async function run(client, message, args, command, settings, tset
         return message.reply({ embeds: [embed] });
       }
 
-      if (!channel.isText()) {
-        const embed = client.embeds.error(command, `<#${channel.id}> is not a text channel.`);
-        return message.reply({ embeds: [embed] });
-      }
-
-      const announceEmbed = client.embeds.custom("Announcement", announcement, [`Announced by ${message.author.tag}`, message.author.displayAvatarURL()]);
+      const announceEmbed = client.embeds.new({ title: "Announcement", description: announcement, footer: [`Announced by ${message.author.tag}`, message.author.displayAvatarURL()]} );
       const messageOptions = { embeds: [announceEmbed], content: null };
 
       if (option) {
@@ -63,7 +62,7 @@ export default async function run(client, message, args, command, settings, tset
         else messageOptions.content = `<@&${option}>`;
       }
 
-      if (!client.functions.isMod(message.member, message.guild, settings)) {
+      if (!client.functions.isMod(message.member)) {
         if (!channel.permissionsFor(message.member).has("SEND_MESSAGES")) {
           const embed = client.embeds.permission("SEND_MESSAGES");
           return message.reply({ embeds: [embed] });
@@ -82,12 +81,12 @@ export default async function run(client, message, args, command, settings, tset
           message.reply({ embeds: [embed] });
         }
       })
-      .catch(async (error) => {
+      .catch((error) => {
         const embed = client.embeds.errorInfo(command, message, error);
         message.reply({ embeds: [embed] });
       })
     } else {
-      const embed = client.embeds.noChannel(command, option ? thirdArg : secArg)
+      const embed = client.embeds.invalidItem(command, ["text channel"], [option ? thirdArg : secArg]);
       message.reply({ embeds: [embed] });
     }
   } catch (error) {
