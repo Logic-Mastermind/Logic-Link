@@ -1,4 +1,7 @@
 .replit
 .breakpoints
 .vscode
-Data/
+Data/enmap.sqlite
+Data/enmap.sqlite-shm
+Data/enmap.sqlite-wal
+node_modules
