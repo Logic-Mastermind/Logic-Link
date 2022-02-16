@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@types/node": "^17.0.6",
+    "electron-rebuild": "^3.2.7",
     "node": "^16.6.1"
   },
   "repository": {

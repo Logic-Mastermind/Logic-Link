@@ -670,7 +670,7 @@ export default class Embeds {
         },
         {
           name: "Aliases",
-          value: `${command.aliases.length == 0 ? `${client.util.messages.noAlias}` : `\`${prefix}${cmdName} ${command.aliases.join(`\`\n\`${prefix}${cmdName} `)}\``}\n\u200b`
+          value: `${command.aliases.length == 0 ? `${client.util.messages.noAlias}` : `\`${prefix}${command.aliases.join(`\`\n\`${prefix}${cmdName} `)}\``}\n\u200b`
         },
         {
           name: "Options",
