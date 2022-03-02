@@ -34,11 +34,11 @@ export default class Components {
     const { label, style, id, emoji, url, disabled } = data;
     const button = new Discord.MessageButton();
 
-    button.setLabel(label);
     button.setStyle(style);
     button.setCustomId(id);
 
     if (emoji) button.setEmoji(emoji);
+    if (label) button.setLabel(label);
     if (url) button.setURL(url);
     if (disabled) button.setDisabled();
 

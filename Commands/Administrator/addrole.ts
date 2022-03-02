@@ -56,26 +56,30 @@ export default async function run(client: Types.client, message: Discord.Message
       client.logger.updateLog(`Added role successfully.`, extra.logId);
       const successEmbed = client.embeds.success(command, `Added the <@&${role.id}> role to <@${member.id}>.`);
       editMsg.edit({ embeds: [successEmbed] });
+      
     } else {
       if (!thirdArg && member) {
         client.logger.updateLog(`User did not pass enough arguments.`, extra.logId);
         const embed = client.embeds.noArgs(command, message.guild);
         message.reply({ embeds: [embed] });
 
-      } else if (!member) {
-        if (!thirdArg) {
-          client.logger.updateLog(`Member does not exist.`, extra.logId);
-          const embed = client.embeds.invalidItem(command, ["member"], [secArg]);
-          message.reply({ embeds: [embed] });
-
-        } else {
-          client.logger.updateLog(`Member and role does not exist.`, extra.logId);
-          const embed = client.embeds.invalidItem(command, ["member", "role"], [secArg, thirdArg]);
-          message.reply({ embeds: [embed] });
-        }
       } else {
-        client.logger.updateLog(`Role does not exist.`, extra.logId);
-        const embed = client.embeds.invalidItem(command, ["role"], [thirdArg]);
+        const invalidTypes = [];
+        const invalidArgs = [];
+        
+        if (!member) {
+          invalidTypes.push("member");
+          invalidArgs.push(secArg);
+        }
+
+        if (thirdArg) {
+          if (!role) {
+            invalidTypes.push("role");
+            invalidArgs.push(thirdArg);
+          }
+        }
+
+        const embed = client.embeds.invalidItem(command, invalidTypes, invalidArgs);
         message.reply({ embeds: [embed] });
       }
     }

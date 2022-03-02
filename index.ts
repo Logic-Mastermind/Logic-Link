@@ -1,7 +1,6 @@
 import fs from "fs";
 import Client from "./Structures/Client";
 import Util from "./Structures/Util";
-import server from "./server";
 import path from "path";
 
 const client = new Client({

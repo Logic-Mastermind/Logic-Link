@@ -1,4 +1,5 @@
 import Discord from "discord.js";
+import Types from "../Typings/types";
 import client from "../index";
 
 /**
@@ -22,32 +23,28 @@ export default class Logger {
    * @function log
    * @param {string} content - The content of the log.
    * @param {Discord.User|string} [user] - The user who emitted this log.
-   * @returns {number|Error} The ID of the log that was created.
+   * @returns {number} The ID of the log that was created.
    */
-  log(content: string, user?: Discord.User | string): number | Error {
-    try {
-      const count = client.db.logs.count;
-      const logId = (count + 1).toString();
+  log(content: string, user?: Discord.User | string, type?: "log" | "warn" | "error"): number {
+    const count = client.db.logs.count;
+    const logId = (count + 1).toString();
 
-      if (user) {
-        const canLog = client.db.devSettings.get(client.config.devId).allowLog;
-        if (!canLog && (userId === client.config.devId)) return;
-
-        var userId = user;
-        if (user instanceof Discord.User) userId = user.id;
-        client.db.logs.set(logId, userId, "user");
-      }
-
-      client.db.logs.set(logId, Date.now(), "timestamp");
-      client.db.logs.set(logId, content, "content");
-      client.db.logs.set(logId, "Log", "type");
-      client.db.logs.set(logId, [], "details");
-
-      return Number(logId);
-    } catch (error) {
-      client.functions.sendError(error);
-      return error;
+    if (user) {
+      var userId = user;
+      if (user instanceof Discord.User) userId = user.id;
+      
+      const canLog = client.db.devSettings.get(client.config.devId).allowLog;
+      console.log(1)
+      if (userId == client.config.devId) if (canLog === false) return new ;
+      client.db.logs.set(logId, userId, "user");
     }
+
+    client.db.logs.set(logId, Date.now(), "timestamp");
+    client.db.logs.set(logId, content, "content");
+    client.db.logs.set(logId, type, "type");
+    client.db.logs.set(logId, [], "details");
+
+    return Number(logId);
   }
 
   /**
@@ -55,32 +52,10 @@ export default class Logger {
    * @function warn
    * @param {string} content - The content of the log.
    * @param {Discord.User|string} [user] - The user who emitted this log.
-   * @returns {number|Error} The ID of the log that was created.
+   * @returns {number} The ID of the log that was created.
    */
-   warn(content: string, user?: Discord.User | string): number | Error {
-    try {
-      const count = client.db.logs.count;
-      const logId = (count + 1).toString();
-
-      if (user) {
-        const canLog = client.db.devSettings.get(client.config.devId, "allowLog");
-        if (!canLog && (userId === client.config.devId)) return;
-
-        var userId = user;
-        if (user instanceof Discord.User) userId = user.id;
-        client.db.logs.set(logId, userId, "user");
-      }
-
-      client.db.logs.set(logId, Date.now(), "timestamp");
-      client.db.logs.set(logId, content, "content");
-      client.db.logs.set(logId, "Warn", "type");
-      client.db.logs.set(logId, [], "details");
-
-      return Number(logId);
-    } catch (error) {
-      client.functions.sendError(error);
-      return error;
-    }
+   warn(content: string, user?: Discord.User | string): number {
+    return this.log(content, user, "warn");
   }
 
   /**
@@ -88,54 +63,25 @@ export default class Logger {
    * @function error
    * @param {string} content - The content of the log.
    * @param {Discord.User|string} [user] - The user who emitted this log.
-   * @returns {number|Error} The ID of the log that was created.
+   * @returns {number} The ID of the log that was created.
    */
-   error(content: string, user?: Discord.User | string): number | Error {
-    try {
-      const count = client.db.logs.count;
-      const logId = (count + 1).toString();
-
-      if (user) {
-        const canLog = client.db.devSettings.get(client.config.devId, "allowLog");
-        if (!canLog && (userId === client.config.devId)) return;
-
-        var userId = user;
-        if (user instanceof Discord.User) userId = user.id;
-        client.db.logs.set(logId, userId, "user");
-      }
-
-      client.db.logs.set(logId, Date.now(), "timestamp");
-      client.db.logs.set(logId, content, "content");
-      client.db.logs.set(logId, "Error", "type");
-      client.db.logs.set(logId, [], "details");
-
-      return Number(logId);
-    } catch (error) {
-      client.functions.sendError(error);
-      return error;
-    }
+   error(content: string, user?: Discord.User | string): number {
+    return this.log(content, user, "error");
   }
 
   /**
    * Updates a log with further details.
    * @function updateLog
    * @param {string} content - The content of the update.
-   * @param {string|number|Error} id - The ID of the log to update.
-   * @returns {string[]|Error} All of the updates to the log.
+   * @param {string|number} id - The ID of the log to update.
+   * @returns {string[]} All of the updates to the log.
    */
-  updateLog(content: string, id: string | number | Error): string[] | Error {
-    try {
-      if (typeof id != "number") return;
-      const data = client.db.logs.get(id);
+  updateLog(content: string, id: string | number): string[] {
+    if (typeof id != "number") return;
+    client.db.logs.push(id, content, "details");
 
-      data.details.push(content);
-      client.db.logs.set(id.toString(), data.details, "details");      
-      return data.details;
-
-    } catch (error) {
-      client.functions.sendError(error);
-      return error;
-    }
+    const data = client.db.logs.get(id);
+    return data.details;
   }
 
   /**
@@ -144,14 +90,8 @@ export default class Logger {
    * @returns {boolean} Whether the operation succeeded or not.
    */
   clear(): boolean {
-    try {
-      client.db.logs.clear();
-      client.db.devSettings.set(client.config.devId, Date.now(), "logsCleared");
-      return true;
-
-    } catch (error) {
-      client.functions.sendError(error);
-      return false;
-    }
+    client.db.logs.clear();
+    client.db.devSettings.set(client.config.devId, Date.now(), "logsCleared");
+    return true;
   }
 }

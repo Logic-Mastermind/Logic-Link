@@ -1,6 +1,5 @@
 const Commands = {
   General: {
-    description: "Basic info / utility commands available to all users.",
     avatar: {
       name: "Avatar",
       description: "Displays the profile avatar of any user.",
@@ -12,7 +11,8 @@ const Commands = {
       aliases: ["av"],
       usage: "avatar [user]",
       category: "General",
-      commandName: "avatar"
+      commandName: "avatar",
+      option: {}
     },
     botinfo: {
       name: "Bot Info",
@@ -25,7 +25,8 @@ const Commands = {
       aliases: ["binfo"],
       usage: "botinfo",
       category: "General",
-      commandName: "botinfo"
+      commandName: "botinfo",
+      option: {}
     },
     help: {
       name: "Help",
@@ -38,7 +39,8 @@ const Commands = {
       aliases: ["cmd", "cmds", "commands"],
       usage: "help [command name]",
       category: "General",
-      commandName: "help"
+      commandName: "help",
+      option: {}
     },
     serverinfo: {
       name: "Server Info",
@@ -51,7 +53,8 @@ const Commands = {
       aliases: ["sinfo"],
       usage: "serverinfo",
       category: "General",
-      commandName: "serverinfo"
+      commandName: "serverinfo",
+      option: {}
     },
     roleinfo: {
       name: "Role Info",
@@ -64,7 +67,8 @@ const Commands = {
       aliases: ["rinfo"],
       usage: "roleinfo <role>",
       category: "General",
-      commandName: "roleinfo"
+      commandName: "roleinfo",
+      option: {}
     },
     channelinfo: {
       name: "Channel Info",
@@ -77,7 +81,8 @@ const Commands = {
       aliases: ["cinfo"],
       usage: "channelinfo <channel>",
       category: "General",
-      commandName: "channelinfo"
+      commandName: "channelinfo",
+      option: {}
     },
     invite: {
       name: "Bot Invite",
@@ -90,7 +95,8 @@ const Commands = {
       aliases: ["inv", "links"],
       usage: "invite",
       category: "General",
-      commandName: "invite"
+      commandName: "invite",
+      option: {}
     },
     membercount: {
       name: "Member Count",
@@ -103,7 +109,8 @@ const Commands = {
       aliases: ["mcount", "mc"],
       usage: "membercount",
       category: "General",
-      commandName: "membercount"
+      commandName: "membercount",
+      option: {}
     },
     pastebin: {
       name: "Pastebin",
@@ -116,7 +123,8 @@ const Commands = {
       aliases: ["paste", "pbin"],
       usage: "pastebin <option>",
       category: "General",
-      commandName: "pastebin"
+      commandName: "pastebin",
+      option: {}
     },
     ping: {
       name: "Ping",
@@ -129,7 +137,8 @@ const Commands = {
       aliases: [],
       usage: "ping",
       category: "General",
-      commandName: "ping"
+      commandName: "ping",
+      option: {}
     },
     remind: {
       name: "Remind",
@@ -142,7 +151,8 @@ const Commands = {
       aliases: ["remindme"],
       usage: "remind [duration] <task>",
       category: "General",
-      commandName: "remind"
+      commandName: "remind",
+      option: {}
     },
     uptime: {
       name: "Up-Time",
@@ -155,7 +165,8 @@ const Commands = {
       aliases: ["up-time", "upt"],
       usage: "uptime",
       category: "General",
-      commandName: "uptime"
+      commandName: "uptime",
+      option: {}
     },
     voice: {
       name: "Voice",
@@ -235,11 +246,11 @@ const Commands = {
       aliases: ["who-is", "userinfo", "uinfo", "who"],
       usage: "whois [user]",
       category: "General",
-      commandName: "whois"
+      commandName: "whois",
+      option: {}
     }
   },
   Ticket: {
-    description: "Next generation ticket systems and commands great for de-cluttering channels.",
     thelp: {
       name: "Ticket Help",
       description: "Provides information about ticket commands.",
@@ -252,7 +263,8 @@ const Commands = {
       usage: "thelp [command]",
       category: "Ticket",
       subCategory: "Basic",
-      commandName: "thelp"
+      commandName: "thelp",
+      option: {}
     },
     panels: {
       name: "Ticket Panels",
@@ -352,7 +364,8 @@ const Commands = {
       usage: "tsettings [setting] [option parameter]",
       category: "Ticket",
       subCategory: "Administrator",
-      commandName: "tsettings"
+      commandName: "tsettings",
+      option: {}
     },
     add: {
       name: "Add",
@@ -366,11 +379,11 @@ const Commands = {
       usage: "add <user | role>",
       category: "Ticket",
       subCategory: "Support",
-      commandName: "add"
+      commandName: "add",
+      option: {}
     }
   },
   Moderator: {
-    description: "Advanced moderation commands useful for stopping raids and attacks.",
     announce: {
       name: "Announce",
       description: "Sends an announcement to a channel.",
@@ -437,6 +450,7 @@ const Commands = {
       usage: "ban <user> [reason]",
       category: "Moderator",
       commandName: "ban",
+      option: {}
     },
     case: {
       name: "Cases",
@@ -450,6 +464,7 @@ const Commands = {
       usage: "case <id>",
       category: "Moderator",
       commandName: "case",
+      option: {}
     },
     softban: {
       name: "Softban",
@@ -462,7 +477,8 @@ const Commands = {
       aliases: ["sban"],
       usage: "softban <user> [reason]",
       category: "Moderator",
-      commandName: "softban"
+      commandName: "softban",
+      option: {}
     },
     tempban: {
       name: "Tempban",
@@ -475,7 +491,8 @@ const Commands = {
       aliases: ["tban"],
       usage: "tban <user> <duration> [reason]",
       category: "Moderator",
-      commandName: "tempban"
+      commandName: "tempban",
+      option: {}
     },
     embed: {
       name: "Embed",
@@ -488,7 +505,8 @@ const Commands = {
       aliases: ["emb"],
       usage: "embed \"<title>\" <description>",
       category: "Moderator",
-      commandName: "embed"
+      commandName: "embed",
+      option: {}
     },
     kick: {
       name: "Kick",
@@ -501,7 +519,8 @@ const Commands = {
       aliases: [],
       usage: "kick <user> [reason]",
       category: "Moderator",
-      commandName: "kick"
+      commandName: "kick",
+      option: {}
     },
     mute: {
       name: "Mute",
@@ -514,7 +533,8 @@ const Commands = {
       aliases: [],
       usage: "mute <user> [duration] [reason]",
       category: "Moderator",
-      commandName: "mute"
+      commandName: "mute",
+      option: {}
     },
     nickname: {
       name: "Nickname",
@@ -527,7 +547,8 @@ const Commands = {
       aliases: ["nick", "setnick", "set-nick"],
       usage: "nickname <user> <new nickname | reset>",
       category: "Moderator",
-      commandName: "nickname"
+      commandName: "nickname",
+      option: {}
     },
     purge: {
       name: "Purge",
@@ -540,7 +561,8 @@ const Commands = {
       aliases: [],
       usage: "purge <number>",
       category: "Moderator",
-      commandName: "purge"
+      commandName: "purge",
+      option: {}
     },
     slowmode: {
       name: "Slowmode",
@@ -553,7 +575,8 @@ const Commands = {
       aliases: ["slow", "smode"],
       usage: "slowmode [channel] <number | off>",
       category: "Moderator",
-      commandName: "slowmode"
+      commandName: "slowmode",
+      option: {}
     },
     unban: {
       name: "Un-Ban",
@@ -566,7 +589,8 @@ const Commands = {
       aliases: ["un-ban"],
       usage: "unban <user> [reason]",
       category: "Moderator",
-      commandName: "unban"
+      commandName: "unban",
+      option: {}
     },
     unmute: {
       name: "Un-Mute",
@@ -579,7 +603,8 @@ const Commands = {
       aliases: ["un-mute"],
       usage: "unmute <user> [reason]",
       category: "Moderator",
-      commandName: "unmute"
+      commandName: "unmute",
+      option: {}
     },
     warn: {
       name: "Warn",
@@ -592,7 +617,8 @@ const Commands = {
       aliases: [],
       usage: "warn <user> [warning]",
       category: "Moderator",
-      commandName: "warn"
+      commandName: "warn",
+      option: {}
     },
     warnings: {
       name: "Warnings",
@@ -605,11 +631,11 @@ const Commands = {
       aliases: ["warns"],
       usage: "warnings <member>",
       category: "Moderator",
-      commandName: "warnings"
+      commandName: "warnings",
+      option: {}
     }
   },
   Administrator: {
-    description: "Easy to use admin / utility commands that can get the job done quickly.",
     addrole: {
       name: "Add Role",
       description: "Adds a specific role to a user.",
@@ -622,6 +648,7 @@ const Commands = {
       usage: "addrole <user> <role>",
       category: "Administrator",
       commandName: "addrole",
+      option: {}
     },
     addroles: {
       name: "Add Roles",
@@ -635,6 +662,7 @@ const Commands = {
       usage: "addroles <user> <roles>",
       category: "Administrator",
       commandName: "addroles",
+      option: {}
     },
     create: {
       name: "Create",
@@ -737,7 +765,8 @@ const Commands = {
       aliases: [],
       usage: "hide [channel] [reason]",
       category: "Administrator",
-      commandName: "hide"
+      commandName: "hide",
+      option: {}
     },
     hoist: {
       name: "Hoist",
@@ -750,7 +779,8 @@ const Commands = {
       aliases: [],
       usage: "hoist <role>",
       category: "Administrator",
-      commandName: "hoist"
+      commandName: "hoist",
+      option: {}
     },
     lock: {
       name: "Lock",
@@ -763,7 +793,8 @@ const Commands = {
       aliases: [],
       usage: "lock [channel] [reason]",
       category: "Administrator",
-      commandName: "lock"
+      commandName: "lock",
+      option: {}
     },
     lockdown: {
       name: "Lockdown",
@@ -776,7 +807,8 @@ const Commands = {
       aliases: ["ld"],
       usage: "lockdown [off]",
       category: "Administrator",
-      commandName: "lockdown"
+      commandName: "lockdown",
+      option: {}
     },
     removerole: {
       name: "Remove Role",
@@ -790,6 +822,7 @@ const Commands = {
       usage: "removerole <user> <role>",
       category: "Administrator",
       commandName: "removerole",
+      option: {}
     },
     removeroles: {
       name: "Remove Role",
@@ -803,6 +836,7 @@ const Commands = {
       usage: "removeroles <user> <roles>",
       category: "Administrator",
       commandName: "removeroles",
+      option: {}
     },
     settings: {
       name: "Settings",
@@ -940,7 +974,8 @@ const Commands = {
       aliases: ["un-hoist"],
       usage: "unhoist <role>",
       category: "Administrator",
-      commandName: "unhoist"
+      commandName: "unhoist",
+      option: {}
     },
     unhide: {
       name: "Un-Hide",
@@ -953,7 +988,8 @@ const Commands = {
       aliases: [],
       usage: "unhide [channel] [reason]",
       category: "Administrator",
-      commandName: "unhide"
+      commandName: "unhide",
+      option: {}
     },
     unlock: {
       name: "Un-Lock",
@@ -966,11 +1002,11 @@ const Commands = {
       aliases: ["un-lock"],
       usage: "unlock [channel] [reason]",
       category: "Administrator",
-      commandName: "unlock"
+      commandName: "unlock",
+      option: {}
     }
   },
   Support: {
-    description: "Helpful commands for our support team used to diagnose issues.",
     bug: {
       name: "Bug Report",
       description: "Submits a bug report to the support server.",
@@ -982,7 +1018,8 @@ const Commands = {
       aliases: ["report"],
       usage: "bug new",
       category: "Support",
-      commandName: "bug"
+      commandName: "bug",
+      option: {}
     },
     error: {
       name: "Error",
@@ -995,7 +1032,8 @@ const Commands = {
       aliases: ["err"],
       usage: "error <id>",
       category: "Support",
-      commandName: "error"
+      commandName: "error",
+      option: {}
     },
     shelp: {
       name: "Support Help",
@@ -1008,11 +1046,11 @@ const Commands = {
       aliases: [],
       usage: "shelp [command]",
       category: "Support",
-      commandName: "shelp"
+      commandName: "shelp",
+      option: {}
     }
   },
   Developer: {
-    description: "Secret development commands used to debug problems and fix bugs.",
     blacklist: {
       name: "Blacklist",
       description: "Disallows certain users from using commands.",
@@ -1080,7 +1118,8 @@ const Commands = {
       aliases: ["devld"],
       usage: "devlockdown [guild] <reason>",
       category: "Developer",
-      commandName: "devlockdown"
+      commandName: "devlockdown",
+      option: {}
     },
     devhelp: {
       name: "Developer Help",
@@ -1093,7 +1132,8 @@ const Commands = {
       aliases: ["dhelp"],
       usage: "devhelp [option]",
       category: "Developer",
-      commandName: "devhelp"
+      commandName: "devhelp",
+      option: {}
     },
     devmode: {
       name: "Developer Mode",
@@ -1106,7 +1146,8 @@ const Commands = {
       aliases: ["dmode"],
       usage: "devmode <on | off>",
       category: "Developer",
-      commandName: "devmode"
+      commandName: "devmode",
+      option: {}
     },
     eval: {
       name: "Eval",
@@ -1129,7 +1170,7 @@ const Commands = {
           cooldown: 0,
           minArgs: 1,
           options: [],
-          aliases: ["s"],
+          aliases: [],
           usage: "eval silent <code>",
           category: "Developer",
           commandName: "silent",
@@ -1142,7 +1183,7 @@ const Commands = {
           cooldown: 0,
           minArgs: 1,
           options: [],
-          aliases: ["a"],
+          aliases: [],
           usage: "eval async <code>",
           category: "Developer",
           commandName: "async",
@@ -1157,10 +1198,11 @@ const Commands = {
       cooldown: 0,
       minArgs: 0,
       options: ["add", "remove", "persistent"],
-      aliases: [],
+      aliases: ["log"],
       usage: "logs <option>",
       category: "Developer",
-      commandName: "logs"
+      commandName: "logs",
+      option: {}
     },
     reload: {
       name: "Reload",
@@ -1173,7 +1215,8 @@ const Commands = {
       aliases: ["rld"],
       usage: "reload <command name>",
       category: "Developer",
-      commandName: "reload"
+      commandName: "reload",
+      option: {}
     },
     reset: {
       name: "Reset",
@@ -1227,7 +1270,8 @@ const Commands = {
       aliases: [],
       usage: "restart",
       category: "Developer",
-      commandName: "restart"
+      commandName: "restart",
+      option: {}
     },
     shutdown: {
       name: "Shutdown",
@@ -1240,7 +1284,8 @@ const Commands = {
       aliases: [],
       usage: "shutdown",
       category: "Developer",
-      commandName: "shutdown"
+      commandName: "shutdown",
+      option: {}
     },
     test: {
       name: "Test",
@@ -1253,7 +1298,8 @@ const Commands = {
       aliases: [],
       usage: "test",
       category: "Developer",
-      commandName: "test"
+      commandName: "test",
+      option: {}
     },
     unblacklist: {
       name: "Un-Blacklist",
@@ -1267,8 +1313,21 @@ const Commands = {
       usage: "unblacklist <user>",
       category: "Developer",
       commandName: "unblacklist",
+      option: {}
     },
   }
 }
 
-export default Commands;
+import Discord from "discord.js";
+import Types from "../Typings/types";
+
+const CommandMap = {
+  Administrator: new Discord.Collection(Object.entries(Commands.Administrator)) as Types.commandCategory,
+  Developer: new Discord.Collection(Object.entries(Commands.Developer)) as Types.commandCategory,
+  General: new Discord.Collection(Object.entries(Commands.General)) as Types.commandCategory,
+  Moderator: new Discord.Collection(Object.entries(Commands.Moderator)) as Types.commandCategory,
+  Support: new Discord.Collection(Object.entries(Commands.Support)) as Types.commandCategory,
+  Ticket: new Discord.Collection(Object.entries(Commands.Ticket)) as Types.commandCategory
+}
+
+export default CommandMap;

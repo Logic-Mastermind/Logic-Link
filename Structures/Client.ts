@@ -17,9 +17,9 @@ import server from "../server";
 
 /**
  * An extended discord.js client used for Logic Link.
- * @class AdvancedClient
+ * @class LogicLink
  */
-export default class AdvancedClient extends Discord.Client {
+export default class LogicLink extends Discord.Client {
   components = new Components();
   functions = new Functions();
   embeds = new Embeds();
@@ -66,8 +66,7 @@ export default class AdvancedClient extends Discord.Client {
    * @returns {boolean}
    */
   initialize(): boolean {
-
-    for (const category in Commands) {
+    for (const category in this.commands) {
       if (category == "Ticket") continue;
       let cmds = [];
 
@@ -81,7 +80,7 @@ export default class AdvancedClient extends Discord.Client {
           let cmd = (await import(path.resolve(__dirname, `../Commands/${category}/${name}`))).default;
 
           console.log(`CMD: ${name}`);
-          this.commands[category][name].run = cmd;
+          this.commands[category].get(name).run = cmd;
           cmds.push(name);
         }
       });
@@ -110,7 +109,8 @@ export default class AdvancedClient extends Discord.Client {
             let cmd = (await import(path.resolve(__dirname, `../Commands/Ticket/${category}/${name}`))).default;
   
             console.log(`CMD: ${name}`);
-            this.commands.Ticket[name].run = cmd;
+            //@ts-ignore
+            this.commands.Ticket.get(name).run = cmd;
             cmds.push(name);
           }
         });

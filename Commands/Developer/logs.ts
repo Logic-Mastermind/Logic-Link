@@ -13,7 +13,7 @@ export default async function run(client: Types.client, message: Discord.Message
 
   try {
     var canLog = client.db.devSettings.get(client.config.devId, "allowLog");
-    var logs = new Discord.Collection(client.db.logs).sort() as Types.logData;
+    var logs = new Discord.Collection(client.db.logs).sort() as Types.logDataCollection;
     var pages = [];
     var allLogs = [];
 
@@ -85,7 +85,7 @@ export default async function run(client: Types.client, message: Discord.Message
       if (!v.type) continue;
       if (!v.content) continue;
 
-      const priority = v.type == "Error" ? `-` : v.type == "Warn" ? `+` : `~`;
+      const priority = v.type == "error" ? `-` : v.type == "warn" ? `+` : `~`;
       const log = `${priority} [Log] ${k}: ${v.content}`;
       allLogs.push(log);
     }
@@ -114,7 +114,7 @@ export default async function run(client: Types.client, message: Discord.Message
     const msg = await message.reply({ embeds: [pages[0]], components: [actionRow] });
     pages = pages.slice(1);
 
-    if (pages[0]) client.functions.paginate(msg, pages, { filter: (c) => c.user.id == message.author.id });
+    if (pages[0]) client.functions.paginate(msg, pages, { filter: (u) => u.id == message.author.id });
   } catch (error) {
     client.functions.sendErrorMsg(error, message, command, extra.logId);
   }

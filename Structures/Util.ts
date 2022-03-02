@@ -81,6 +81,14 @@ const Util = {
     requiredParams: `You are missing required parameters needed to carry out this command.`,
     deleteConfirmation: `This command is able to delete roles and channels based on partial names without warning. Please be careful when using this command, if you don't feel comfortable providing a partial name, remember that you can always just mention the role or channel to be sure that you are deleting the right one.\n\nBy clicking the "Accept" button below, you acknowledge the conditions above and understand that you will be fully responsible for roles and channels deleted with this command.`,
   },
+  categoryInfo: {
+    Administrator: "Easy to use admin / utility commands that can get the job done quickly.",
+    Developer: "Secret development commands used to debug problems and fix bugs.",
+    General: "Basic info / utility commands available to all users.",
+    Moderator: "Advanced moderation commands useful for stopping raids and attacks.",
+    Support: "Helpful commands for our support team used to diagnose issues.",
+    Ticket: "Next generation ticket systems and commands great for de-cluttering channels."
+  },
   timeoutLimit: 2147483647,
   resetAliases: ["clear", "remove", "reset", "off"],
   intents: [

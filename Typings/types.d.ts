@@ -11,13 +11,8 @@ declare namespace Types {
   export type guildTextChannels = Discord.TextChannel | Discord.ThreadChannel | Discord.NewsChannel;
   export type anyGuildSetting = string | guildChannels | Discord.Role | null | boolean | caseCollection;
   export type chalkOptions = "bold" | "dim" | "italic" | "underline" | "inverse" | "strikethrough" | "red" | "green" | "yellow" | "blue" | "magenta" | "cyan" | "white" | "gray" | "bgBlack" | "bgRed" | "bgGreen" | "bgYellow" | "bgBlue" | "bgMagenta" | "bgCyan" | "bgWhite";
-  export type logData = Discord.Collection<string, {
-    timestamp: number,
-    content: string,
-    type: "Log" | "Warn" | "Error",
-    user: string | null,
-    details: string[]
-  }>
+  export type logDataCollection = Discord.Collection<string, logData>;
+  export type commandCategory = Discord.Collection<string, Types.commandData>;
   
   export type client = Client;
   export type permissionString =
@@ -118,6 +113,14 @@ declare namespace Types {
     inline?: boolean
   }
 
+  export interface logData {
+    timestamp: number,
+    content: string,
+    type: "log" | "warn" | "error",
+    user: string | null,
+    details: string[]
+  }
+
   export interface embedData {
     title?: string,
     description: string,
@@ -172,8 +175,10 @@ declare namespace Types {
     commandName: string
     category: "Administrator" | "Developer" | "General" | "Moderator" | "Support" | "Ticket",
     subCategory?: "Basic" | "Support" | "Administrator",
-    option?: empty,
-    run: Function
+    run: Function,
+    option: {
+      [key: string]: any
+    }
   }
 
   export interface timeData {

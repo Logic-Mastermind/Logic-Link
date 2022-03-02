@@ -56,16 +56,10 @@ export default async function run(client: Types.client, message: Discord.Message
       if (typeof evaled !== "string") evaled = require("util").inspect(evaled);
       if (!silent) {
         const msgs = Discord.Util.splitMessage(evaled, { maxLength: 1975 });
-        var inc = 0;
 
-        for (const msg of msgs) {
-          ++inc
-          if (inc >= 5) {
-            await client.functions.sleep(5000);
-            inc = 0;
-          }
-
-          message.reply({ content: `${code}xl\n${msg}${code}` });
+        for (let msg of msgs) {
+          msg = Discord.Formatters.codeBlock('xl', msg);
+          message.reply({ content: msg });
         }
       }
     } catch (error) {

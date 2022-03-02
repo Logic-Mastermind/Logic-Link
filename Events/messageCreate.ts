@@ -100,7 +100,6 @@ export async function handle(message: Discord.Message) {
 
     var settings = client.functions.getSettings(message.guild);
     var tsettings = client.functions.getTicketData(message.guild);
-    var devMode = client.db.devSettings.get(client.config.devId).devMode;
     var logId = client.logger.log(`Command ${command.commandName} ran by ${message.author.id}`, message.author);
     
     const permissionWhitelist = ["delete", "lock", "hide", "unhide", "unlock"];

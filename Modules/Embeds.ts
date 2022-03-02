@@ -150,7 +150,7 @@ export default class Embeds {
     embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
-    if (fields?.length != 0) embed.addFields(fields);
+    if (fields) if (fields[0]) embed.addFields(fields);
     return embed;
   }
 
@@ -172,7 +172,7 @@ export default class Embeds {
     embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
-    if (fields?.length != 0) embed.addFields(fields);
+    if (fields) if (fields[0]) embed.addFields(fields);
     return embed;
   }
 
@@ -194,7 +194,7 @@ export default class Embeds {
     embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
-    if (fields?.length != 0) embed.addFields(fields);
+    if (fields) if (fields[0]) embed.addFields(fields);
     return embed;
   }
 
@@ -216,7 +216,7 @@ export default class Embeds {
     embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
-    if (fields?.length != 0) embed.addFields(fields);
+    if (fields) if (fields[0]) embed.addFields(fields);
     return embed;
   }
 
@@ -238,7 +238,7 @@ export default class Embeds {
     embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
-    if (fields?.length != 0) embed.addFields(fields);
+    if (fields) if (fields[0]) embed.addFields(fields);
     return embed;
   }
 
@@ -260,7 +260,7 @@ export default class Embeds {
     embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
-    if (fields?.length != 0) embed.addFields(fields);
+    if (fields) if (fields[0]) embed.addFields(fields);
     return embed;
   }
 
@@ -282,7 +282,7 @@ export default class Embeds {
     embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
-    if (fields?.length != 0) embed.addFields(fields);
+    if (fields) if (fields[0]) embed.addFields(fields);
     return embed;
   }
 
@@ -304,7 +304,7 @@ export default class Embeds {
     embed.setFooter({ text, iconURL });
     embed.setTimestamp();
 
-    if (fields?.length != 0) embed.addFields(fields);
+    if (fields) if (fields[0]) embed.addFields(fields);
     return embed;
   }
 
@@ -657,7 +657,9 @@ export default class Embeds {
   noArgs(command: Types.commandData, guild: Discord.Guild | string): Discord.MessageEmbed {
     const guildId = typeof guild == "object" ? guild.id : guild;
     const prefix = client.functions.fetchPrefix(guildId);
+    
     const cmdName = command.commandName;
+    const parentCmd = command.option ? `` : command.usage.split(" ")[0] + " ";
 
     const embed = this.new({
       title: command.name,
@@ -670,7 +672,7 @@ export default class Embeds {
         },
         {
           name: "Aliases",
-          value: `${command.aliases.length == 0 ? `${client.util.messages.noAlias}` : `\`${prefix}${command.aliases.join(`\`\n\`${prefix}${cmdName} `)}\``}\n\u200b`
+          value: `${command.aliases.length == 0 ? `${client.util.messages.noAlias}` : `\`${prefix}${parentCmd}${command.aliases.join(`\`\n\`${prefix}${parentCmd}`)}\``}\n\u200b`
         },
         {
           name: "Options",
@@ -678,7 +680,7 @@ export default class Embeds {
         },
         {
           name: "Usage Error",
-          value: `You are missing required parameters needed to carry out this command.\nTo get more information, run \`>help eval.\``
+          value: `You are missing required parameters needed to carry out this command.\nTo get more information, run \`${prefix}help ${parentCmd}${command.commandName}\`.`
         }
       ]
     })

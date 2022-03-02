@@ -31,7 +31,7 @@ const Application = [
   {
     name: "addrole",
     type: AppTypes.CHAT_INPUT,
-    description: adm.addrole.description,
+    description: adm.get("addrole").description,
     options: [
       {
         name: "user",
@@ -50,7 +50,7 @@ const Application = [
   {
     name: "addroles",
     type: AppTypes.CHAT_INPUT,
-    description: adm.addroles.description,
+    description: adm.get("addroles").description,
     options: [
       {
         name: "user",
@@ -69,7 +69,7 @@ const Application = [
   {
     name: "create",
     type: AppTypes.CHAT_INPUT,
-    description: adm.create.description,
+    description: adm.get("create").description,
     options: [
       {
         name: "type",
@@ -110,11 +110,11 @@ const Application = [
   {
     name: "delete",
     type: AppTypes.CHAT_INPUT,
-    description: adm.delete.description,
+    description: adm.get("delete").description,
     options: [
       {
         name: "role",
-        description: adm.delete.option.role.description,
+        description: adm.get("delete").option.role.description,
         type: OptionTypes.SUB_COMMAND,
         options: [
           {
@@ -133,7 +133,7 @@ const Application = [
       },
       {
         name: "channel",
-        description: adm.delete.option.channel.description,
+        description: adm.get("delete").option.channel.description,
         type: AppTypes.CHAT_INPUT,
         options: [
           {
@@ -149,7 +149,7 @@ const Application = [
   {
     name: "hide",
     type: AppTypes.CHAT_INPUT,
-    description: adm.hide.description,
+    description: adm.get("hide").description,
     options: [
       {
         name: "channel",
@@ -168,7 +168,7 @@ const Application = [
   {
     name: "hoist",
     type: AppTypes.CHAT_INPUT,
-    description: adm.hoist.description,
+    description: adm.get("hoist").description,
     options: [
       {
         name: "role",
@@ -181,7 +181,7 @@ const Application = [
   {
     name: "lock",
     type: AppTypes.CHAT_INPUT,
-    description: adm.lock.description,
+    description: adm.get("lock").description,
     options: [
       {
         name: "channel",
@@ -200,12 +200,12 @@ const Application = [
   {
     name: "lockdown",
     type: AppTypes.CHAT_INPUT,
-    description: adm.lockdown.description,
+    description: adm.get("lockdown").description,
   },
   {
     name: "removerole",
     type: AppTypes.CHAT_INPUT,
-    description: adm.removerole.description,
+    description: adm.get("removerole").description,
     options: [
       {
         name: "user",
@@ -224,7 +224,7 @@ const Application = [
   {
     name: "removeroles",
     type: AppTypes.CHAT_INPUT,
-    description: adm.removeroles.description,
+    description: adm.get("removeroles").description,
     options: [
       {
         name: "user",
@@ -243,7 +243,7 @@ const Application = [
   {
     name: "settings",
     type: AppTypes.CHAT_INPUT,
-    description: adm.settings.description,
+    description: adm.get("settings").description,
     options: [
       {
         name: "setting",
@@ -300,7 +300,7 @@ const Application = [
   {
     name: "unhide",
     type: AppTypes.CHAT_INPUT,
-    description: adm.unhide.description,
+    description: adm.get("unhide").description,
     options: [
       {
         name: "channel",
@@ -319,7 +319,7 @@ const Application = [
   {
     name: "unhoist",
     type: AppTypes.CHAT_INPUT,
-    description: adm.unhoist.description,
+    description: adm.get("unhoist").description,
     options: [
       {
         name: "role",
@@ -332,7 +332,7 @@ const Application = [
   {
     name: "unlock",
     type: AppTypes.CHAT_INPUT,
-    description: adm.unlock.description,
+    description: adm.get("unlock").description,
     options: [
       {
         name: "channel",
