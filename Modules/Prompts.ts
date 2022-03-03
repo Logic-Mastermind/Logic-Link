@@ -61,7 +61,7 @@ const code = "```";
 
       collector.stop("clicked");
       if (int.customId == "Delete_Conditions:Accept") {
-        client.db.first.set(int.user.id, false, "deleteCmd");
+        client.db.userGlobal.set(int.user.id, true, "deleteCmdWarning");
         int.update({ embeds: [acceptEmbed], components: [] });
 
       } else {
@@ -567,7 +567,7 @@ const code = "```";
 //             collected.id = newCount;
             
 //             panels.set(newCount, collected);
-//             client.db.panels.set(message.guild.id, panels, "panels");
+//             client.db.tickets.set(message.guild.id, panels, "panels");
 //             const result = await client.schemas.sendPanel(collected, tsettings, message.guild.id);
 //             const fields1 = [];
 
@@ -1067,7 +1067,7 @@ const code = "```";
 //               const panels = tsettings.panels;
 //               panels.set(id, panelInfo);
 
-//               client.db.panels.set(message.guild.id, panels, "panels");
+//               client.db.tickets.set(message.guild.id, panels, "panels");
 //               if (collected.channel) {
 //                 await client.schemas.sendPanel(panelInfo, tsettings, message.guild.id);
 //                 if (panelMsg) await panelMsg.delete();
@@ -1152,7 +1152,7 @@ const code = "```";
 //         tsettings.panels.delete(panel.id);
 //         const panels = tsettings.panels;
 
-//         client.db.panels.set(message.guild.id, panels, "panels");
+//         client.db.tickets.set(message.guild.id, panels, "panels");
 //         const embed = client.embeds.success(command.option.delete, `Deleted the \`${panel.name}\` panel.`);
 //         await component.update({ embeds: [embed] });
 

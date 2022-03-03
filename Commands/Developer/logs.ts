@@ -12,8 +12,9 @@ export default async function run(client: Types.client, message: Discord.Message
   const responses = {};
 
   try {
-    var canLog = client.db.devSettings.get(client.config.devId, "allowLog");
-    var logs = new Discord.Collection(client.db.logs).sort() as Types.logDataCollection;
+    var canLog = client.db.devSettings.get("devLogsEnabled");
+    var logs: Types.logData[] = client.db.logs.get("logs");
+
     var pages = [];
     var allLogs = [];
 
@@ -24,7 +25,7 @@ export default async function run(client: Types.client, message: Discord.Message
         return message.reply({ embeds: [embed] });
 
       } else if (secArg == "count") {
-        const embed = client.embeds.success(command, `There is a total of \`${logs.size}\` bot log${logs.size == 1 ? `` : `s`}.`);
+        const embed = client.embeds.success(command, `There is a total of \`${logs.length}\` bot log${logs.length == 1 ? `` : `s`}.`);
         return message.reply({ embeds: [embed] });
 
       } else if (secArg == "off") {
@@ -33,7 +34,7 @@ export default async function run(client: Types.client, message: Discord.Message
           return message.reply({ embeds: [embed] });
         }
 
-        client.db.devSettings.set(client.config.devId, false, "allowLog");
+        client.db.devSettings.set("devLogsEnabled", false);
         const embed = client.embeds.success(command, `Turned off developer logs.`);
         return message.reply({ embeds: [embed] });
 
@@ -43,12 +44,13 @@ export default async function run(client: Types.client, message: Discord.Message
           return message.reply({ embeds: [embed] });
         }
 
-        client.db.devSettings.set(client.config.devId, true, "allowLog");
+        client.db.devSettings.set("devLogsEnabled", true);
         const embed = client.embeds.success(command, `Turned on developer logs.`);
         return message.reply({ embeds: [embed] });
 
       } else if (!isNaN(secArg as any)) {
-        var logData = client.db.logs.get(secArg);
+        const logData = logs[Number(secArg) - 1];
+
         if (!logData.content) {
           const embed = client.embeds.error(command, `A log with the ID: \`${secArg}\` was not found.`);
           return message.reply({ embeds: [embed] });
@@ -76,7 +78,7 @@ export default async function run(client: Types.client, message: Discord.Message
       }
     }
 
-    if (logs.size < 1) {
+    if (logs.length < 1) {
       const embed = client.embeds.error(command, `There are no logs to show.`);
       return message.reply({ embeds: [embed] });
     }
@@ -86,17 +88,17 @@ export default async function run(client: Types.client, message: Discord.Message
       if (!v.content) continue;
 
       const priority = v.type == "error" ? `-` : v.type == "warn" ? `+` : `~`;
-      const log = `${priority} [Log] ${k}: ${v.content}`;
-      allLogs.push(log);
+      const log = `${priority} [Log] ${k + 1}: ${v.content}`;
+      allLogs.unshift(log);
     }
 
     const chunks: string[][] = client.functions.divideChunk(allLogs, 15);
-    for await (const [k, v] of Object.entries(chunks)) {
+    for await (const [k, v] of chunks.entries()) {
       var desc = "";
       var logsTotal = allLogs.length;
-      var totalLogs = logs.size;
+      var totalLogs = logs.length;
 
-      if (k == "0") {
+      if (k == 0) {
         desc = `Displaying all logs last cleared since <t:${client.readySince}:T>.\nA total of \`${logsTotal}\` log${logsTotal == 1 ? ` is` : `s are`} shown.${logsTotal !== totalLogs ? ` (${totalLogs} total logs)` : ``}\n\n`;
       }
 

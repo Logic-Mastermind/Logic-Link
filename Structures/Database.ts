@@ -23,44 +23,26 @@ const Database = {
       cases: new Discord.Collection()
     }
   }),
-  first: new Enmap({
-    name: "first",
-    fetchAll: false,
-    autoFetch: true,
-    dataDir: "./Data/",
-    autoEnsure: {
-      deleteCmd: true,
-    }
-  }),
-  tsettings: new Enmap({
-    name: "tsettings",
-    fetchAll: false,
-    autoFetch: true,
-    dataDir: "./Data/",
-    autoEnsure: {
-      dmUsers: false
-    }
-  }),
-  panels: new Enmap({
+  tickets: new Enmap({
     name: "panels",
     fetchAll: false,
     autoFetch: true,
     dataDir: "./Data/",
     autoEnsure: {
-      panels: new Discord.Collection()
+      panels: new Discord.Collection(),
+      settings: {
+        dmUsers: false
+      }
     }
   }),
   timeouts: new Enmap({
     name: "timeouts",
     fetchAll: true,
     autoFetch: true,
-    dataDir: "./Data/",
-    autoEnsure: {
-      type: null
-    }
+    dataDir: "./Data/"
   }),
-  devlock: new Enmap({
-    name: "devlock",
+  commandLocks: new Enmap({
+    name: "commandLocks",
     fetchAll: true,
     autoFetch: true,
     dataDir: "./Data/",
@@ -99,11 +81,6 @@ const Database = {
     fetchAll: false,
     autoFetch: true,
     dataDir: "./Data/",
-    autoEnsure: {
-      devMode: false,
-      logsCleared: null,
-      allowLog: true
-    }
   }),
   errors: new Enmap({
     name: "errors",
@@ -115,12 +92,7 @@ const Database = {
     name: "logs",
     fetchAll: false,
     autoFetch: true,
-    dataDir: "./Data/",
-    autoEnsure: {
-      timestamp: null,
-      content: null,
-      type: null
-    }
+    dataDir: "./Data/"
   }),
   userInfo: new Enmap({
     name: "userInfo",
@@ -130,17 +102,17 @@ const Database = {
     autoEnsure: {
       inPrompt: null,
       ticketCooldowns: {},
-      ticketButtonCoooldown: null
+      ticketButtonCoooldown: null,
     }
   }),
-  blacklists: new Enmap({
-    name: "blacklists",
+  userGlobal: new Enmap({
+    name: "userGlobal",
     fetchAll: false,
     autoFetch: true,
     dataDir: "./Data/",
     autoEnsure: {
-      blacklisted: false,
-      reason: null
+      blacklist: null,
+      deleteCmdWarning: false
     }
   })
 }

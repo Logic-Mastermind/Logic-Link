@@ -1,6 +1,6 @@
 import Discord from "discord.js";
-import Types from "../Typings/types";
 import client from "../index";
+import Types from "../Typings/types";
 
 /**
  * A class with methods used to save log data to the database.
@@ -26,25 +26,27 @@ export default class Logger {
    * @returns {number} The ID of the log that was created.
    */
   log(content: string, user?: Discord.User | string, type?: "log" | "warn" | "error"): number {
-    const count = client.db.logs.count;
-    const logId = (count + 1).toString();
+    const logData = {} as Types.logData;
+    const logs = client.db.logs.get("logs");
 
     if (user) {
-      var userId = user;
+      var userId: string;
       if (user instanceof Discord.User) userId = user.id;
+      else userId = user;
       
-      const canLog = client.db.devSettings.get(client.config.devId).allowLog;
-      console.log(1)
-      if (userId == client.config.devId) if (canLog === false) return new ;
-      client.db.logs.set(logId, userId, "user");
+      const canLog = client.db.devSettings.get("devLogsEnabled");
+      if (userId == client.config.devId) if (canLog === false) return;
+      logData.user = userId;
     }
 
-    client.db.logs.set(logId, Date.now(), "timestamp");
-    client.db.logs.set(logId, content, "content");
-    client.db.logs.set(logId, type, "type");
-    client.db.logs.set(logId, [], "details");
+    logData.timestamp = Date.now();
+    logData.content = content;
+    logData.type = type || "log";
+    logData.details = [];
 
-    return Number(logId);
+    logs.push(logData);
+    client.db.logs.set("logs", logs);
+    return logs.length;
   }
 
   /**
@@ -76,12 +78,20 @@ export default class Logger {
    * @param {string|number} id - The ID of the log to update.
    * @returns {string[]} All of the updates to the log.
    */
-  updateLog(content: string, id: string | number): string[] {
-    if (typeof id != "number") return;
-    client.db.logs.push(id, content, "details");
+  updateLog(content: string, id: number): string[] {
+    if (!id) return;
+    id = id - 1;
 
-    const data = client.db.logs.get(id);
-    return data.details;
+    const logs: Types.logData[] = client.db.logs.get("logs");
+    const log = logs[id];
+
+    log.details.push(content);
+    logs.splice(id, 1);
+
+    delete logs[id];
+    logs.splice(id, 1, log);
+    client.db.logs.set("logs", logs);
+    return log.details;
   }
 
   /**
@@ -90,7 +100,7 @@ export default class Logger {
    * @returns {boolean} Whether the operation succeeded or not.
    */
   clear(): boolean {
-    client.db.logs.clear();
+    client.db.logs.set("logs", []);
     client.db.devSettings.set(client.config.devId, Date.now(), "logsCleared");
     return true;
   }

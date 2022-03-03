@@ -47,7 +47,7 @@ import FS from "fs";
     panel.msg = msg.id;
     
     panels.set(panel.id, panel);
-    client.db.panels.set(guildId, panels, "panels");
+    client.db.tickets.set(guildId, panels, "panels");
     return true;
   }
 
@@ -132,7 +132,7 @@ import FS from "fs";
     });
 
     panels.set(panel.id, panel);    
-    client.db.panels.set(guild.id, panels, "panels");
+    client.db.tickets.set(guild.id, panels, "panels");
     return panel.tickets.get(count);
   }
 
@@ -170,7 +170,7 @@ import FS from "fs";
     });
 
     panels.set(panel.id, panel);
-    client.db.panels.set(guild.id, panels, "panels");
+    client.db.tickets.set(guild.id, panels, "panels");
     return panel.tickets.get(count);
   }
 
@@ -203,7 +203,7 @@ import FS from "fs";
     });
 
     panels.set(panel.id, panel);
-    client.db.panels.set(guild.id, panels, "panels");
+    client.db.tickets.set(guild.id, panels, "panels");
     return panel.tickets.get(count);
   }
 
@@ -218,7 +218,7 @@ import FS from "fs";
     panel.tickets.delete(count);
     panels.set(panel.id, panel);
     
-    client.db.panels.set(guild.id, panels, "panels");
+    client.db.tickets.set(guild.id, panels, "panels");
     return panel;
   }
 }

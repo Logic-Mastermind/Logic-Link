@@ -14,7 +14,7 @@ export async function handle(message: Discord.Message) {
     var allArgs = message.content.split(/ +/g);
     var guildPrefix = client.functions.fetchPrefix(message.guild);
     var pingPrefixes = [`<@${client.user.id}>`, `<@!${client.user.id}>`];
-    var blacklistInfo = client.db.blacklists.get(message.author.id);
+    var blacklistInfo = client.db.userGlobal.get(message.author.id, "blacklist");
     var userInfo = client.db.userInfo.get(`${message.author.id}-${message.guild.id}`);
     var prefix = guildPrefix;
 
@@ -93,7 +93,7 @@ export async function handle(message: Discord.Message) {
       }, "cmdSpam");
     }
 
-    if (blacklistInfo.blacklisted) {
+    if (blacklistInfo?.blacklisted) {
       const embed = client.embeds.error(command, `You are currently blacklisted from using Logic Link.`, [{ name: "Reason", value: blacklistInfo.blacklisted, inline: false }]);
       return message.reply({ embeds: [embed] });
     }
@@ -110,9 +110,9 @@ export async function handle(message: Discord.Message) {
       return message.reply({ embeds: [embed] });
     }
 
-    const locked = client.db.devlock.get(command.commandName, "locked");
-    const lockedGuild = client.guilds.cache.get(client.db.devlock.get(command.commandName, "guild"));
-    const lockedReason = client.db.devlock.get(command.commandName, "reason");
+    const locked = client.db.commandLocks.get(command.commandName, "locked");
+    const lockedGuild = client.guilds.cache.get(client.db.commandLocks.get(command.commandName, "guild"));
+    const lockedReason = client.db.commandLocks.get(command.commandName, "reason");
 
     if (message.author.id !== client.config.devId) {
       if (locked == true && lockedGuild) {

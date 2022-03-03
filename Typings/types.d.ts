@@ -76,7 +76,7 @@ declare namespace Types {
   export interface extraObject {
     allArgs: string[],
     mentioned: boolean,
-    logId: number | Error,
+    logId: number,
     hasBotSupport: boolean,
     hasTicketSupport: boolean,
     isDev: boolean,

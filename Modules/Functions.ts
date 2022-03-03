@@ -31,10 +31,10 @@ export default class Functions {
    * @param {Error} error - The error that was emitted.
    * @param {Discord.Message} message - The command message that caused the error.
    * @param {Types.commandData} command - The command that the function is executing from.
-   * @param {string} [logId] - The logId that the command action recieved.
+   * @param {number} [logId] - The logId that the command action recieved.
    * @returns {void}
    */
-  sendErrorMsg(error: Types.errorData, message: Discord.Message, command: Types.commandData, logId?: number | Error): void {
+  sendErrorMsg(error: Types.errorData, message: Discord.Message, command: Types.commandData, logId?: number): void {
     const whClient = new Discord.WebhookClient({ url: "https://canary.discord.com/api/webhooks/874010484234399745/-LA99Q0YTBlLE75xsUYw9LGuRhw4Gn7chFhx1LLyxGgUDDLahtbdFv0j0QrMrZ2UjkUa" });
 
     const errorId = this.getRandomString(10);
@@ -608,13 +608,7 @@ export default class Functions {
   getTicketData(guild: Discord.Guild | string): Types.ticketSettings {
     const guildId = guild instanceof Discord.Guild ? guild.id : guild;
 
-    const settings = client.db.tsettings.get(guildId);
-    const panels = client.db.panels.get(guildId, "panels");
-
-    return {
-      settings,
-      panels
-    }
+    return client.db.tickets.get(guildId);
   }
 
   /**
@@ -1018,7 +1012,7 @@ export default class Functions {
     const hasPerm = target.permissions.has("ADMINISTRATOR") || target.roles.cache.has(settings.adminRole);
     const isOwner = target.guild.ownerId == target.id;
 
-    const devMode = client.db.devSettings.get(client.config.devId).devMode ? target.id == client.config.devId : false;
+    const devMode = client.db.devSettings.get("devMode") ? target.id == client.config.devId : false;
     return hasPerm || isOwner || devMode;
   }
 
@@ -1033,7 +1027,7 @@ export default class Functions {
     const hasPerm = target.permissions.has("ADMINISTRATOR") || target.roles.cache.has(settings.modRole);
     const isOwner = target.guild.ownerId == target.id;
 
-    const devMode = client.db.devSettings.get(client.config.devId).devMode ? target.id == client.config.devId : false;
+    const devMode = client.db.devSettings.get("devMode") ? target.id == client.config.devId : false;
     return hasPerm || isOwner || devMode;
   }
 
@@ -1083,7 +1077,7 @@ export default class Functions {
       else if (command.subCategory == "Basic") otherPerm = true;
     }
 
-    if (client.db.devSettings.get(client.config.devId).devMode) otherPerm = target.id == client.config.devId;
+    if (client.db.devSettings.get("devMode")) otherPerm = target.id == client.config.devId;
     return hasPermissions || otherPerm;
   }
 
