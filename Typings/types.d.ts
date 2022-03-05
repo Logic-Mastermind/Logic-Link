@@ -13,6 +13,9 @@ declare namespace Types {
   export type chalkOptions = "bold" | "dim" | "italic" | "underline" | "inverse" | "strikethrough" | "red" | "green" | "yellow" | "blue" | "magenta" | "cyan" | "white" | "gray" | "bgBlack" | "bgRed" | "bgGreen" | "bgYellow" | "bgBlue" | "bgMagenta" | "bgCyan" | "bgWhite";
   export type logDataCollection = Discord.Collection<string, logData>;
   export type commandCategory = Discord.Collection<string, Types.commandData>;
+
+  export type modPerms = "BAN_MEMBERS" | "KICK_MEMBERS" | "MANAGE_MESSAGES";
+  export type adminPerms = "MANAGE_GUILD" | "MANAGE_ROLES" | "MANAGE_CHANNELS";
   
   export type client = Client;
   export type permissionString =
@@ -134,10 +137,26 @@ declare namespace Types {
 
   export interface menuItemData {
     label: string,
-    description: string,
-    id: string,
+    description?: string,
+    value: string,
     emoji?: string,
     def?: boolean
+  }
+
+  export interface helpCategoryInfo {
+    noPanels: string;
+    guildPrefix: string,
+    Administrator: string,
+    Developer: string,
+    General: string,
+    Moderator: string,
+    Support: string,
+    Ticket: {
+      Basic: string,
+      Support: string,
+      Admin: string,
+      title: string,
+    }
   }
 
   export interface guildSettings {

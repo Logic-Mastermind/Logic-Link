@@ -77,11 +77,11 @@ export default class Components {
     const itemsArray = [];
 
     for (const item of items) {
-      const { label, description, id, emoji, def } = item;
+      const { label, description, value, emoji, def } = item;
       itemsArray.push({
         label,
+        value,
         description,
-        id,
         emoji,
         default: def,
       });

@@ -29,7 +29,7 @@ export default async function run(client: Types.client, message: Discord.Message
         }
 
         if (!channel) channel = client.functions.findChannel(fourthArg, message.guild, { searchFilter: (c) => c.isText() });
-        const role = client.functions.findRole(thirdArg, message.guild);
+        const role = message.mentions.roles.first() || client.functions.findRole(thirdArg, message.guild);
 
         if (!role) {
           const embed = client.embeds.invalidItem(command, ["role"], [thirdArg]);
@@ -52,6 +52,11 @@ export default async function run(client: Types.client, message: Discord.Message
       if (!channel.permissionsFor(message.member).has("SEND_MESSAGES")) {
         const embed = client.embeds.permission(command, "SEND_MESSAGES");
         return message.reply({ embeds: [embed] });
+      }
+
+      if (!announcement) {
+        const noArgs = client.embeds.noArgs(option ? command.option[option] : command, message.guild);
+        return message.reply({ embeds: [noArgs] });
       }
 
       const announceEmbed = client.embeds.new({ title: "Announcement", description: announcement, footer: [`Announced by ${message.author.tag}`, message.author.displayAvatarURL()]} );

@@ -475,36 +475,30 @@ export default class Embeds {
   /**
    * 
    * @param {string} name - The name of the category.
-   * @param {string} prefix - The prefix of the guild.
-   * @param {Object} info - Info for the embed.
-   * @param {string} info.main - The main title of the field.
-   * @param {string} [info.supView] - The title of the ticket support field.
-   * @param {string} [info.basicView] - The title of the ticket basic field.
-   * @param {string} [info.noPanel] - A string which represents whether panels exist in the guild.
+   * @param {Types.helpCategoryInfo} info
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  // helpCategory(name: string, prefix: string, info: Types.helpCategoryData): Discord.MessageEmbed {
-  //   const category = client.category.get(name);
-  //   const lowerName = name.toLowerCase();
+  helpCategory(name: string, info: Types.helpCategoryInfo): Discord.MessageEmbed {
+    const category = client.category.get(name);
+    const description = client.util.categoryInfo[name];
+    const cmdArray = [];
 
-  //   const basic = `${client.util.members} Basic Commands`;
-  //   const description = client.commands[lowerName].description;
-  //   const cmdArray = [];
+    if (!Array.isArray(category)) {
+      // Ticket category
+      cmdArray.push({ name: info.Ticket.Basic, value: `${code}\n${category.Basic.join("\n")}${code}`, inline: true });
+      cmdArray.push({ name: info.Ticket.Support, value: `${code}\n${category.Support.join("\n")}${code}`, inline: true });
+      cmdArray.push({ name: info.Ticket.Admin, value: `${code}\n${category.Administrator.join("\n")}${code}`, inline: true });
+    } else {
+      // Normal category
+      cmdArray.push({ name: info[name], value: `${code}\n${category.join("\n")}${code}`, inline: true });
+      cmdArray.push({ name: "\u200b", value: `\u200b`, inline: true });
+      cmdArray.push({ name: "\u200b", value: `\u200b`, inline: true });
+    }
 
-  //   if (name == "Ticket") {
-  //     cmdArray.push({ name: basic, value: `${code}\n${category.Basic.join("\n")}${code}`, inline: true });
-  //     cmdArray.push({ name: info.supView, value: `${code}\n${category.Support.join("\n")}${code}`, inline: true });
-  //     cmdArray.push({ name: info.main, value: `${code}\n${category.Administrator.join("\n")}${code}`, inline: true });
-  //   } else {
-  //     cmdArray.push({ name: info.main, value: `${code}\n${category.join("\n")}${code}`, inline: true });
-  //     cmdArray.push({ name: client.util.whitespace, value: `\u200b`, inline: true });
-  //     cmdArray.push({ name: client.util.whitespace, value: `\u200b`, inline: true });
-  //   }
+    const helpEmbed = this.blue(`Help - ${name}`, `${description}\n\n**Command List**\nBelow shows a list of all ${name.toLowerCase()} commands.\nTo get more details about a particular command, run: \`${info.guildPrefix}help [command]\`.\nIf you would like a detailed guide on the help menu, run \`${info.guildPrefix}help guide\`.\n\n${code}${name} Commands${code}\u200b${name == "Ticket" ? info.noPanels : ``}`, cmdArray);
 
-  //   const helpEmbed = this.blue(`Help - ${name}`, `${description}\n\n**Command List**\nBelow shows a list of all ${lowerName} commands.\nTo get more details about a particular command, run: \`${prefix}help [command]\`.\nIf you would like a detailed guide on the help menu, run \`${prefix}help guide\`.\n\n${code}${name} Commands${code}\u200b${info.noPanel}`, cmdArray);
-
-  //   return helpEmbed;
-  // }
+    return helpEmbed;
+  }
 
   /**
    * Creates a discord.js MessageEmbed and replaces info fields using the data given.

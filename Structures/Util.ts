@@ -103,19 +103,23 @@ const Util = {
     'DIRECT_MESSAGES',
     'GUILD_SCHEDULED_EVENTS'
   ],
-  keyPerms: [
-    'ADMINISTRATOR',
-    'MANAGE_GUILD',
-    'MANAGE_CHANNELS',
-    'MANAGE_ROLES',
-    'MANAGE_NICKNAMES',
-    'MANAGE_WEBHOOKS',
-    'MANAGE_MESSAGES',
-    'MANAGE_EMOJIS',
-    'BAN_MEMBERS',
-    'KICK_MEMBERS',
-    'MENTION_EVERYONE',
-  ],
+  permissions: {
+    keyPerms: [
+      'ADMINISTRATOR',
+      'MANAGE_GUILD',
+      'MANAGE_CHANNELS',
+      'MANAGE_ROLES',
+      'MANAGE_NICKNAMES',
+      'MANAGE_WEBHOOKS',
+      'MANAGE_MESSAGES',
+      'MANAGE_EMOJIS',
+      'BAN_MEMBERS',
+      'KICK_MEMBERS',
+      'MENTION_EVERYONE',
+    ],
+    modPerms: ["BAN_MEMBERS", "KICK_MEMBERS", "MANAGE_MESSAGES"],
+    adminPerms: ["MANAGE_GUILD", "MANAGE_ROLES", "MANAGE_CHANNELS"]
+  },
   chalkOptions: ["bold", "dim", "italic", "underline", "inverse", "strikethrough", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "gray", "bgBlack", "bgRed", "bgGreen", "bgYellow", "bgBlue", "bgMagenta", "bgCyan", "bgWhite"],
 }
 

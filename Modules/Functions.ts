@@ -966,7 +966,7 @@ export default class Functions {
 
     if (permissions.includes("ADMINISTRATOR")) return ["Administrator"];
     for (var perm of permissions) {
-      if (client.util.keyPerms.includes(perm)) {
+      if (client.util.permissions.keyPerms.includes(perm)) {
         //@ts-ignore
         perm.replaceAll("_", " ");
         perm = perm.toLowerCase();
@@ -1005,12 +1005,15 @@ export default class Functions {
    * Checks various factors to determine whether a user is a server admin.
    * @function isAdmin
    * @param {Discord.GuildMember} target - The user that is being checked.
+   * @param {boolean} [widePermCheck] - Checks if a user has one or more permissions that are normally given to admins.
    * @returns {boolean} Whether or not the user is an admin.
    */
-  isAdmin(target: Discord.GuildMember): boolean {
+  isAdmin(target: Discord.GuildMember, widePermCheck?: boolean): boolean {
     const settings: Types.guildSettings = client.db.settings.get(target.guild.id);
-    const hasPerm = target.permissions.has("ADMINISTRATOR") || target.roles.cache.has(settings.adminRole);
     const isOwner = target.guild.ownerId == target.id;
+
+    let hasPerm = target.permissions.has("ADMINISTRATOR") || target.roles.cache.has(settings.modRole);
+    if (widePermCheck) hasPerm ||= client.util.permissions.modPerms.some((p: Types.adminPerms) => target.permissions.has(p));
 
     const devMode = client.db.devSettings.get("devMode") ? target.id == client.config.devId : false;
     return hasPerm || isOwner || devMode;
@@ -1020,12 +1023,15 @@ export default class Functions {
    * Checks various factors to determine whether a user is a server moderator.
    * @function isMod
    * @param {Discord.GuildMember} target - The user that is being checked.
+   * @param {boolean} [widePermCheck] - Checks if a user has one or more permissions that are normally given to moderators.
    * @returns {boolean} Whether or not the user is a moderator.
    */
-   isMod(target: Discord.GuildMember): boolean {
+   isMod(target: Discord.GuildMember, widePermCheck?: boolean): boolean {
     const settings: Types.guildSettings = client.db.settings.get(target.guild.id);
-    const hasPerm = target.permissions.has("ADMINISTRATOR") || target.roles.cache.has(settings.modRole);
     const isOwner = target.guild.ownerId == target.id;
+
+    let hasPerm = target.permissions.has("ADMINISTRATOR") || target.roles.cache.has(settings.modRole);
+    if (widePermCheck) hasPerm ||= client.util.permissions.modPerms.some((p: Types.modPerms) => target.permissions.has(p));
 
     const devMode = client.db.devSettings.get("devMode") ? target.id == client.config.devId : false;
     return hasPerm || isOwner || devMode;

@@ -12,6 +12,8 @@ const code = "```";
   message: Discord.Message;
   command: Types.commandData;
 
+  filter = () => true;
+
   /**
    * Used to set class properties.
    * @constructor
@@ -77,76 +79,74 @@ const code = "```";
     });
   }
 
-//   /**
-//    * Controls the help embed message component prompts.
-//    * @async
-//    * @function helpMenu
-//    * @param obj 
-//    */
-//   async helpMenu(obj) {
-//     const filter = () => true;
-//     const collector = msg.createMessageComponentCollector({ filter, idle: 60 * 1000 });
-//     const original = msg.embeds[0];
-//     const select = msg.components[0].components[0];
+  /**
+   * Controls the help embed message component prompts.
+   * @async
+   * @function helpMenu
+   * @param obj 
+   */
+  async helpMenu(msg: Discord.Message, obj: Types.helpCategoryInfo) {
+    const collector = msg.createMessageComponentCollector({ filter: this.filter, idle: 60 * 1000 });
+    const original = msg.embeds[0];
+    const select = msg.components[0].components[0];
 
-//     const backBtn = client.components.button({ label: "Back", style: "SECONDARY", id: "Help_Menu:Back" });
-//     const btnRow = client.components.actionRow(backBtn);
-//     const selectRow = client.components.actionRow(select);
+    const btnRow = client.components.actionRow(client.components.button({ label: "Back", style: "SECONDARY", id: "Help_Menu:Back" }));
+    const selectRow = client.components.actionRow(select);
 
-//     collector.on("collect", async (int) => {
-//       if (int.member.id !== message.author.id) {
-//         const embed = client.embeds.notComponent();
-//         return int.reply({ embeds: [embed], ephemeral: true });
-//       }
+    collector.on("collect", async (int: Discord.ButtonInteraction | Discord.SelectMenuInteraction) => {
+      if (int.user.id !== this.message.author.id) {
+        const embed = client.embeds.notComponent();
+        return int.reply({ embeds: [embed], ephemeral: true });
+      }
 
-//       if (int.componentType == "BUTTON") {
-//         return int.update({ embeds: [original], components: [selectRow] });
-//       }
+      if (int.componentType == "BUTTON") {
+        return int.update({ embeds: [original], components: [selectRow] });
+      }
 
-//       switch (int.values[0]) {
-//         case "Help_Menu:General":
-//         {
-//           const helpEmbed = client.embeds.helpCategory("General", obj.gen, obj.prefix);
-//           await int.update({ embeds: [helpEmbed], components: [btnRow] });
-//           break;
-//         }
-//         case "Help_Menu:Moderator":
-//         {
-//           const helpEmbed = client.embeds.helpCategory("Moderator", obj.mod, obj.prefix);
-//           await int.update({ embeds: [helpEmbed], components: [btnRow] });
-//           break;
-//         }
-//         case "Help_Menu:Administrator":
-//         {
-//           const helpEmbed = client.embeds.helpCategory("Administrator", obj.admin, obj.prefix);
-//           await int.update({ embeds: [helpEmbed], components: [btnRow] });
-//           break;
-//         }
-//         case "Help_Menu:Ticket":
-//         {
-//           const helpEmbed = client.embeds.helpCategory("Ticket", obj.tck, obj.prefix, obj.sup, obj.noPanel);
-//           await int.update({ embeds: [helpEmbed], components: [btnRow] });
-//           break;
-//         }
-//         case "Help_Menu:Support":
-//         {
-//           const helpEmbed = client.embeds.helpCategory("Support", obj.support, obj.prefix);
-//           await int.update({ embeds: [helpEmbed], components: [btnRow] });
-//           break;
-//         }
-//         case "Help_Menu:Developer":
-//         {
-//           const helpEmbed = client.embeds.helpCategory("Developer", obj.dev, obj.prefix);
-//           await int.update({ embeds: [helpEmbed], components: [btnRow] });
-//           break;
-//         }
-//       }
-//     });
+      switch (int.values[0]) {
+        case "Help_Menu:General":
+        {
+          const helpEmbed = client.embeds.helpCategory("General", obj);
+          await int.update({ embeds: [helpEmbed], components: [btnRow] });
+          break;
+        }
+        case "Help_Menu:Moderator":
+        {
+          const helpEmbed = client.embeds.helpCategory("Moderator", obj);
+          await int.update({ embeds: [helpEmbed], components: [btnRow] });
+          break;
+        }
+        case "Help_Menu:Administrator":
+        {
+          const helpEmbed = client.embeds.helpCategory("Administrator", obj);
+          await int.update({ embeds: [helpEmbed], components: [btnRow] });
+          break;
+        }
+        case "Help_Menu:Ticket":
+        {
+          const helpEmbed = client.embeds.helpCategory("Ticket", obj);
+          await int.update({ embeds: [helpEmbed], components: [btnRow] });
+          break;
+        }
+        case "Help_Menu:Support":
+        {
+          const helpEmbed = client.embeds.helpCategory("Support", obj);
+          await int.update({ embeds: [helpEmbed], components: [btnRow] });
+          break;
+        }
+        case "Help_Menu:Developer":
+        {
+          const helpEmbed = client.embeds.helpCategory("Developer", obj);
+          await int.update({ embeds: [helpEmbed], components: [btnRow] });
+          break;
+        }
+      }
+    });
 
-//     collector.on("end", async () => {
-//       msg.edit({ embeds: [original], components: [client.buttons.actionRow([select.setDisabled()])] });
-//     })
-//   }
+    collector.on("end", async () => {
+      msg.edit({ embeds: [original], components: [client.components.actionRow(select.setDisabled())] });
+    })
+  }
 
 //   async bugReport(message, command) {
     
