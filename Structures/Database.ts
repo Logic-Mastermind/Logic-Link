@@ -52,29 +52,11 @@ const Database = {
       reason: null
     }
   }),
-  channelLocks: new Enmap({
-    name: "channelLocks",
+  channelData: new Enmap({
+    name: "channelData",
     fetchAll: false,
     autoFetch: true,
-    dataDir: "./Data/",
-    autoEnsure: {
-      locked: false,
-      locker: null,
-      channel: null,
-      lockedAt: null
-    }
-  }),
-  channelHides: new Enmap({
-    name: "channelHides",
-    fetchAll: false,
-    autoFetch: true,
-    dataDir: "./Data/",
-    autoEnsure: {
-      hidden: false,
-      locker: null,
-      channel: null,
-      lockedAt: null
-    }
+    dataDir: "./Data/"
   }),
   devSettings: new Enmap({
     name: "devSettings",

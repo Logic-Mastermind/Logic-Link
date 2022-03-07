@@ -206,9 +206,9 @@ export default class Functions {
    * @param {Object} [options] - Options for filtering.
    * @param {boolean} [options.safe] - Whether or not to check if channel names start or are included in the filter.
    * @param {Function} [options.searchFilter] - A filter to test against all matched channels.
-   * @returns {Types.guildChannels|null} The channel, if it was found.
+   * @returns {Types.guildChannel|null} The channel, if it was found.
    */
-  findChannel(filter: string, guild: Discord.Guild | Discord.Collection<string, Types.guildChannels>, options?: Types.itemFilterOptions): Types.guildChannels | null {
+  findChannel(filter: string, guild: Discord.Guild | Discord.Collection<string, Types.guildChannel>, options?: Types.itemFilterOptions): Types.guildChannel | null {
     const filterL = filter.toLowerCase();
     const collection = guild instanceof Discord.Guild ? guild.channels.cache : guild;
 
@@ -216,7 +216,7 @@ export default class Functions {
     const searchFilter = options?.searchFilter;
     if (!collection) throw new Error("Invalid collection recieved");
 
-    var channel: Types.guildChannels;
+    var channel: Types.guildChannel;
     var found: string;
 
     channel = collection.get(filter);
@@ -982,10 +982,10 @@ export default class Functions {
   /**
    * Gets the permission overwrites for a channel and returns an array of formatted strings.
    * @function getPermOverwrites
-   * @param {Types.guildChannels} channel - The channel to get permission overwrites for.
+   * @param {Types.guildChannel} channel - The channel to get permission overwrites for.
    * @returns {string[]} The array of mention-formatted permission overwrites.
    */
-  getPermOverwrites(channel: Types.guildChannels): string[] {
+  getPermOverwrites(channel: Types.guildChannel): string[] {
     if (channel instanceof Discord.ThreadChannel) channel = channel.guild.channels.cache.get(channel.parentId) as Discord.GuildChannel;
     const overwrites = channel.permissionOverwrites.cache;
     const everyone = channel.guild.roles.everyone;
@@ -1123,11 +1123,11 @@ export default class Functions {
    * Bulk deletes messages in a channel while ignoring pinned messages.
    * @async
    * @function bulkDeleteMessages
-   * @param {Types.guildTextChannels} channel - The channel to bulk delete messages in.
+   * @param {Types.guildTextChannel} channel - The channel to bulk delete messages in.
    * @param {number} num - The number of messages to purge.
    * @returns {Promise} A promise containing a collection of messages that were deleted.
    */
-  async bulkDeleteMessages(channel: Types.guildTextChannels, num: number): Promise<Discord.Collection<string, Discord.Message>> {
+  async bulkDeleteMessages(channel: Types.guildTextChannel, num: number): Promise<Discord.Collection<string, Discord.Message>> {
     const msgs = await channel.messages.fetch({ limit: num });
     for await (const [id, msg] of msgs.entries()) {
       if (msg.pinned) msgs.delete(id);

@@ -6,10 +6,10 @@ declare namespace Types {
   export type caseTypes = "BAN" | "KICK" | "MUTE" | "UNBAN" | "UNMUTE" | "WARN";
   export type RGBOptions = [number, number, number];
 
-  export type guildChannels = Discord.GuildChannel | Discord.ThreadChannel;
+  export type guildChannel = Discord.GuildChannel | Discord.ThreadChannel;
   export type caseCollection = Discord.Collection<number, caseData>;
-  export type guildTextChannels = Discord.TextChannel | Discord.ThreadChannel | Discord.NewsChannel;
-  export type anyGuildSetting = string | guildChannels | Discord.Role | null | boolean | caseCollection;
+  export type guildTextChannel = Discord.TextChannel | Discord.ThreadChannel | Discord.NewsChannel;
+  export type anyGuildSetting = string | guildChannel | Discord.Role | null | boolean | caseCollection;
   export type chalkOptions = "bold" | "dim" | "italic" | "underline" | "inverse" | "strikethrough" | "red" | "green" | "yellow" | "blue" | "magenta" | "cyan" | "white" | "gray" | "bgBlack" | "bgRed" | "bgGreen" | "bgYellow" | "bgBlue" | "bgMagenta" | "bgCyan" | "bgWhite";
   export type logDataCollection = Discord.Collection<string, logData>;
   export type commandCategory = Discord.Collection<string, Types.commandData>;
@@ -93,6 +93,12 @@ declare namespace Types {
     arrayBuffers?: number
   }
 
+  export interface componentCollectorOptions {
+    botMessage: Discord.Message,
+    userMessage: Discord.Message,
+    collectorOptions: Discord.MessageComponentCollectorOptions<Discord.MessageComponentInteraction>
+  }
+
   export interface caseData {
     id?: number,
     type: caseTypes,
@@ -100,6 +106,23 @@ declare namespace Types {
     moderator: string,
     reason: string,
     timestamp: number
+  }
+
+  export interface channelHideData {
+    hidden: boolean,
+    locker: string,
+    lockedAt: number
+  }
+
+  export interface channelLockData {
+    locked: boolean,
+    locker: string,
+    lockedAt: number
+  }
+
+  export interface channelData {
+    hide: channelHideData,
+    lock: channelLockData
   }
 
   export interface selectMenuData {

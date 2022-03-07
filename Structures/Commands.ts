@@ -763,7 +763,7 @@ const Commands = {
       minArgs: 1,
       options: [],
       aliases: [],
-      usage: "hide [channel] [reason]",
+      usage: "hide <channel> [reason]",
       category: "Administrator",
       commandName: "hide",
       option: {}
@@ -791,7 +791,7 @@ const Commands = {
       minArgs: 1,
       options: [],
       aliases: [],
-      usage: "lock [channel] [reason]",
+      usage: "lock <channel> [reason]",
       category: "Administrator",
       commandName: "lock",
       option: {}
@@ -986,7 +986,7 @@ const Commands = {
       minArgs: 1,
       options: [],
       aliases: [],
-      usage: "unhide [channel] [reason]",
+      usage: "unhide <channel> [reason]",
       category: "Administrator",
       commandName: "unhide",
       option: {}
@@ -1000,7 +1000,7 @@ const Commands = {
       minArgs: 1,
       options: [],
       aliases: ["un-lock"],
-      usage: "unlock [channel] [reason]",
+      usage: "unlock <channel> [reason]",
       category: "Administrator",
       commandName: "unlock",
       option: {}

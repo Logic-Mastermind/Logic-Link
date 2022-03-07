@@ -14,6 +14,67 @@ import Logger from "../Modules/Logger";
 import Util from "../Structures/Util";
 import Schemas from "../Modules/Schemas";
 import server from "../server";
+import Types from "../Typings/types";
+
+/**
+ * A message collector with advanced functions for custom prompts.
+ * @class Prompt
+ */
+class Prompt {
+  collect: Function;
+  end: Function;
+  command: Types.commandData;
+
+  embeds = new Embeds;
+  functions = new Functions;
+  db = Database
+
+  /**
+   * Sets the class properties that respond to collector events.
+   * @constructor
+   * @param {Options} options - An object containing the names of collector events.
+   * @param {Function} options.collect - The function that responds to the 'collect' event.
+   * @param {Function} options.end - The function that responds to the 'end' event.
+   * @param {Types.commandData} [options.command] - The command that was executed.
+   */
+  constructor(options) {
+    this.collect = options.collect;
+    this.end = options.end;
+    this.command = options.command;
+  }
+
+  /**
+   * Creates a new component collector
+   * @function startComponentCollector
+   * @param {Options} options - An object containing options relating component collectors.
+   * @param {Discord.Message} options.botMessage - The message to start the collector from.
+   * @param {Discord.Message} options.userMessage - The message that the user sent.
+   * @param {Discord.MessageComponentCollectorOptions} [options.collectorOptions] - The options for the component collector.
+   */
+  startComponentCollector(options: Types.componentCollectorOptions) {
+    const collector = options.botMessage.createMessageComponentCollector(options.collectorOptions);
+    collector.on("collect", async (int) => {
+      if (int.user.id !== options.userMessage.author.id) {
+        return int.reply({ embeds: [this.embeds.notComponent()], ephemeral: true });
+      }
+
+      const returned = await this.collect(int);
+      if (returned) return;
+
+      collector.stop("finished");
+      options.botMessage.delete();
+    });
+
+    collector.on("end", async (collected, reason) => {
+      if (collected.size == 0) {
+        options.botMessage.reply({ embeds: [this.embeds.inactivity(this.command || "Prompt")] });
+
+      } else {
+        this.end(collected, reason);
+      }
+    });
+  }
+}
 
 /**
  * An extended discord.js client used for Logic Link.
@@ -125,4 +186,6 @@ export default class LogicLink extends Discord.Client {
     this.login(this.config.token);
     return true;
   }
+
+
 }

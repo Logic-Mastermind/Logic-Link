@@ -13,7 +13,7 @@ export default async function run(client: Types.client, message: Discord.Message
   
   try {
     var role: Discord.Role = message.mentions.roles.first() ;
-    var channel = message.mentions.channels.first() as Types.guildChannels;
+    var channel = message.mentions.channels.first() as Types.guildChannel;
     var seenWarning = client.db.userGlobal.get(message.author.id, "deleteCmdWarning");
 
     if (!role) role =  client.functions.findRole(args.join(" "), message.guild, { safe: true });
@@ -78,7 +78,7 @@ export default async function run(client: Types.client, message: Discord.Message
       const editMsg = await message.reply({ embeds: [pendingEmbed] });
 
       channel.delete()
-      .then((c: Types.guildChannels) => {
+      .then((c: Types.guildChannel) => {
         if (c.id == message.channel.id) return;
         const embed = client.embeds.success(command.option.channel, `Deleted the \`${channel.name}\` channel.`);
 

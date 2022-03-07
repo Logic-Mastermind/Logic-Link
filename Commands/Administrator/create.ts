@@ -46,7 +46,7 @@ export default async function run(client: Types.client, message: Discord.Message
         .catch((error) => {
           const embed = client.embeds.errorInfo(command.option.channel, message, error);
           editMsg.edit({ embeds: [embed] });
-        }) as Types.guildTextChannels;
+        }) as Types.guildTextChannel;
 
         const embed = client.embeds.success(command.option.channel,`Created the <#${chan.id}> channel.`);
         editMsg.edit({ embeds: [embed] });
