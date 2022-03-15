@@ -5,7 +5,7 @@
   "description": "Logic Link is a powerful utility/moderation bot with advanced customization and automation options.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node index"
+    "start": "ts-node ./src/index"
   },
   "keywords": [],
   "author": "Logic-Mastermind",
@@ -31,7 +31,8 @@
   },
   "devDependencies": {
     "@types/node": "^17.0.6",
-    "node": "^16.13.2"
+    "node": "^16.13.2",
+    "prisma": "^3.10.0"
   },
   "repository": {
     "type": "git",

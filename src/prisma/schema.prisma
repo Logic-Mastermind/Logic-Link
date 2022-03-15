@@ -1,0 +1,32 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Guild {
+  id               String   @id @map("_id")       /// The guild Id.
+  prefix           String   @unique @default(">") /// The prefix of the guild.
+  modRole          String   @unique               /// The moderator role Id
+  adminRole        String   @unique               /// The admin role Id
+  logChannel       String   @unique               /// The log channel Id
+  mutedRole        String   @unique               /// The muted role Id
+
+  mutedRoleConfig  String   @unique               /// A role Id for a role which was set up successfully.
+  welcomeSystem    Json                           /// Welcome system settings
+  panelSetup       Boolean  @default(false)
+  cases            Json
+}
+
+// type welcomeSystem {
+//   enabled Boolean @default(false)
+//   channel String?
+//   message String?
+//   role String?
+// }
