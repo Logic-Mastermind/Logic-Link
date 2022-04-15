@@ -2,7 +2,7 @@ import Discord, { Intents } from "discord.js";
 import Client from "../Models/Client";
 
 declare namespace Types {
-  export type embedColors = "RED" | "GREEN" | "BLUE" | "ORANGE" | "DEFAULT";
+  export type embedColors = "RED" | "GREEN" | "BLUE" | "ORANGE" | "DEFAULT" | string | number;
   export type caseTypes = "BAN" | "KICK" | "MUTE" | "UNBAN" | "UNMUTE" | "WARN";
   export type RGBOptions = [number, number, number];
 
@@ -68,12 +68,12 @@ declare namespace Types {
   }
 
   export interface caseFilter {
-    type: caseTypes,
-    user: string,
-    moderator: string,
-    reason: string,
-    timestamp: number
-    when: "BEFORE" | "AFTER"
+    type?: caseTypes,
+    user?: string,
+    moderator?: string,
+    reason?: string,
+    timestamp?: number
+    when?: "BEFORE" | "AFTER"
   }
 
   export interface extraObject {
@@ -91,12 +91,6 @@ declare namespace Types {
     heapUsed?: number,
     external?: number,
     arrayBuffers?: number
-  }
-
-  export interface componentCollectorOptions {
-    botMessage: Discord.Message,
-    userMessage: Discord.Message,
-    collectorOptions: Discord.MessageComponentCollectorOptions<Discord.MessageComponentInteraction>
   }
 
   export interface caseData {
@@ -158,7 +152,7 @@ declare namespace Types {
     description: string,
     color?: embedColors,
     footer?: [string, string],
-    timestamp?: number | null | Date,
+    timestamp?: number,
     image?: string,
     thumbnail?: string,
     fields?: fieldData[]
@@ -188,6 +182,75 @@ declare namespace Types {
     }
   }
 
+  export interface ticketPanel {
+    name?: string,
+    opened?: string,
+    closed?: string,
+    ticket?: string,
+    claiming?: boolean,
+    channel?: string,
+    support?: string[],
+    additional?: string[]
+  }
+
+  export interface collectorConstructorOptions {
+    botMessage?: Discord.Message,
+    userMessage: Discord.Message,
+    channel?: Discord.TextChannel,
+    command?: Types.commandData
+  }
+
+  export interface promptQuestion {
+    title: string,
+    question: string,
+    description: string
+  }
+
+  export interface promptData {
+    [key: string]: promptQuestion
+  }
+
+  export interface messageCollectorOptions {
+    collect: (msg: Discord.Message, args: {
+      collector: Discord.MessageCollector,
+      current: number,
+      next: Function,
+      msgArgs: string[],
+      embed: (type: "success" | "error", description: string, originalQuestion?: boolean | fieldData[]) => void,
+      lastMessage: Discord.Message
+    }) => 1 | 0,
+    end: (collected: Discord.Collection<string, Discord.Message>, result: string, args: {
+      collector: Discord.MessageCollector,
+      lastMessage: Discord.Message,
+      question: promptQuestion
+    }) => any,
+    promptData?: {
+      info: promptData,
+      embeds: Discord.MessageEmbed[]
+    }
+    collectorOptions?: Discord.CollectorOptions<[Discord.Message<boolean>]>
+  }
+
+  export interface componentCollectorOptions {
+    collect: (int: Discord.Interaction, args: {
+      collector: Discord.InteractionCollector<Discord.MessageComponentInteraction>,
+      current: number,
+      next: Function,
+      embed: (type: "success" | "error", description: string, originalQuestion?: boolean | fieldData[]) => void,
+      lastMessage: Discord.Message
+    }) => 1 | 0,
+    end: (collected: Discord.Collection<string, Discord.Message>, result: string, args: {
+      collector: Discord.InteractionCollector<Discord.MessageComponentInteraction>,
+      lastMessage: Discord.Message,
+      question: promptQuestion
+    }) => any,
+    promptData?: {
+      info: promptData,
+      embeds: Discord.MessageEmbed[]
+    }
+    collectorOptions?: Discord.InteractionCollectorOptions<Discord.Interaction>
+  }
+
   export interface guildSettings {
     prefix: string,
     modRole: string,
@@ -199,7 +262,6 @@ declare namespace Types {
     mutedRole: string,
     welcomeSystem: boolean,
     mutedRoleConfig: boolean,
-    panelSetup: boolean,
     cases: Discord.Collection<number, caseData>,
 
     modRoleObj: Discord.Role,
@@ -252,17 +314,17 @@ declare namespace Types {
     support: string[],
     additional: string[],
     channel: string,
-    createdAt: string,
+    createdAt: number,
     createdBy: string,
     tickets: Discord.Collection<number, ticketData>,
     totalTicketCount: number,
     ticketLimit: number,
-    claimed: string,
-    ticket: string,
+    claimedFormat: string,
+    ticketFormat: string,
     panelMessage: string | null,
     ticketMessage: string | null,
     id: number,
-    msg: string
+    createdMessage: string
   }
 
   export interface ticketData {

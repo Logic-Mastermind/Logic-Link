@@ -5,8 +5,6 @@ export default async function run(client: Types.client, message: Discord.Message
   
   const clientMember = message.guild.me;
   const guildPrefix = client.functions.fetchPrefix(message.guild);
-  
-  const noArgs = client.functions.getNoArgs(command, message.guild);
   const { secArg, thirdArg, fourthArg, fifthArg } = client.functions.getArgs(args);
   const code = `\`\`\``;
   const responses = {};
@@ -483,7 +481,7 @@ export default async function run(client: Types.client, message: Discord.Message
           const row = client.components.actionRow(confirm, cancel);
 
           const msg = await message.reply({ embeds: [embed], components: [row] });
-          const prompt = new client.prompts(message, command);
+          const prompt = new client.prompt(message, command);
           //prompt.resetSettings();
 
           break;

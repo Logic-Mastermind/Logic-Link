@@ -5,8 +5,6 @@ export default async function run(client: Types.client, message: Discord.Message
   
   const clientMember = message.guild.me;
   const guildPrefix = client.functions.fetchPrefix(message.guild);
-  
-  const noArgs = client.functions.getNoArgs(command, message.guild);
   const { secArg, thirdArg, fourthArg, fifthArg } = client.functions.getArgs(args);
   const code = `\`\`\``;
   const responses = {};
@@ -20,7 +18,7 @@ export default async function run(client: Types.client, message: Discord.Message
     if (!channel) channel = client.functions.findChannel(args.join(" "), message.guild, { safe: true });
 
     if (!seenWarning) {
-      const prompt = new client.prompts(message, command);
+      const prompt = new client.prompt(message, command);
       return prompt.deleteConfirmation();
     }
 
@@ -93,7 +91,7 @@ export default async function run(client: Types.client, message: Discord.Message
     if (role && channel) {
       const embed = client.embeds.warn(command, `Both a role and channel have been found, which one would you like to delete?`, [{
         name: "Detailed Info",
-        value: `${client.util.emojis.moderator} Role: <@&${role.id}>\n${client.util.emojis.channel} Channel: <#${channel.id}>`,
+        value: `${client.util.emojis.roleIcon} Role: <@&${role.id}>\n${client.util.emojis.channel} Channel: <#${channel.id}>`,
         inline: false
       }]);
 

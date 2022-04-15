@@ -1,8 +1,5 @@
 import Discord from "discord.js";
-import clearMod from "clear-module";
 import client from "../index";
-import Chalk from "chalk";
-import FS from "fs";
 
 /**
  * A class with methods that standardize specific functions.
@@ -20,8 +17,18 @@ import FS from "fs";
     if (client) this.client = client;
   }
   
-  async sendPanel(panel, tsettings, guildId) {
+  /**
+   * @async
+   * @function sendPanel
+   * @param {number} panelId - ID of the panel.
+   * @param {string} guildId - Guild that the panel is in.
+   * @returns {Promise<string|boolean>}
+   */
+  async sendPanel(panelId: number, guildId: string) {
+    const panels = client.functions.getTicketData(guildId).panels;
+    const panel = panels.get(panelId);
     const channel = client.channels.cache.get(panel.channel) as Discord.TextChannel;
+
     const embed = client.embeds.blue(panel.name, `${client.util.emojis.check} To create a ticket, click on the button below.`, [{
       name: "Additional Info",
       value: `Clicking the button below will create a ticket for this panel.\nPlease remember to adhere to this server's rules within the ticket.`,
@@ -31,10 +38,9 @@ import FS from "fs";
     const button = client.components.button({ label: "Create Ticket", id: `Ticket_Create:${panel.id}`, style: "SUCCESS", emoji: "📩" });
     const row = client.components.actionRow(button);
 
-    if (!channel.permissionsFor(channel.guild.me).has("SEND_MESSAGES")) return false;
+    if (!channel.permissionsFor(channel.guild.me).has("SEND_MESSAGES")) return "SEND_MESSAGES";
     const msg = await channel.send({ embeds: [embed], components: [row] });
-    const panels = tsettings.panels;
-    panel.msg = msg.id;
+    panel.createdMessage = msg.id;
     
     panels.set(panel.id, panel);
     client.db.tickets.set(guildId, panels, "panels");

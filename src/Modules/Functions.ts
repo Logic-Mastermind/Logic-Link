@@ -595,6 +595,7 @@ export default class Functions {
     settingsObj.welcomeChannelObj = guild.channels.cache.get(settingsObj.welcomeChannel);
     settingsObj.welcomeRoleObj = guild.roles.cache.get(settingsObj.welcomeRole);
     settingsObj.mutedRoleObj = guild.roles.cache.get(settingsObj.mutedRole);
+    settingsObj.cases = new Discord.Collection(settings.cases);
     
     if (setting) return settingsObj[setting];
     return settingsObj;
@@ -958,21 +959,18 @@ export default class Functions {
   /**
    * Gets a member's permissions and converts them into an array of formatted strings.
    * @function getPermissions
-   * @param {Discord.GuildMember} member - The member to get the permissions from.
+   * @param {Discord.GuildMember | Discord.Role} object - The member to get the permissions from.
    * @returns {string[]} The formatted permissions of the member.
    */
-  getPermissions(member: Discord.GuildMember): string[] {
-    const permissions = member.permissions.toArray() as string[];
+  getPermissions(object: Discord.GuildMember | Discord.Role): string[] {
+    const permissions = object.permissions.toArray() as string[];
     const newPerms = [];
 
     if (permissions.includes("ADMINISTRATOR")) return ["Administrator"];
     for (let perm of permissions) {
       if (client.util.permissions.keyPerms.includes(perm)) {
-        //@ts-ignore
-        perm.replaceAll("_", " ");
-        perm = perm.toLowerCase();
-
-        newPerms.push(this.upperFirstAll(perm));
+        perm = perm.replaceAll("_", " ");
+        newPerms.push(this.upperFirstAll(perm.toLowerCase()));
       }
     }
 

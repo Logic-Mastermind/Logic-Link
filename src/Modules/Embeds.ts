@@ -6,12 +6,74 @@ import ms from "ms";
 const code = "```"
 const text = `Logic Link - Imagine A World`;
 const iconURL = `https://cdn.discordapp.com/emojis/775848533298905130.png?v=1`;
-const { MessageEmbed } = Discord;
 
 const check = "<:Check:867931890437476353>";
 const question = "<:IconSupport:868117797429997578>";
 const error = "<:MessageFail:868113159737720912>";
 const warn = "<:Warn:868113114221121586>";
+
+/**
+ * A custom message embed class which eliminates text limit errors by con
+ * @class Embed
+ */
+class Embed extends Discord.MessageEmbed {
+
+  /**
+   * Creates a new Discord.MessageEmbed().
+   * @constructor
+   * @param {Types.embedData} data - The embed data.
+   */
+  constructor(data?: Types.embedData) {
+    if (data) {
+      if (data.title?.length > 256) data.title = data.title.substring(0, 253) + "...";
+      if (data.description.length > 4096) data.description = data.description.substring(0, 4093) + "...";
+
+      if (data.fields) {
+        data.fields.forEach((field, i, a) => {
+          if (field.name.length > 256) field.name = field.name.substring(0,  253) + "...";
+          if (field.value.length > 1024) field.value = field.value.substring(0, 1021) + "...";
+
+          a.splice(i, 1, field);
+        })
+      }
+    }
+
+    //@ts-ignore
+    super(data);
+  } 
+
+  public setTitle(title: string): this {
+    if (title.length > 256) title = title.substring(0, 253) + "...";
+    super.setTitle(title);
+    return this;
+  }
+
+  public setDescription(description: string): this {
+    if (description.length > 4096) description = description.substring(0, 4093) + "...";
+    super.setDescription(description);
+    return this;
+  }
+
+  public addFields(fields: Discord.EmbedFieldData[]): this {
+    fields.forEach((field, i, a) => {
+      if (field.name.length > 256) field.name = field.name.substring(0,  253) + "...";
+      if (field.value.length > 1024) field.value = field.value.substring(0, 1021) + "...";
+
+      a.splice(i, 1, field);
+    })
+
+    super.addFields(fields);
+    return this;
+  }
+
+  public addField(name: string, value: string, inline?: boolean): this {
+    if (name.length > 256) name = name.substring(0,  253) + "...";
+    if (value.length > 1024) value = value.substring(0, 1021) + "...";
+
+    super.addField(name, value);
+    return this;
+  }
+}
 
 /**
  * A class with methods that return discord.js MessageEmbeds
@@ -43,21 +105,21 @@ export default class Embeds {
    * @param {Types.fieldData[]} [data.fields] - The fields for the embed.
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  new(data: Types.embedData): Discord.MessageEmbed {
-    const { title, description, color, footer, timestamp, image, thumbnail, fields } = data;
-    const embed = new MessageEmbed();
-    embed.setDescription(description);
-    embed.setColor(color || "BLUE");
+  new(data?: Types.embedData): Discord.MessageEmbed {
+    if (!data) return new Embed();
+
+    const embed = new Embed();
+    embed.setDescription(data.description);
+    embed.setColor(data.color as "" || "BLUE");
     embed.setTimestamp(null);
 
+    if (data.title) embed.setTitle(data.title);
+    if (data.timestamp != null) embed.setTimestamp(data.timestamp);
+    if (data.image) embed.setImage(data.image);
+    if (data.thumbnail) embed.setThumbnail(data.thumbnail);
+    if (data.fields) embed.addFields(data.fields);
 
-    if (title) embed.setTitle(title);
-    if (timestamp != null) embed.setTimestamp(timestamp);
-    if (image) embed.setImage(image);
-    if (thumbnail) embed.setThumbnail(thumbnail);
-    if (fields) embed.addFields(fields);
-
-    if (footer) embed.setFooter({ text: footer[0], iconURL: footer[1] });
+    if (data.footer) embed.setFooter({ text: data.footer[0], iconURL: data.footer[1] });
     else embed.setFooter({ text, iconURL });
     return embed;
   }
@@ -76,15 +138,12 @@ export default class Embeds {
     
     const description = `${msg || `You do not have the required permissions to execute ${typeof cmd == "object" && !Array.isArray(cmd) ? `the \`${cmd.commandName}\` command.` : `this`}`}\nTo execute this command, you will need to be granted the permission${permissions.length == 1 ? `` : `s`} below.`;
 
-    const embed = new MessageEmbed();
-    embed.setTitle(`Insufficient Permissions`);
-    embed.setDescription(description);
-    embed.setColor(`RED`);
-    embed.addField("Command Permissions", `${code}${permissions.join(" | ")}${code}`);
-    embed.setFooter({ text, iconURL });
-    embed.setTimestamp();
-
-    return embed;
+    return this.new({
+      title: "Insufficient Permissions",
+      fields: [{ name: "Command Permissions", value:  `${code}${permissions.join(" | ")}${code}` }],
+      color: "RED",
+      description
+    });
   }
 
   /**
@@ -101,15 +160,12 @@ export default class Embeds {
     
     const description = `${msg || `I do not have the required permissions to execute ${typeof cmd == "object" && !Array.isArray(cmd) ? `the \`${cmd.commandName}\` command.` : `this`}`}\nTo execute this command, I will need to be granted the permission${permissions.length == 1 ? `` : `s`} below.`;
 
-    const embed = new MessageEmbed();
-    embed.setTitle(`Insufficient Permissions`);
-    embed.setDescription(description);
-    embed.setColor(`RED`);
-    embed.addField("Command Permissions", `${code}${permissions.join(" | ")}${code}`);
-    embed.setFooter({ text, iconURL });
-    embed.setTimestamp();
-
-    return embed;
+    return this.new({
+      title: "Insufficient Permissions",
+      fields: [{ name: "Command Permissions", value:  `${code}${permissions.join(" | ")}${code}` }],
+      color: "RED",
+      description
+    });
   }
 
   /**
@@ -120,14 +176,11 @@ export default class Embeds {
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
   pending(command: Types.commandData | string, msg?: string): Discord.MessageEmbed {
-    const title = typeof command == "object" ? command.name : command;
-    const embed = new MessageEmbed();
-
-    embed.setTitle(title);
-    embed.setColor(`BLUE`);
-    embed.setDescription(`${client.util.emojis.clock} ${msg || `Loading...`} ${client.util.emojis.pending}`);
-    embed.setFooter({ text, iconURL });
-    embed.setTimestamp();
+    const embed = this.new({
+      title: typeof command == "object" ? command.name : command,
+      description: `${client.util.emojis.clock} ${msg || `Loading...`} ${client.util.emojis.pending}`,
+      color: "BLUE"
+    });
 
     return embed;
   }
@@ -141,17 +194,12 @@ export default class Embeds {
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
   success(command: Types.commandData | string, description: string, fields?: Types.fieldData[]): Discord.MessageEmbed {
-    const title = typeof command == "object" ? command.name : command;
-    const embed = new MessageEmbed();
-
-    embed.setTitle(title);
-    embed.setColor(`GREEN`);
-    embed.setDescription(`${check} ${description}`);
-    embed.setFooter({ text, iconURL });
-    embed.setTimestamp();
-
-    if (fields) if (fields[0]) embed.addFields(fields);
-    return embed;
+    return this.new({
+      title: typeof command == "object" ? command.name : command,
+      color: "GREEN",
+      fields: fields || [],
+      description: `${check} ${description}`
+    });
   }
 
   /**
@@ -163,17 +211,12 @@ export default class Embeds {
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
   green(command: Types.commandData | string, description: string, fields?: Types.fieldData[]): Discord.MessageEmbed {
-    const title = typeof command == "object" ? command.name : command;
-    const embed = new MessageEmbed();
-
-    embed.setTitle(title);
-    embed.setColor(`GREEN`);
-    embed.setDescription(description);
-    embed.setFooter({ text, iconURL });
-    embed.setTimestamp();
-
-    if (fields) if (fields[0]) embed.addFields(fields);
-    return embed;
+    return this.new({
+      title: typeof command == "object" ? command.name : command,
+      color: "GREEN",
+      fields: fields || [],
+      description: `${description}`
+    });
   }
 
   /**
@@ -185,17 +228,12 @@ export default class Embeds {
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
   warn(command: Types.commandData | string, description: string, fields?: Types.fieldData[]): Discord.MessageEmbed {
-    const title = typeof command == "object" ? command.name : command;
-    const embed = new MessageEmbed();
-
-    embed.setTitle(title);
-    embed.setColor(`#f9a61a`);
-    embed.setDescription(`${warn} ${description}`);
-    embed.setFooter({ text, iconURL });
-    embed.setTimestamp();
-
-    if (fields) if (fields[0]) embed.addFields(fields);
-    return embed;
+    return this.new({
+      title: typeof command == "object" ? command.name : command,
+      color: "#f9a61a",
+      fields: fields || [],
+      description: `${warn} ${description}`
+    });
   }
 
   /**
@@ -207,17 +245,12 @@ export default class Embeds {
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
   orange(command: Types.commandData | string, description: string, fields?: Types.fieldData[]): Discord.MessageEmbed {
-    const title = typeof command == "object" ? command.name : command;
-    const embed = new MessageEmbed();
-
-    embed.setTitle(title);
-    embed.setColor(`#f9a61a`);
-    embed.setDescription(description);
-    embed.setFooter({ text, iconURL });
-    embed.setTimestamp();
-
-    if (fields) if (fields[0]) embed.addFields(fields);
-    return embed;
+    return this.new({
+      title: typeof command == "object" ? command.name : command,
+      color: "#f9a61a",
+      fields: fields || [],
+      description: `${description}`
+    });
   }
 
   /**
@@ -229,17 +262,12 @@ export default class Embeds {
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
   error(command: Types.commandData | string, description: string, fields?: Types.fieldData[]): Discord.MessageEmbed {
-    const title = typeof command == "object" ? command.name : command;
-    const embed = new MessageEmbed();
-
-    embed.setTitle(title);
-    embed.setColor(`RED`);
-    embed.setDescription(`${error} ${description}`);
-    embed.setFooter({ text, iconURL });
-    embed.setTimestamp();
-
-    if (fields) if (fields[0]) embed.addFields(fields);
-    return embed;
+    return this.new({
+      title: typeof command == "object" ? command.name : command,
+      color: "RED",
+      fields: fields || [],
+      description: `${error} ${description}`
+    });
   }
 
   /**
@@ -251,17 +279,26 @@ export default class Embeds {
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
   red(command: Types.commandData | string, description: string, fields?: Types.fieldData[]): Discord.MessageEmbed {
-    const title = typeof command == "object" ? command.name : command;
-    const embed = new MessageEmbed();
+    return this.new({
+      title: typeof command == "object" ? command.name : command,
+      color: "RED",
+      fields: fields || [],
+      description: `${description}`
+    });
+  }
 
-    embed.setTitle(title);
-    embed.setColor(`RED`);
-    embed.setDescription(description);
-    embed.setFooter({ text, iconURL });
-    embed.setTimestamp();
-
-    if (fields) if (fields[0]) embed.addFields(fields);
-    return embed;
+  /**
+   * Creates a pre-defined discord.js MessageEmbed and replaces some values.
+   * @function inactivity
+   * @param {command|string} command - The command this function is executing from.
+   * @returns {Discord.MessageEmbed} The embed that was created.
+   */
+   inactivity(command: Types.commandData | string): Discord.MessageEmbed {
+    return this.new({
+      title: typeof command == "object" ? command.name : command,
+      color: "RED",
+      description: `${error} This prompt has timed out due to inactivity.`
+    });
   }
 
   /**
@@ -273,17 +310,12 @@ export default class Embeds {
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
   question(command: Types.commandData | string, description: string, fields?: Types.fieldData[]): Discord.MessageEmbed {
-    const title = typeof command == "object" ? command.name : command;
-    const embed = new MessageEmbed();
-
-    embed.setTitle(title);
-    embed.setColor(`BLUE`);
-    embed.setDescription(`${question} ${description}`);
-    embed.setFooter({ text, iconURL });
-    embed.setTimestamp();
-
-    if (fields) if (fields[0]) embed.addFields(fields);
-    return embed;
+    return this.new({
+      title: typeof command == "object" ? command.name : command,
+      color: "BLUE",
+      fields: fields || [],
+      description: `${question} ${description}`
+    });
   }
 
   /**
@@ -295,17 +327,12 @@ export default class Embeds {
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
   blue(command: Types.commandData | string, description: string, fields?: Types.fieldData[]): Discord.MessageEmbed {
-    const title = typeof command == "object" ? command.name : command;
-    const embed = new MessageEmbed();
-
-    embed.setTitle(title);
-    embed.setColor(`BLUE`);
-    embed.setDescription(description);
-    embed.setFooter({ text, iconURL });
-    embed.setTimestamp();
-
-    if (fields) if (fields[0]) embed.addFields(fields);
-    return embed;
+    return this.new({
+      title: typeof command == "object" ? command.name : command,
+      color: "BLUE",
+      fields: fields || [],
+      description: `${description}`
+    });
   }
 
   /**
@@ -317,38 +344,16 @@ export default class Embeds {
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
   settingsNoArgs(command: Types.commandData, description: string, prefix: string): Discord.MessageEmbed {
-    const title = typeof command == "object" ? command.name : command;
-    const embed = new MessageEmbed();
-
-    embed.setTitle(title);
-    embed.setColor(`BLUE`);
-    embed.setDescription(`${command.description}\n\u200b`);
-    embed.addField("Current Setting", `${description}\n\u200b`);
-    embed.addField("Usage", `${code}${prefix}${command.usage}${code}\u200b`);
-    embed.addField("Usage Error", `You are missing required parameters needed to carry out this command.\nTo get more information, run: \`${prefix}help ${command.commandName}\`.`);
-    embed.setFooter({ text, iconURL });
-    embed.setTimestamp();
-
-    return embed;
-  }
-
-  /**
-   * Creates a pre-defined discord.js MessageEmbed and replaces some values.
-   * @function inactivity
-   * @param {command|string} command - The command this function is executing from.
-   * @returns {Discord.MessageEmbed} The embed that was created.
-   */
-  inactivity(command: Types.commandData | string): Discord.MessageEmbed {
-    const title = typeof command == "object" ? command.name : command;
-    const embed = new MessageEmbed();
-
-    embed.setTitle(title);
-    embed.setColor(`RED`);
-    embed.setDescription(`${error} This prompt has timed out due to inactivity.`);
-    embed.setFooter({ text, iconURL });
-    embed.setTimestamp();
-
-    return embed;
+    return this.new({
+      title: typeof command == "object" ? command.name : command,
+      color: "BLUE",
+      description: `${command.description}\n\u200b`,
+      fields: [
+        { name: "Current Setting", value: `${description}\n\u200b` },
+        { name: "Usage", value: `${code}${prefix}${command.usage}${code}\u200b` },
+        { name: "Usage Error", value: `You are missing required parameters needed to carry out this command.\nTo get more information, run: \`${prefix}help ${command.commandName}\`.` },
+      ]
+    });
   }
 
   /**
@@ -357,14 +362,11 @@ export default class Embeds {
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
   notComponent() {
-    const embed = new MessageEmbed();
-    embed.setTitle("Message Component");
-    embed.setColor(`RED`);
-    embed.setDescription(`${error} This is not your message component.`);
-    embed.setFooter({ text, iconURL });
-    embed.setTimestamp();
-
-    return embed;
+    return this.new({
+      title: "Message Component",
+      description: `${error} This is not your message component.`,
+      color: "RED"
+    });
   }
 
   /**
@@ -375,24 +377,19 @@ export default class Embeds {
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
   helpMenu(command: Types.commandData, prefix: string): Discord.MessageEmbed {
-    const fields = [
-      { name: `Permissions`, value: `${command.permissions.includes("ALL") ? `${client.util.messages.noPerms}` : `${command.category == "Developer" ? `Locked to bot developer.` : `\`${command.permissions.join(" | ")}\``}`}`, inline: true },
-      { name: `Bot Permissions`, value: `${command.clientPerms ? command.clientPerms[0] ? `\`${command.clientPerms.join(" | ")}\`` : client.util.messages.noPerms : client.util.messages.noPerms}`, inline: true },
-      { name: `\u200b`, value: `\u200b`, inline: true },
-      { name: `Aliases`, value: `${command.aliases[0] ? `\`${command.aliases.join("\`\n\`")}\`` : client.util.messages.noAlias}`, inline: true },
-      { name: `Options`, value: `${command.options[0] ? `\`${command.options.join("\`\n\`")}\`` : client.util.messages.noOption}`, inline: true },
-      { name: `\u200b`, value: `\u200b`, inline: true },
-    ]
-    
-    const embed = new MessageEmbed();
-    embed.setTitle(`Help - ${command.name}`);
-    embed.setColor(`BLUE`);
-    embed.setDescription(`${command.description}\n\n**Usage**\n${code}\n${prefix}${command.usage}${code}\n**Cooldown**\n${command.cooldown == 0 ? `${client.util.messages.noCooldown}` : `${ms(command.cooldown * 1000, { long: true })} cooldown.`}`);
-    embed.addFields(fields);
-    embed.setFooter({ text, iconURL });
-    embed.setTimestamp();
-
-    return embed;
+    return this.new({
+      title: `Help - ${command.name}`,
+      color: "BLUE",
+      description: `${command.description}\n\n**Usage**\n${code}\n${prefix}${command.usage}${code}\n**Cooldown**\n${command.cooldown == 0 ? `${client.util.messages.noCooldown}` : `${ms(command.cooldown * 1000, { long: true })} cooldown.`}`,
+      fields: [
+        { name: `Permissions`, value: `${command.permissions.includes("ALL") ? `${client.util.messages.noPerms}` : `${command.category == "Developer" ? `Locked to bot developer.` : `\`${command.permissions.join(" | ")}\``}`}`, inline: true },
+        { name: `Bot Permissions`, value: `${command.clientPerms ? command.clientPerms[0] ? `\`${command.clientPerms.join(" | ")}\`` : client.util.messages.noPerms : client.util.messages.noPerms}`, inline: true },
+        { name: `\u200b`, value: `\u200b`, inline: true },
+        { name: `Aliases`, value: `${command.aliases[0] ? `\`${command.aliases.join("\`\n\`")}\`` : client.util.messages.noAlias}`, inline: true },
+        { name: `Options`, value: `${command.options[0] ? `\`${command.options.join("\`\n\`")}\`` : client.util.messages.noOption}`, inline: true },
+        { name: `\u200b`, value: `\u200b`, inline: true },
+      ]
+    });
   }
 
   /**
@@ -404,23 +401,20 @@ export default class Embeds {
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
   invalidItem(command: Types.commandData | string, items: string[], args: string[]): Discord.MessageEmbed {
-    const title = typeof command == "object" ? command.name : command;
     const fieldArgs = [];
-
     for (const [key, arg] of Object.entries(args)) {
       const string = `\`${arg}\` is not a valid ${items[key]}.`;
       fieldArgs.push(string);
     }
 
-    const embed = new MessageEmbed();
-    embed.setTitle(title);
-    embed.setColor(`RED`);
-    embed.setDescription(`${error} I could not record any ${items.map(i => i + "s").join(" or ")} from your message.`);
-    embed.addField("Detailed Info", fieldArgs.join("\n"));
-    embed.setFooter({ text, iconURL });
-    embed.setTimestamp();
-
-    return embed;
+    return this.new({
+      title: typeof command == "object" ? command.name : command,
+      color: "RED",
+      description: `${error} I could not record any ${items.map(i => i + "s").join(" or ")} from your message.`,
+      fields: [
+        { name: "Detailed Info", value: fieldArgs.join("\n") }
+      ]
+    });
   }
 
   /**
@@ -432,17 +426,12 @@ export default class Embeds {
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
   detailed(command: Types.commandData | string, content: string, ...fields: string[]): Discord.MessageEmbed {
-    const title = typeof command == "object" ? command.name : command;
-    const embed = new MessageEmbed();
-
-    embed.setTitle(title);
-    embed.setColor(`RED`);
-    embed.setDescription(`${error} ${content}`);
-    embed.setFooter({ text, iconURL });
-    embed.setTimestamp();
-
-    if (fields) embed.addField("Detailed Info", fields.join("\n"));
-    return embed;
+    return this.new({
+      title: typeof command == "object" ? command.name : command,
+      color: "RED",
+      description: `${error} ${content}`,
+      fields: fields ? [{ name: "Detailed Info", value: fields.join("\n") }] : []
+    });
   }
 
   /**
@@ -454,9 +443,9 @@ export default class Embeds {
    * @param {number} [duration] - The duration for the action.
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
-  moderated(action: string, guild: Discord.Guild | string, reason: string, duration?: number): Discord.MessageEmbed {
+  moderated(action: Types.caseTypes, guild: Discord.Guild | string, reason: string, duration?: number): Discord.MessageEmbed {
     let guildName = typeof guild == "object" ? guild.name : guild;
-    let parsed: string;
+    let parsed: string = "";
 
     if (action == "BAN") parsed = "Banned";
     else if (action == "KICK") parsed = "Kicked";
@@ -495,9 +484,7 @@ export default class Embeds {
       cmdArray.push({ name: "\u200b", value: `\u200b`, inline: true });
     }
 
-    const helpEmbed = this.blue(`Help - ${name}`, `${description}\n\n**Command List**\nBelow shows a list of all ${name.toLowerCase()} commands.\nTo get more details about a particular command, run: \`${info.guildPrefix}help [command]\`.\nIf you would like a detailed guide on the help menu, run \`${info.guildPrefix}help guide\`.\n\n${code}${name} Commands${code}\u200b${name == "Ticket" ? info.noPanels : ``}`, cmdArray);
-
-    return helpEmbed;
+    return this.blue(`Help - ${name}`, `${description}\n\n**Command List**\nBelow shows a list of all ${name.toLowerCase()} commands.\nTo get more details about a particular command, run: \`${info.guildPrefix}help [command]\`.\nIf you would like a detailed guide on the help menu, run \`${info.guildPrefix}help guide\`.\n\n${code}${name} Commands${code}\u200b${name == "Ticket" ? info.noPanels : ``}`, cmdArray);
   }
 
   /**
@@ -509,13 +496,11 @@ export default class Embeds {
    * @returns {Discord.MessageEmbed} The embed that was created.
    */
   itemInfo(command: Types.commandData | string, item: string, data: Types.empty): Discord.MessageEmbed {
-    const title = typeof command == "object" ? command.name : command;
-    const embed = new MessageEmbed();
-
-    embed.setTitle(title);
-    embed.setColor("GREEN");
-    embed.setFooter({ text, iconURL });
-    embed.setTimestamp();
+    const embed = this.new({
+      title: typeof command == "object" ? command.name : command,
+      description: "",
+      color: "GREEN",
+    });
 
     if (item == "user") {
       embed.addFields([
@@ -655,7 +640,7 @@ export default class Embeds {
     const cmdName = command.commandName;
     const parentCmd = command.option ? `` : command.usage.split(" ")[0] + " ";
 
-    const embed = this.new({
+    return this.new({
       title: command.name,
       description: `${command.description}\n\u200b`,
       color: "ORANGE",
@@ -677,8 +662,6 @@ export default class Embeds {
           value: `You are missing required parameters needed to carry out this command.\nTo get more information, run \`${prefix}help ${parentCmd}${command.commandName}\`.`
         }
       ]
-    })
-    
-    return embed;
+    });
   }
 }

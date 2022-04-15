@@ -6,8 +6,6 @@ export default async function run(client: Types.client, message: Discord.Message
   
   const clientMember = message.guild.me;
   const guildPrefix = client.functions.fetchPrefix(message.guild);
-  
-  const noArgs = client.functions.getNoArgs(command, message.guild);
   const { secArg, thirdArg, fourthArg, fifthArg } = client.functions.getArgs(args);
   const code = `\`\`\``;
   const responses = {};
@@ -65,7 +63,7 @@ export default async function run(client: Types.client, message: Discord.Message
     } catch (error) {
       const embed = client.embeds.error(command, `An error has occured whilst trying to execute that evaluation.\n\u200b`, [
         { name: "Code Executed", value: `${code}js\n${execCode}${code}\u200b`, inline: false },
-        { name: "Error Stack", value: `${code}${error.stack}${code}`, inline: false }
+        { name: "Error Stack", value: `${code}${error.stack.substring(0, 1000)}${error.stack.length > 1024 ? "..." : ""}${code}`, inline: false }
       ]);
 
       message.reply({ embeds: [embed] });

@@ -5,8 +5,6 @@ export default async function run(client: Types.client, message: Discord.Message
   
   const clientMember = message.guild.me;
   const guildPrefix = client.functions.fetchPrefix(message.guild);
-  
-  const noArgs = client.functions.getNoArgs(command, message.guild);
   const { secArg, thirdArg, fourthArg, fifthArg } = client.functions.getArgs(args);
   const code = `\`\`\``;
   const responses = {};
@@ -56,7 +54,7 @@ export default async function run(client: Types.client, message: Discord.Message
           return message.reply({ embeds: [embed] });
         }
 
-        const embed = client.embeds.blue(command, `Showing info for the log with ID: \`${secArg}\`.\n\n${client.util.emojis.category} Type: \`${logData.type}\`\n${logData.user ? `${client.util.emojis.moderator} User: <@${logData.user}>\n` : ``}${client.util.emojis.clock} Date: <t:${Math.round(logData.timestamp / 1000)}:R>\n${client.util.emojis.message} Content: ${logData.content}${logData.details ? `\n\n**Log Details**\n${client.util.emojis.reply}${logData.details.join(`\n${client.util.emojis.reply}`)}` : ``}`);
+        const embed = client.embeds.blue(command, `Showing info for the log with ID: \`${secArg}\`.\n\n${client.util.emojis.category} Type: \`${logData.type}\`\n${logData.user ? `${client.util.emojis.roleIcon} User: <@${logData.user}>\n` : ``}${client.util.emojis.clock} Date: <t:${Math.round(logData.timestamp / 1000)}:R>\n${client.util.emojis.message} Content: ${logData.content}${logData.details ? `\n\n**Log Details**\n${client.util.emojis.reply}${logData.details.join(`\n${client.util.emojis.reply}`)}` : ``}`);
         return message.reply({ embeds: [embed] });
 
       } else {
