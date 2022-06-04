@@ -481,8 +481,7 @@ export default async function run(client: Types.client, message: Discord.Message
           const row = client.components.actionRow(confirm, cancel);
 
           const msg = await message.reply({ embeds: [embed], components: [row] });
-          const prompt = new client.prompt(message, command);
-          //prompt.resetSettings();
+          //extra.prompt.resetSettings();
 
           break;
         }

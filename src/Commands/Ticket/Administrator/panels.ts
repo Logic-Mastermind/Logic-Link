@@ -47,7 +47,7 @@ export default async function run(client: Types.client, message: Discord.Message
             let closed = message.guild.channels.cache.get(panelInfo.closed);
             
             const fields = [
-              { name: `Panel Configuration`, value: `${client.util.emojis.text} Name: \`${panelInfo.name}\`\n${client.util.emojis.category} Opened Category: \`#${opened.name}\`\n${client.util.emojis.category} Closed Category: \`#${closed.name}\`\n${client.util.emojis.message} Ticket Format: \`${panelInfo.ticketFormat}\`${panelInfo.claiming ? `\n${client.util.emojis.message} Claimed Format: \`${panelInfo.claimedFormat}\`` : ``}\n${client.util.emojis.override} Claiming: \`${panelInfo.claiming ? `On` : `Off`}\`\n${client.util.emojis.channel} Panel Channel: <#${panelInfo.channel}>\n\u200b` },
+              { name: `Panel Configuration`, value: `${client.util.emojis.text} Name: \`${panelInfo.name}\`\n${client.util.emojis.category} Opened Category: \`#${opened.name}\`\n${client.util.emojis.category} Closed Category: \`#${closed.name}\`\n${client.util.emojis.message} Ticket Format: \`${panelInfo.ticketName}\`${panelInfo.claiming ? `\n${client.util.emojis.message} Claimed Format: \`${panelInfo.claimedName}\`` : ``}\n${client.util.emojis.override} Claiming: \`${panelInfo.claiming ? `On` : `Off`}\`\n${client.util.emojis.channel} Panel Channel: <#${panelInfo.channel}>\n\u200b` },
 
               { name: `Role Configuration`, value: `${client.util.emojis.roleIcon} Support Roles:\n<@&${panelInfo.support.join(">\n<@&")}>\n\n${client.util.emojis.roleIcon} Additional Roles:\n<@&${panelInfo.additional.join(">\n<@&")}>` }
             ];
@@ -66,8 +66,7 @@ export default async function run(client: Types.client, message: Discord.Message
         case "n":
         case "new":
         {
-          const prompt = new client.prompt(message, command);
-          prompt.newPanel(message.guild);
+          extra.prompt.newPanel(message.guild);
           break;
         }
         case "m":
@@ -138,7 +137,7 @@ export default async function run(client: Types.client, message: Discord.Message
               
               const row = client.components.actionRow(select);
               const msg = await message.reply({ embeds: [embed], components: [row] });
-              new client.prompt(message, command).modifyPanel(command, message, msg, id, tsettings);
+              //prompt.modifyPanel(command, message, msg, id, tsettings);
             } else {
               const embed = client.embeds.error(command.option.modify, `\`${thirdArg}\` is not a valid panel ID.`);
               message.reply({ embeds: [embed] });
@@ -169,7 +168,7 @@ export default async function run(client: Types.client, message: Discord.Message
               }]);
 
               const confirmMsg = await message.channel.send({ embeds: [embed], components: [row] });
-              new client.prompt(message, command).deletePanel(confirmMsg, tsettings, panelInfo);
+              //prompt.deletePanel(confirmMsg, tsettings, panelInfo);
             } else {
               const embed = client.embeds.error(command.option.delete, `\`${thirdArg}\` is not a valid panel ID.`);
               message.reply({ embeds: [embed] });
@@ -194,7 +193,7 @@ export default async function run(client: Types.client, message: Discord.Message
             let closed = message.guild.channels.cache.get(panelInfo.closed);
             
             const fields = [
-              { name: `Panel Configuration`, value: `${client.util.emojis.text} Name: \`${panelInfo.name}\`\n${client.util.emojis.category} Opened Category: \`#${opened.name}\`\n${client.util.emojis.category} Closed Category: \`#${closed.name}\`\n${client.util.emojis.message} Ticket Format: \`${panelInfo.ticketFormat}\`${panelInfo.claiming ? `\n${client.util.emojis.message} Claimed Format: \`${panelInfo.claimedFormat}\`` : ``}\n${client.util.emojis.override} Claiming: \`${panelInfo.claiming ? `On` : `Off`}\`\n${client.util.emojis.channel} Panel Channel: <#${panelInfo.channel}>\n\u200b` },
+              { name: `Panel Configuration`, value: `${client.util.emojis.text} Name: \`${panelInfo.name}\`\n${client.util.emojis.category} Opened Category: \`#${opened.name}\`\n${client.util.emojis.category} Closed Category: \`#${closed.name}\`\n${client.util.emojis.message} Ticket Format: \`${panelInfo.ticketName}\`${panelInfo.claiming ? `\n${client.util.emojis.message} Claimed Format: \`${panelInfo.claimedName}\`` : ``}\n${client.util.emojis.override} Claiming: \`${panelInfo.claiming ? `On` : `Off`}\`\n${client.util.emojis.channel} Panel Channel: <#${panelInfo.channel}>\n\u200b` },
 
               { name: `Role Configuration`, value: `${client.util.emojis.roleIcon} Support Roles:\n<@&${panelInfo.support.join(">\n<@&")}>\n\n${client.util.emojis.roleIcon} Additional Roles:\n<@&${panelInfo.additional.join(">\n<@&")}>` }
             ];
@@ -223,30 +222,26 @@ export default async function run(client: Types.client, message: Discord.Message
           const embed = client.embeds.success(options.help, `Showing a list of all available command options.`, [
             {
               name: `\`${guildPrefix}${options.new.usage}\``,
-              value: options.new.description,
-              inline: false
+              value: options.new.description
             },
             {
               name: `\`${guildPrefix}${options.modify.usage}\``,
-              value: options.modify.description,
-              inline: false
+              value: options.modify.description
             },
             {
               name: `\`${guildPrefix}${options.delete.usage}\``,
-              value: options.delete.description,
-              inline: false
+              value: options.delete.description
             },
             {
               name: `\`${guildPrefix}${options.all.usage}\``,
-              value: options.delete.description,
-              inline: false
+              value: options.delete.description
             },
             {
               name: `\`${guildPrefix}panels <id>\``,
-              value: "Shows panel information for the selected panel.",
-              inline: false
+              value: "Shows panel information for the selected panel."
             }
           ]);
+
           message.reply({ embeds: [embed] });
           break;
         }

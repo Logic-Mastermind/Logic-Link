@@ -25,7 +25,7 @@ export default async function run(client: Types.client, message: Discord.Message
           return message.reply({ embeds: [embed] });
         }
 
-        if (!clientMember.permissions.has(command.option.channel.clientPerms)) {
+        if (!client.functions.hasPerm(command.option.channel, clientMember)) {
           const embed = client.embeds.botPermission(command.option.channel);
           return message.reply({ embeds: [embed] });
         }
@@ -59,7 +59,7 @@ export default async function run(client: Types.client, message: Discord.Message
           return message.reply({ embeds: [embed] })
         }
 
-        if (!clientMember.permissions.has(command.option.role.clientPerms)) {
+        if (!client.functions.hasPerm(command.option.role, clientMember)) {
           const embed = client.embeds.botPermission(command.option.role);
           return message.reply({ embeds: [embed] });
         }
@@ -94,7 +94,7 @@ export default async function run(client: Types.client, message: Discord.Message
           return message.reply({ embeds: [embed] });
         }
 
-        if (!clientMember.permissions.has(command.option.voice.clientPerms)) {
+        if (!client.functions.hasPerm(command.option.voice, clientMember)) {
           const embed = client.embeds.botPermission(command.option.voice);
           return message.reply({ embeds: [embed] });
         }

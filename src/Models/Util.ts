@@ -89,6 +89,55 @@ const Util = {
     Support: "Helpful commands for our support team used to diagnose issues.",
     Ticket: "Next generation ticket systems and commands great for de-cluttering channels."
   },
+  promptData: {
+    panel: {
+      name: {
+        title: `Panel Name`,
+        question: `What should be the name of this panel?`,
+        description: `The name must be within 3 and 32 characters long.\nThe name must also be unique to other panels.`
+      },
+      opened: {
+        title: `Opened Category`,
+        question: `Where would you like opened tickets to go?`,
+        description: `Type the name or ID of a category you want to set this to.\nTickets will be moved here once they are opened.`
+      },
+      closed: {
+        title: `Closed Category`,
+        question: `Where would you like closed tickets to go?`,
+        description: `Type the name or ID of a category you want to set this to.\nTickets will be moved here once they are closed.`
+      },
+      claiming: {
+        title: `Ticket Claiming`,
+        question: `Would you like to enable or disable panel claiming? (\`on\` or \`off\`)`,
+        description: `Type the option that you would like this to set to.\nWhen enabled, support team roles will be able to claim tickets.`
+      },
+      support: {
+        title: `Support Roles`,
+        question: `What are some support roles that you would like for this panel?`,
+        description: `Members with these roles will be able to view and manage support tickets.\nMention or type the names of those roles below.`
+      },
+      additional: {
+        title: `Additional Roles`,
+        question: `What are some additional roles that you would like for this panel?`,
+        description: `By default, members with these roles will be able to view support tickets.\nMention or type the names of those roles below.`
+      },
+      channel: {
+        title: `Panel Channel`,
+        question: `Where would you like this panel to be sent to?`,
+        description: `Mention or type the name of a channel for this setting.\nMake sure that I have the required permissions to send messages here.`
+      },
+      ticketFormat: {
+        title: `Ticket Format`,
+        question: `What format should ticket names follow?`, 
+        description: `The format must be within 3 and 32 characters long.\nText that includes \`[number]\` will be replaced with the current ticket number.`
+      },
+      claimedFormat: {
+        title: `Claimed Format`,
+        question: `What format should claimed ticket names follow?`,
+        description: `The format must be within 3 and 32 characters long.\nText that includes \`[number]\` will be replaced with the current ticket number.`
+      }
+    }
+  },
   timeoutLimit: 2147483647,
   resetAliases: ["clear", "remove", "reset", "off"],
   intents: [

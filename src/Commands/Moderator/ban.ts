@@ -53,17 +53,19 @@ export default async function run(client: Types.client, message: Discord.Message
         }
       }
 
-      if (thirdArg) {
-        if (fourthArg) {
-          timeObj = client.functions.getTime(thirdArg);
-          if (!timeObj.passed) {
-            reason = args.slice(1).join(" ");
+      if (command.commandName !== "softban") {
+        if (thirdArg) {
+          if (fourthArg) {
+            timeObj = client.functions.getTime(thirdArg);
+            if (!timeObj.passed) {
+              reason = args.slice(1).join(" ");
+            } else {
+              reason = args.slice(2).join(" ");
+            }
           } else {
-            reason = args.slice(2).join(" ");
+            timeObj = client.functions.getTime(thirdArg);
+            if (!timeObj.passed) reason = args.slice(1).join(" ");
           }
-        } else {
-          timeObj = client.functions.getTime(thirdArg);
-          if (!timeObj.passed) reason = args.slice(1).join(" ");
         }
       }
       
@@ -72,10 +74,10 @@ export default async function run(client: Types.client, message: Discord.Message
 
       const bannedEmbed = client.embeds.moderated("BAN", message.guild, reason, timeObj?.duration);
       if (!user.bot) await user.send({ embeds: [bannedEmbed] });
-      setTimeout(banMember, 500);
+      setTimeout(banMember, 500, user);
 
-      function banMember() {
-        message.guild.members.ban(user, { days: command.commandName == "softban" ? 0 : 7, reason: `${user.tag} was banned. Responsible User: ${message.author.tag}` })
+      function banMember(userToBan: Discord.User) {
+        message.guild.members.ban(userToBan, { days: command.commandName == "softban" ? 0 : 7, reason: `${userToBan.tag} was banned. Responsible User: ${message.author.tag}` })
         .then(() => {
           const fields = [{
             name: "Reason",
@@ -84,7 +86,7 @@ export default async function run(client: Types.client, message: Discord.Message
           }];
 
           const caseData: Types.caseData = {
-            type: "BAN",
+            type: command.commandName == "softban" ? "SOFTBAN" : "BAN",
             user: member.id,
             moderator: message.author.id,
             reason: reason,
@@ -99,8 +101,10 @@ export default async function run(client: Types.client, message: Discord.Message
             }
           }
 
+          if (command.commandName == "softban") message.guild.members.unban(userToBan, `Unbanning the user, as per a softban.`);
           client.functions.createCase(caseData, message.guild);
-          const embed = client.embeds.success(command, `Banned <@${member.id}> from the server.`, fields);
+
+          const embed = client.embeds.success(command, `${command.commandName == "softban" ? "Soft-banned" : "Banned"} <@${member.id}> from the server.`, fields);
           editMsg.edit({ embeds: [embed] });
         })
         .catch((error) => {
@@ -109,16 +113,16 @@ export default async function run(client: Types.client, message: Discord.Message
         });
 
         if (timeObj?.passed) {
-          const key = `${user.id}-${message.guild.id}[ban]`;
+          const key = `${userToBan.id}-${message.guild.id}[ban]`;
           client.db.timeouts.set(key, "BAN", "type");
-          client.db.timeouts.set(key, user.id, "banned");
+          client.db.timeouts.set(key, userToBan.id, "banned");
           client.db.timeouts.set(key, Date.now() + timeObj?.duration, "end");
           client.db.timeouts.set(key, message.guild.id, "guildId");
 
           if (timeObj?.duration > client.util.timeoutLimit) return;
           setTimeout(async () => {
             if (clientMember.permissions.has("BAN_MEMBERS")) {
-              await message.guild.members.unban(user, `${user.tag} was un-banned. Responsible User: ${message.author.tag}`).catch(() => {});
+              await message.guild.members.unban(userToBan, `${userToBan.tag} was un-banned. Responsible User: ${message.author.tag}`).catch(() => {});
 
               client.db.timeouts.delete(key);
             }

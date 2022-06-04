@@ -175,7 +175,12 @@ export async function handle(message: Discord.Message) {
       logId,
       hasBotSupport: message.member.roles.cache.has(client.config.supportRole),
       isDev: message.author.id == client.config.devId,
-      hasTicketSupport: client.functions.hasTicketRole(message.member, "Support")
+      hasTicketSupport: client.functions.hasTicketRole(message.member, "Support"),
+      prompt: new client.prompt({
+        command,
+        user: message.author,
+        userMessage: message
+      })
     }
     
     client.logger.updateLog(`All checks were passed.`, logId);

@@ -98,8 +98,7 @@ export default async function run(client: Types.client, message: Discord.Message
       const helpEmbed = client.embeds.blue(command, `${client.util.messages.welcomeBotInfo}\n\n**Command List**\nBelow shows a list of command categories.\nTo view commands in each category, run the command associated with it.\nIf you would like a detailed guide on the help menu, run \`${guildPrefix}help guide\`.\n\n${code}Commands${code}\u200b`, cmdArray)
 
       const msg = await message.reply({ embeds: [helpEmbed], components: [actionRow] });
-      const prompt = new client.prompt(message, command);
-      prompt.helpMenu(msg, obj);
+      extra.prompt.helpMenu(msg, obj);
     } else {
       switch (secArg) {
         case "gen":

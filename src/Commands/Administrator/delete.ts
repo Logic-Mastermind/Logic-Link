@@ -16,11 +16,7 @@ export default async function run(client: Types.client, message: Discord.Message
 
     if (!role) role =  client.functions.findRole(args.join(" "), message.guild, { safe: true });
     if (!channel) channel = client.functions.findChannel(args.join(" "), message.guild, { safe: true });
-
-    if (!seenWarning) {
-      const prompt = new client.prompt(message, command);
-      return prompt.deleteConfirmation();
-    }
+    if (!seenWarning) return extra.prompt.deleteConfirmation();
 
     async function deleteRole() {
       if (!client.functions.hasPerm(command.option.role, message.member)) {
@@ -28,7 +24,7 @@ export default async function run(client: Types.client, message: Discord.Message
         return message.reply({ embeds: [embed] });
       }
 
-      if (!clientMember.permissions.has(command.option.role.permissions)) {
+      if (!client.functions.hasPerm(command.option.role, clientMember)) {
         const embed = client.embeds.botPermission(command.option.role);
         return message.reply({ embeds: [embed] });
       }
@@ -59,15 +55,12 @@ export default async function run(client: Types.client, message: Discord.Message
     }
 
     async function deleteChannel() {
-      const hasPerm = channel.permissionsFor(message.member).has(command.option.channel.permissions);
-      const hasPermBot = channel.permissionsFor(clientMember).has(command.option.channel.permissions);
-
-      if (!hasPerm && !client.functions.isAdmin(message.member)) {
+      if (!channel.permissionsFor(message.member).has("MANAGE_CHANNELS") && !client.functions.isAdmin(message.member)) {
         const embed = client.embeds.permission(command.option.channel);
         return message.reply({ embeds: [embed] });
       }
 
-      if (!hasPermBot) {
+      if (!channel.permissionsFor(clientMember).has("MANAGE_CHANNELS")) {
         const embed = client.embeds.botPermission(command.option.channel);
         return message.reply({ embeds: [embed] });
       }

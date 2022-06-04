@@ -609,8 +609,12 @@ export default class Functions {
    */
   getTicketData(guild: Discord.Guild | string): Types.ticketSettings {
     const guildId = guild instanceof Discord.Guild ? guild.id : guild;
+    const data = client.db.tickets.get(guildId);
 
-    return client.db.tickets.get(guildId);
+    return {
+      settings: data.settings,
+      panels: new Discord.Collection(data.panels)
+    }
   }
 
   /**

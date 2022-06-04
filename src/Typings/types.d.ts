@@ -1,9 +1,10 @@
-import Discord, { Intents } from "discord.js";
+import Discord from "discord.js";
 import Client from "../Models/Client";
+import prompts from "../Modules/Prompts";
 
 declare namespace Types {
   export type embedColors = "RED" | "GREEN" | "BLUE" | "ORANGE" | "DEFAULT" | string | number;
-  export type caseTypes = "BAN" | "KICK" | "MUTE" | "UNBAN" | "UNMUTE" | "WARN";
+  export type caseTypes = "BAN" | "SOFTBAN" | "KICK" | "MUTE" | "UNBAN" | "UNMUTE" | "WARN";
   export type RGBOptions = [number, number, number];
 
   export type guildChannel = Discord.GuildChannel | Discord.ThreadChannel;
@@ -83,6 +84,7 @@ declare namespace Types {
     hasBotSupport: boolean,
     hasTicketSupport: boolean,
     isDev: boolean,
+    prompt: prompts
   }
 
   export interface memoryUsage {
@@ -193,13 +195,6 @@ declare namespace Types {
     additional?: string[]
   }
 
-  export interface collectorConstructorOptions {
-    botMessage?: Discord.Message,
-    userMessage: Discord.Message,
-    channel?: Discord.TextChannel,
-    command?: Types.commandData
-  }
-
   export interface promptQuestion {
     title: string,
     question: string,
@@ -217,39 +212,47 @@ declare namespace Types {
       next: Function,
       msgArgs: string[],
       embed: (type: "success" | "error", description: string, originalQuestion?: boolean | fieldData[]) => void,
+      functions: {
+        validateOption: (collected: empty) => 0 | 1
+      },
       lastMessage: Discord.Message
-    }) => 1 | 0,
+    }) => 0 | 1,
     end: (collected: Discord.Collection<string, Discord.Message>, result: string, args: {
       collector: Discord.MessageCollector,
       lastMessage: Discord.Message,
       question: promptQuestion
     }) => any,
+    _collect?: Function,
+    _end?: Function,
     promptData?: {
       info: promptData,
-      embeds: Discord.MessageEmbed[]
+      embeds: Discord.MessageEmbed[],
+      startEmbed: Discord.MessageEmbed
     }
     collectorOptions?: Discord.CollectorOptions<[Discord.Message<boolean>]>
   }
 
-  export interface componentCollectorOptions {
-    collect: (int: Discord.Interaction, args: {
-      collector: Discord.InteractionCollector<Discord.MessageComponentInteraction>,
-      current: number,
-      next: Function,
-      embed: (type: "success" | "error", description: string, originalQuestion?: boolean | fieldData[]) => void,
-      lastMessage: Discord.Message
-    }) => 1 | 0,
-    end: (collected: Discord.Collection<string, Discord.Message>, result: string, args: {
-      collector: Discord.InteractionCollector<Discord.MessageComponentInteraction>,
-      lastMessage: Discord.Message,
-      question: promptQuestion
-    }) => any,
-    promptData?: {
-      info: promptData,
-      embeds: Discord.MessageEmbed[]
-    }
-    collectorOptions?: Discord.InteractionCollectorOptions<Discord.Interaction>
-  }
+  // export interface componentCollectorOptions {
+  //   collect: (int: Discord.Interaction, args: {
+  //     collector: Discord.InteractionCollector<Discord.MessageComponentInteraction>,
+  //     current: number,
+  //     next: Function,
+  //     embed: (type: "success" | "error", description: string, originalQuestion?: boolean | fieldData[]) => void,
+  //     lastMessage: Discord.Message
+  //   }) => 1 | 0,
+  //   end: (collected: Discord.Collection<string, Discord.Message>, result: string, args: {
+  //     collector: Discord.InteractionCollector<Discord.MessageComponentInteraction>,
+  //     lastMessage: Discord.Message,
+  //     question: promptQuestion
+  //   }) => any,
+  //   _collect: Function,
+  //   _end: Function,
+  //   promptData?: {
+  //     info: promptData,
+  //     embeds: Discord.MessageEmbed[]
+  //   }
+  //   collectorOptions?: Discord.InteractionCollectorOptions<Discord.Interaction>
+  // }
 
   export interface guildSettings {
     prefix: string,
@@ -287,7 +290,7 @@ declare namespace Types {
     subCategory?: "Basic" | "Support" | "Administrator",
     run: Function,
     option: {
-      [key: string]: any
+      [key: string]: commandData
     }
   }
 
@@ -319,8 +322,8 @@ declare namespace Types {
     tickets: Discord.Collection<number, ticketData>,
     totalTicketCount: number,
     ticketLimit: number,
-    claimedFormat: string,
-    ticketFormat: string,
+    claimedName: string,
+    ticketName: string,
     panelMessage: string | null,
     ticketMessage: string | null,
     id: number,
@@ -329,6 +332,7 @@ declare namespace Types {
 
   export interface ticketData {
     id: number,
+    state: "OPENED" | "CLOSED"
     channel: string,
     opener: string,
     claimer: string | null,
