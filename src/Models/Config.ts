@@ -1,5 +1,5 @@
 const Config = {
-  token: "ODczNTI3MDc2MzU4MDY2MTk2.G1KiSh.gofrkBK3nxIix4o7VJGewVw4UPLjCI4QJ3P6dg",
+  token: "",
   pasteBinAPI: process.env["PASTE_BIN_API"],
   globalTicketLimit: 3,
   defaultPrefix: ">",
