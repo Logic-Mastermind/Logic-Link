@@ -1,5 +1,5 @@
 import Discord from "discord.js";
-import Types from "../../Typings/types";
+import Types from "../../types";
 
 export default async function run(client: Types.client, message: Discord.Message, args: string[], command: Types.commandData, settings: Types.guildSettings, tsettings: Types.ticketSettings, extra: Types.extraObject) {
   

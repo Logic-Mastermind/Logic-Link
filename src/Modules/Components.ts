@@ -1,4 +1,4 @@
-import Types from "../Typings/types";
+import Types from "../types";
 import Discord from "discord.js";
 import client from "../index";
 

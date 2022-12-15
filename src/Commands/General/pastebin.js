@@ -1,13 +1,14 @@
-const Discord = require("discord.js");
-const Fetch = require("node-fetch");
-const Paste = require("pastebin-api").default;
+import Discord from "discord.js";
+import Paste from "pastebin-api";
+import Fetch from "node-fetch";
+import type types from "types";
 
-exports.run = async (client, message, args, command, settings, tsettings, extra) => {
+export default async function run(client: types.client, message: Discord.Message, args: string[], command: types.commandData, settings: types.guildSettings, tsettings: types.ticketSettings, extra: types.extraObject) {
   const clientMember = message.guild.me;
-  const guildPrefix = await client.functions.fetchPrefix(message.guild);
+  const guildPrefix = client.functions.fetchPrefix(message.guild);
   
-  const noArgs = await client.functions.getNoArgs(command, message.guild);
-  const { secArg, thirdArg, fourthArg, fifthArg } = await client.functions.getArgs(args);
+  const noArgs = client.functions.getNoArgs(command, message.guild);
+  const { secArg, thirdArg, fourthArg, fifthArg } = client.functions.getArgs(args);
   const code = `\`\`\``;
   const responses = {};
 
@@ -46,8 +47,15 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
         null
       ]
 
-      let collected = {};
+      let collected: { [key: string]: any } = {};
       let channel = titleMsg.channel;
+
+      const next = async () => {
+        const embed = embeds[currentNum + 1];
+        const newMessage = await channel.send({ embeds: [embed] });
+        msgId[currentNum - 1] = newMessage.id;
+        currentNum++;
+      }
 
       collector.on("collect", async (msg) => {
         const editMsg = channel.messages.cache.get(msgId[currentNum - 1]);
@@ -59,8 +67,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             
             current = "content";
             currentNum = 2;
-            client.functions.next(channel, msgId, embeds, currentNum);
-            return;
+            return next();
           }
 
           if (msg.content.toLowerCase() == "cancel") {
@@ -75,7 +82,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             const embed = client.embeds.error(command, `The name cannot be greater than 100 characters.`, [
               { name: "Question", value: prompt.title, inline: false }
             ]);
-            return editMsg.edit({ embeds: [embed] });
+            return editMsg.edit({ embeds: [embed] }) as unknown as void;
           }
 
           collected.title = msg.content;
@@ -84,7 +91,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
 
           current = "content";
           currentNum = 2;
-          client.functions.next(channel, msgId, embeds, currentNum);
+          next();
 
         } else if (current == "content") {
           if (msg.content.toLowerCase() == "skip") {
@@ -146,7 +153,7 @@ exports.run = async (client, message, args, command, settings, tsettings, extra)
             });
 
             const embed = client.embeds.success(command, `Pastebin link generated succesfully.`, [
-              { name: "Link", value: `${client.util.link} - ${link}`, inline: false }
+              { name: "Link", value: `${client.util.emojis.link} - ${link}`, inline: false }
             ]);
 
             editMsg.edit({ embeds: [embed] });

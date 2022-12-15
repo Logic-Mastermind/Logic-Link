@@ -1,5 +1,5 @@
 import Discord from "discord.js";
-import Types from "../Typings/types";
+import Types from "../types";
 import client from "../index";
 
 /**

@@ -1,6 +1,6 @@
 import Discord from "discord.js";
 import client from "../index";
-import Types from "../Typings/types";
+import Types from "../types";
 
 interface collectorOptions {
   botMessage?: Discord.Message,

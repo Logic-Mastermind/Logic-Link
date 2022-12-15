@@ -1,7 +1,7 @@
 import applicationScheme from "../Models/Application";
 import client from "../index";
 
-export async function handle()  {
+export async function handle() {
   client.cmdScheme = applicationScheme;
   client.functions.log(`\n[${client.user.tag}]\nTotal Channels: ${client.channels.cache.size}\nTotal Servers: ${client.guilds.cache.size}\nTotal Users: ${client.users.cache.size}`);
   console.timeEnd("Login");

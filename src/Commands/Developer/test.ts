@@ -1,5 +1,5 @@
 import Discord from "discord.js";
-import Types from "../../Typings/types";
+import Types from "../../types";
 import { Octokit } from "@octokit/core";
 import fetch from "node-fetch";
 

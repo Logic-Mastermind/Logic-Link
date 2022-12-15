@@ -1,16 +1,17 @@
 {
   "alwaysStrict": true,
-  "paths": {
-    "*": ["Typings/*.d.ts"]
-  },
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "target": "ESNext",
     "lib": ["DOM", "ES2015", "ES2021"],
     "module": "CommonJS",
+    "typeRoots": ["types.d.ts"],
     "moduleResolution": "Node",
     "downlevelIteration": true, 
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+
+    "rootDir": "src",
+    "baseUrl": "src"
   }
 }

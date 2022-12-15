@@ -140,9 +140,9 @@ const Commands = {
       commandName: "ping",
       option: {}
     },
-    remind: {
+    reminder: {
       name: "Remind",
-      description: "Creates an automatic reminder that direct messages you a task when the time runs out.",
+      description: "Creates an automatic reminder that direct messages you a task when the time runs out",
       permissions: ["ALL"],
       clientPerms: [],
       cooldown: 5,
@@ -650,6 +650,12 @@ const Commands = {
     }
   },
   Administrator: {
+    role: {
+      description: "Adds and removes a role to/from a user"
+    },
+    roles: {
+      description: "Adds and removes multiple roles to/from a user"
+    },
     addrole: {
       name: "Add Role",
       description: "Adds a specific role to a user.",
@@ -1123,7 +1129,7 @@ const Commands = {
     },
     devlockdown: {
       name: "Developer Lockdown",
-      description: "Disables all commands bein being used.",
+      description: "Disables all commands from being used.",
       permissions: ["BOT_DEVELOPER"],
       clientPerms: [],
       cooldown: 0,
@@ -1333,7 +1339,7 @@ const Commands = {
 }
 
 import Discord from "discord.js";
-import Types from "../Typings/types";
+import Types from "../types";
 
 const CommandMap = {
   Administrator: new Discord.Collection(Object.entries(Commands.Administrator)) as Types.commandCategory,

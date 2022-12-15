@@ -1,4 +1,4 @@
-import Types from "../Typings/types";
+import Types from "../types";
 import { REST } from '@discordjs/rest';
 import Discord from "discord.js";
 import client from "../index";
@@ -438,7 +438,9 @@ export default class Functions {
     filter = filter.toLowerCase();
 
     function filterCommands(cmdData) {
-      if (filter == cmdData.commandName || cmdData.aliases.includes(filter)) {
+      const aliases = cmdData.aliases || [];
+      const cmdName = cmdData.commandName || "";
+      if (filter == cmdName || aliases.includes(filter)) {
         command = cmdData
         return true;
 

@@ -1,6 +1,6 @@
 import Discord from "discord.js";
 import client from "../index";
-import Types from "../Typings/types";
+import Types from "../types";
 
 /**
  * A class with methods used to save log data to the database.
